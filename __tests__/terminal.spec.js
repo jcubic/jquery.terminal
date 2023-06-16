@@ -155,6 +155,8 @@ Storage.prototype.clear = function() {
     });
 })();
 
+console.log(process.env['NODE_OPTIONS']);
+
 global.window.Element.prototype.getBoundingClientRect = function() {
     var self = $(this);
     return {width: self.width(), height: self.height()};

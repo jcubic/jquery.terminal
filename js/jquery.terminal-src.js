@@ -5813,7 +5813,7 @@
             }, options);
             var prev_format = '';
             var result = [];
-            var array = $.terminal.normalize(str).split(/\n/g);
+            var array = str.split(/\n/g);
             var have_formatting = $.terminal.have_formatting(str);
             for (var i = 0, len = array.length; i < len; ++i) {
                 if (array[i] === '') {
@@ -9109,14 +9109,14 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
-                var formattted = $.terminal.apply_formatters(message, {
+                var formatted = $.terminal.apply_formatters(message, {
                     animation: true
                 });
-                formattted = $.terminal.normalize(formattted);
+                formatted = $.terminal.normalize(formatted);
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
-                var len = $.terminal.length(formattted);
+                var len = $.terminal.length(formatted);
                 if (message.length > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
@@ -9125,7 +9125,7 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
-                    var chars = $.terminal.partition(formattted, {wrap: false});
+                    var chars = $.terminal.partition(formatted, {wrap: false});
                     var interval = setInterval(function() {
                         if (!skip) {
                             var chr = chars[char_i];
@@ -9145,8 +9145,8 @@
                             char_i++;
                         } else {
                             self.skip_stop();
-                            var chrRest = $.terminal.substring(formattted, char_i, len);
-                            new_prompt += chrRest;
+                            var chr_rest = $.terminal.substring(formatted, char_i, len);
+                            new_prompt += chr_rest;
                             command_line.prompt(new_prompt, {formatters: false});
                             char_i = len;
                         }
