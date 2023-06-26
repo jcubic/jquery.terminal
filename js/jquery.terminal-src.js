@@ -3549,7 +3549,7 @@
             }
             function set(prompt, options) {
                 if (prompt) {
-                    if (options.formatters) {
+                    if (options && options.formatters || !options) {
                         prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                         prompt = $.terminal.normalize(prompt);
                     }
@@ -3583,9 +3583,6 @@
                 }
             }
             return function(options) {
-                var settings = $.extend({
-                    formatters: true
-                }, options);
                 // the data is used as cancelable reference because we have ref
                 // data object that is hold in closure and we remove `set` function
                 // so previous call to function prompt will be ignored
@@ -3598,7 +3595,7 @@
                     set: set
                 };
                 with_prompt(prompt, function(prompt) {
-                    data.set(prompt, settings);
+                    data.set(prompt, options);
                 }, self);
             };
         })();
@@ -3812,9 +3809,6 @@
                 prompt_len = just_prompt_len + prompt_offset;
             },
             prompt: function(user_prompt, options) {
-                var settings = $.extend({
-                    formatters: true
-                }, options);
                 if (user_prompt === true) {
                     return last_rendered_prompt;
                 } else if (user_prompt === undefined) {
@@ -3828,7 +3822,7 @@
                         throw new Error('prompt must be a function or string');
                     }
                     if (should_redraw) {
-                        draw_prompt(settings);
+                        draw_prompt(options);
                         // we could check if command is longer then numchars-new
                         // prompt
                         redraw();
@@ -7376,6 +7370,8 @@
     // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
+    // if set to false nested formatting will not process formatting, only text
+    // between formatting, we need this option because we're flattening the formatting
     $.terminal.nested_formatting.__meta__ = true;
     // if set to false nested formatting will not inherit styles colors and attribues
     $.terminal.nested_formatting.__inherit__ = true;
