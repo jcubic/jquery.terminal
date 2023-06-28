@@ -3542,10 +3542,12 @@
                            '</span>';
                 }).concat([last_line]).join('\n');
             }
-            function set(prompt) {
+            function set(prompt, options) {
                 if (prompt) {
-                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
-                    prompt = $.terminal.normalize(prompt);
+                    if (options && options.formatters || !options) {
+                        prompt = $.terminal.apply_formatters(prompt, {prompt: true});
+                        prompt = $.terminal.normalize(prompt);
+                    }
                     prompt = crlf(prompt);
                 }
                 var formatted = format_prompt(prompt);
@@ -3575,7 +3577,7 @@
                     }
                 }
             }
-            return function() {
+            return function(options) {
                 // the data is used as cancelable reference because we have ref
                 // data object that is hold in closure and we remove `set` function
                 // so previous call to function prompt will be ignored
@@ -3588,7 +3590,7 @@
                     set: set
                 };
                 with_prompt(prompt, function(prompt) {
-                    data.set(prompt);
+                    data.set(prompt, options);
                 }, self);
             };
         })();
@@ -3801,7 +3803,7 @@
                 prompt_offset = len;
                 prompt_len = just_prompt_len + prompt_offset;
             },
-            prompt: function(user_prompt) {
+            prompt: function(user_prompt, options) {
                 if (user_prompt === true) {
                     return last_rendered_prompt;
                 } else if (user_prompt === undefined) {
@@ -3815,7 +3817,7 @@
                         throw new Error('prompt must be a function or string');
                     }
                     if (should_redraw) {
-                        draw_prompt();
+                        draw_prompt(options);
                         // we could check if command is longer then numchars-new
                         // prompt
                         redraw();
@@ -7367,6 +7369,8 @@
     // -----------------------------------------------------------------------
     // :: Default options
     // -----------------------------------------------------------------------
+    // if set to false nested formatting will not process formatting, only text
+    // between formatting, we need this option because we're flattening the formatting
     $.terminal.nested_formatting.__meta__ = true;
     // if set to false nested formatting will not inherit styles colors and attribues
     $.terminal.nested_formatting.__inherit__ = true;
@@ -9100,13 +9104,14 @@
         // ---------------------------------------------------------------------
         function typed(finish_typing_fn) {
             return function typing_animation(message, options) {
-                var formattted = $.terminal.apply_formatters(message, {
+                var formatted = $.terminal.apply_formatters(message, {
                     animation: true
                 });
+                formatted = $.terminal.normalize(formatted);
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
-                var len = $.terminal.length(formattted);
+                var len = $.terminal.length(formatted);
                 if (message.length > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
@@ -9115,7 +9120,7 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
-                    var chars = $.terminal.partition(formattted, {wrap: false});
+                    var chars = $.terminal.partition(formatted, {wrap: false});
                     var interval = setInterval(function() {
                         if (!skip) {
                             var chr = chars[char_i];
@@ -9128,16 +9133,16 @@
                                 }
                             }
                             new_prompt += chr;
-                            self.set_prompt(new_prompt);
+                            command_line.prompt(new_prompt, {formatters: false});
                             if (bottom && (chr === '\n' || !self.is_bottom())) {
                                 self.scroll_to_bottom();
                             }
                             char_i++;
                         } else {
                             self.skip_stop();
-                            var chrRest = $.terminal.substring(formattted, char_i, len);
-                            new_prompt += chrRest;
-                            self.set_prompt(new_prompt);
+                            var chr_rest = $.terminal.substring(formatted, char_i, len);
+                            new_prompt += chr_rest;
+                            command_line.prompt(new_prompt, {formatters: false});
                             char_i = len;
                         }
                         if (char_i === len) {
@@ -12153,7 +12158,7 @@
                 }, options);
             }
             function bottom_detect(intersections) {
-                is_bottom_detected = intersections[0].intersectionRatio === 1;
+                is_bottom_detected = intersections[0].intersectionRatio >= 0.9;
             }
             function create_bottom_detect() {
                 if (window.IntersectionObserver) {
