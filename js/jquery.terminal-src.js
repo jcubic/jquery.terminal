@@ -8001,7 +8001,6 @@
                         var rest = interpreters.slice(1);
                         var type = get_type(first);
                         if (type === 'string') {
-                            self.pause(settings.softPause);
                             if (settings.describe === false) {
                                 if (++rpc_count === 1) {
                                     fn_interpreter = make_basic_json_rpc(first, login);
@@ -8010,6 +8009,7 @@
                                 }
                                 recur(rest, success);
                             } else {
+                                self.pause(settings.softPause);
                                 make_json_rpc_object(first, login, function(new_obj) {
                                     if (new_obj) {
                                         $.extend(object, new_obj);
