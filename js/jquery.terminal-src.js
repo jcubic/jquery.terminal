@@ -7106,6 +7106,20 @@
             'params': options.params,
             'id': ++ids[options.url]
         };
+        function finalize(json, response, status, jqXHR) {
+            if (validJSONRPC(json) || options.method === 'system.describe') {
+                // don't catch errors in success callback
+                if (options.success) {
+                    options.success(json, status, jqXHR);
+                }
+                deferred.resolve(json);
+            } else {
+                if (options.error) {
+                    options.error(jqXHR, 'Invalid JSON-RPC');
+                }
+                deferred.reject({message: 'Invalid JSON-RPC', response: response});
+            }
+        }
         $.ajax({
             url: options.url,
             beforeSend: function beforeSend(jxhr, settings) {
@@ -7135,18 +7149,16 @@
                 if (is_function(options.response)) {
                     options.response(jqXHR, json);
                 }
-                if (validJSONRPC(json) || options.method === 'system.describe') {
-                    // don't catch errors in success callback
-                    if (options.success) {
-                        options.success(json, status, jqXHR);
+                if (is_function(options.intercept)) {
+                    var ret = options.intercept(request, json);
+                    if (ret) {
+                        return unpromise(ret, function(json) {
+                            var response = JSON.stringify(json);
+                            finalize(json, response, status, jqXHR);
+                        });
                     }
-                    deferred.resolve(json);
-                } else {
-                    if (options.error) {
-                        options.error(jqXHR, 'Invalid JSON-RPC');
-                    }
-                    deferred.reject({message: 'Invalid JSON-RPC', response: response});
                 }
+                finalize(json, response, status, jqXHR);
             },
             error: options.error,
             contentType: 'application/json',
@@ -7709,6 +7721,12 @@
         // :: Create interpreter function from url string
         // ---------------------------------------------------------------------
         function make_basic_json_rpc(url, auth) {
+            var rpc_interceptor;
+            if (settings.rpc) {
+                rpc_interceptor = function() {
+                    return settings.rpc.apply(self, arguments);
+                };
+            }
             var interpreter = function(method, params) {
                 self.pause(settings.softPause);
                 $.jrpc({
@@ -7722,6 +7740,7 @@
                             display_exception(e, 'USER');
                         }
                     },
+                    intercept: rpc_interceptor,
                     response: function(jxhr, response) {
                         try {
                             settings.response.call(self, jxhr, response, self);
