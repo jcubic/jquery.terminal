@@ -5860,9 +5860,20 @@ describe('Terminal plugin', function() {
                 term.flush();
                 expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
             });
+            // https://github.com/jcubic/jquery.terminal/issues/871
+            it('should should update lines that use newline&flush set to false', async () => {
+                var term = $('<div/>').terminal($.noop, { greetings: false });
+                term.echo('Hello', { flush: false, newline: false });
+                term.echo(' ', { flush: false, newline: false });
+                term.echo('World', { flush: false });
+                term.echo('Flush', { flush: false });
+                term.flush();
+                term.refresh();
+                expect(output(term)).toEqual(['Hello World', 'Flush']);
+            });
             it('should flush correctly with newline : false', function(){
                 var term = $('<div/>').terminal($.noop, {
-                    greetings : 'greet'
+                    greetings: 'greet'
                 });
                 var cmd = term.find('.cmd');
 

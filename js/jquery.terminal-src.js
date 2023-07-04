@@ -10474,6 +10474,9 @@
                                 wrapper.toggleClass('partial', appending_to_partial);
                                 if (appending_to_partial) {
                                     partial = wrapper;
+                                } else if (data.newline && partial.length) {
+                                    wrapper = $('<div/>');
+                                    partial = $();
                                 }
                                 data.finalize(wrapper);
                             } else {

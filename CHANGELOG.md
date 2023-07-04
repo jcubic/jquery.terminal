@@ -4,6 +4,7 @@
 ### Bugfix
 * fix CMD wrapping when prompt is empty [#882](https://github.com/jcubic/jquery.terminal/issues/882)
 * fix paused terminal when using array as interpreter and RPC without system describe
+* fix edge case of disappearing content after refresh [#871](https://github.com/jcubic/jquery.terminal/issues/871)
 
 ## 2.36.0
 ### Features
