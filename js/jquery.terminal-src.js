@@ -3511,7 +3511,7 @@
                 var lines = $.terminal.split_equal(tmp_prompt, num_chars);
                 lines = lines.map(function(line) {
                     return line.replace(/^\uFFFF+/, '');
-                }).filter(Boolean);
+                });
                 lines = lines.map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
