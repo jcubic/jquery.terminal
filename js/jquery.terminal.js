@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 29 Jul 2023 13:06:55 +0000
+ * Date: Sat, 29 Jul 2023 13:09:32 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5278,7 +5278,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 29 Jul 2023 13:06:55 +0000',
+        date: 'Sat, 29 Jul 2023 13:09:32 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12277,7 +12277,7 @@
             }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
-                 document.fonts.ready.then(command_queue.resolve);
+                document.fonts.ready.then(command_queue.resolve);
             } else {
                 command_queue.resolve();
             }

@@ -12277,7 +12277,7 @@
             }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
-                 document.fonts.ready.then(command_queue.resolve);
+                document.fonts.ready.then(command_queue.resolve);
             } else {
                 command_queue.resolve();
             }
