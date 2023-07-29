@@ -1,6 +1,7 @@
 ## 2.37.0
 ### Features
 * add `rpc` interceptor [#883](https://github.com/jcubic/jquery.terminal/issues/883)
+* wait for the custom fonts to load [#892](https://github.com/jcubic/jquery.terminal/issues/892)
 ### Bugfix
 * fix CMD wrapping when prompt is empty [#882](https://github.com/jcubic/jquery.terminal/issues/882)
 * fix paused terminal when using array as interpreter and RPC without system describe

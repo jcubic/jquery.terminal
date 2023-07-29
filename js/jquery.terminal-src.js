@@ -246,9 +246,10 @@
     function DelayQueue() {
         var callbacks = $.Callbacks();
         var resolved = false;
+        var self = this;
         this.resolve = function() {
             callbacks.fire();
-            resolved = true;
+            self.resolved = resolved = true;
         };
         this.add = function(fn) {
             if (resolved) {
@@ -11374,7 +11375,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill, .terminal-font')
+                    self.find('.terminal-fill, .terminal-font, .terminal-font-forcer')
                         .remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
@@ -11623,6 +11624,7 @@
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
+        $('<div class="terminal-font-forcer terminal-hidden">x<div>').appendTo(self);
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
@@ -12273,7 +12275,12 @@
                 // don't make sense
                 observe_visibility();
             }
-            command_queue.resolve();
+            // wait for custom font to load #892
+            if (document.fonts && document.fonts.ready) {
+                 document.fonts.ready.then(command_queue.resolve);
+            } else {
+                command_queue.resolve();
+            }
             // touch devices need touch event to get virtual keyboard
             if (enabled && self.is(':visible') && !is_mobile) {
                 self.focus(undefined, true);

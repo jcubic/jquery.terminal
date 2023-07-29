@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 29 Jul 2023 11:57:12 +0000
+ * Date: Sat, 29 Jul 2023 13:06:55 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -246,9 +246,10 @@
     function DelayQueue() {
         var callbacks = $.Callbacks();
         var resolved = false;
+        var self = this;
         this.resolve = function() {
             callbacks.fire();
-            resolved = true;
+            self.resolved = resolved = true;
         };
         this.add = function(fn) {
             if (resolved) {
@@ -5277,7 +5278,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 29 Jul 2023 11:57:12 +0000',
+        date: 'Sat, 29 Jul 2023 13:06:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11374,7 +11375,7 @@
                     }
                     $(window).off('blur', blur_terminal).
                         off('focus', focus_terminal);
-                    self.find('.terminal-fill, .terminal-font')
+                    self.find('.terminal-fill, .terminal-font, .terminal-font-forcer')
                         .remove();
                     self.stopTime();
                     terminals.remove(terminal_id);
@@ -11623,6 +11624,7 @@
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
+        $('<div class="terminal-font-forcer terminal-hidden">x<div>').appendTo(self);
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
@@ -12273,7 +12275,12 @@
                 // don't make sense
                 observe_visibility();
             }
-            command_queue.resolve();
+            // wait for custom font to load #892
+            if (document.fonts && document.fonts.ready) {
+                 document.fonts.ready.then(command_queue.resolve);
+            } else {
+                command_queue.resolve();
+            }
             // touch devices need touch event to get virtual keyboard
             if (enabled && self.is(':visible') && !is_mobile) {
                 self.focus(undefined, true);
