@@ -99,9 +99,10 @@ You can use any version you want, everything what [jsDelivr GH API accepts](http
 
 Include jQuery library, you can use cdn from https://jquery.com/download/
 
+or use jsDelivr:
 
 ```html
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery"></script>
 
 ```
 
