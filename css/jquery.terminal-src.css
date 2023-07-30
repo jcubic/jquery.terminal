@@ -233,7 +233,7 @@ body.full-screen-terminal .terminal {
     white-space: nowrap;
     clear: both;
 }
-.cmd .cmd-prompt > span, .cmd .cmd-prompt:empty {
+.cmd .cmd-prompt > span, .cmd .cmd-prompt > a, .cmd .cmd-prompt:empty {
     float: left;
 }
 .cmd-prompt [data-text] > span {
@@ -267,6 +267,7 @@ body.full-screen-terminal .terminal {
 .terminal-output > :not(.raw) span:not(.fas):not(.far):not(.fa),
 .terminal-output > :not(.raw) a,
 .cmd,
+.terminal-font-forcer,
 .cmd span:not(.fas):not(.far):not(.fa) {
     font-family: monospace;
     font-family: var(--font, monospace);
@@ -1140,6 +1141,18 @@ terminal .terminal-output > div {
     scrollbar-color: #aaa #000;
     scrollbar-color: var(--color, #aaa) var(--background, #000);
     scrollbar-width: thin;
+}
+/* visially hidden */
+.terminal-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 /*
  * Allow to change scrollbar color

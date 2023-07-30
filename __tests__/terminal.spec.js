@@ -3774,8 +3774,15 @@ describe('Terminal plugin', function() {
         });
     });
     describe('prompt', function() {
-        var term = $('<div/>').appendTo('body').terminal($.noop, {
-            prompt: '>>> '
+        var term;
+        beforeEach(function() {
+            term = $('<div/>').appendTo('body').terminal($.noop, {
+                prompt: '>>> ',
+                numChars: 10
+            });
+        });
+        afterEach(function() {
+            term.destroy().remove();
         });
         it('should return prompt', function() {
             expect(term.get_prompt()).toEqual('>>> ');
@@ -3799,7 +3806,19 @@ describe('Terminal plugin', function() {
                 callback('[[ub;#fff;]>>>] ');
             });
             expect(term.find('.cmd-prompt').html()).toMatchSnapshot();
-            term.destroy().remove();
+        });
+        it('should wrap text when prompt is empty', function() {
+            term.set_prompt('');
+            var input = [
+                'A'.repeat(10),
+                'B'.repeat(10),
+                'C'.repeat(10)
+            ];
+            term.insert(input.join(''));
+            var output = term.find('.cmd-wrapper div:not(.cmd-cursor-line)').map(function() {
+                return $(this).text();
+            }).get();
+            expect(output).toEqual(input);
         });
     });
     describe('cmd plugin', function() {
@@ -5841,9 +5860,20 @@ describe('Terminal plugin', function() {
                 term.flush();
                 expect(term.find('.terminal-output').text()).toEqual('foobarbaz');
             });
+            // https://github.com/jcubic/jquery.terminal/issues/871
+            it('should should update lines that use newline&flush set to false', async () => {
+                var term = $('<div/>').terminal($.noop, { greetings: false });
+                term.echo('Hello', { flush: false, newline: false });
+                term.echo(' ', { flush: false, newline: false });
+                term.echo('World', { flush: false });
+                term.echo('Flush', { flush: false });
+                term.flush();
+                term.refresh();
+                expect(output(term)).toEqual(['Hello World', 'Flush']);
+            });
             it('should flush correctly with newline : false', function(){
                 var term = $('<div/>').terminal($.noop, {
-                    greetings : 'greet'
+                    greetings: 'greet'
                 });
                 var cmd = term.find('.cmd');
 
