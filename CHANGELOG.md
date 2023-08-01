@@ -1,3 +1,7 @@
+## 2.37.1
+### Bugfix
+* fix wrong calculation of characters with custom font [#892](https://github.com/jcubic/jquery.terminal/issues/892)
+
 ## 2.37.0
 ### Features
 * add `rpc` interceptor [#883](https://github.com/jcubic/jquery.terminal/issues/883)

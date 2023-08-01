@@ -11624,7 +11624,6 @@
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
-        $('<div class="terminal-font-forcer terminal-hidden">x<div>').appendTo(self);
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
@@ -12180,6 +12179,8 @@
                     pixel_density = get_pixel_size();
                     self.resize();
                 }, options);
+                $('<div class="terminal-font-forcer terminal-hidden">x<div>')
+                    .appendTo(self);
             }
             function bottom_detect(intersections) {
                 is_bottom_detected = intersections[0].intersectionRatio >= 0.9;
@@ -12275,9 +12276,21 @@
                 // don't make sense
                 observe_visibility();
             }
+            function have_custom_font(term) {
+                var font = $(term).css('--font');
+                if (!font) {
+                    return false;
+                }
+                var fonts = Array.from(document.fonts.keys());
+                var font = fonts.find(function(face) {
+                    return face.family === font;
+                });
+                return !!font;
+            }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(command_queue.resolve);
+                calculate_char_size()
             } else {
                 command_queue.resolve();
             }
