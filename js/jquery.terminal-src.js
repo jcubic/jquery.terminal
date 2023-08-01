@@ -12276,21 +12276,9 @@
                 // don't make sense
                 observe_visibility();
             }
-            function have_custom_font(term) {
-                var font = $(term).css('--font');
-                if (!font) {
-                    return false;
-                }
-                var fonts = Array.from(document.fonts.keys());
-                var font = fonts.find(function(face) {
-                    return face.family === font;
-                });
-                return !!font;
-            }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(command_queue.resolve);
-                calculate_char_size()
             } else {
                 command_queue.resolve();
             }
