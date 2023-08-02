@@ -7321,13 +7321,13 @@
     }
     // -----------------------------------------------------------------------
     function have_custom_font(term) {
-        var font = $(term).css('--font');
-        if (!font) {
+        var custom_font = $(term).css('--font');
+        if (!custom_font) {
             return false;
         }
         var fonts = Array.from(document.fonts.keys());
         var font = fonts.find(function(face) {
-            return face.family === font;
+            return face.family === custom_font;
         });
         return !!font;
     }
