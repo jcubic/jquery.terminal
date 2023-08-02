@@ -7320,6 +7320,18 @@
         return Array.isArray(object);
     }
     // -----------------------------------------------------------------------
+    function have_custom_font(term) {
+        var font = $(term).css('--font');
+        if (!font) {
+            return false;
+        }
+        var fonts = Array.from(document.fonts.keys());
+        var font = fonts.find(function(face) {
+            return face.family === font;
+        });
+        return !!font;
+    }
+    // -----------------------------------------------------------------------
     function get_type(object) {
         if (typeof object === 'function') {
             return 'function';
@@ -12278,7 +12290,13 @@
             }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(command_queue.resolve);
+                document.fonts.ready.then(function() {
+                    if (have_custom_font(self)) {
+                        calculate_char_size();
+                        self.resize();
+                    }
+                    command_queue.resolve();
+                });
             } else {
                 command_queue.resolve();
             }
