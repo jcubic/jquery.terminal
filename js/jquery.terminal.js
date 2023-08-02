@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.37.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 30 Jul 2023 18:29:43 +0000
+ * Date: Wed, 02 Aug 2023 16:00:14 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5277,8 +5277,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.37.0',
-        date: 'Sun, 30 Jul 2023 18:29:43 +0000',
+        version: 'DEV',
+        date: 'Wed, 02 Aug 2023 16:00:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7318,6 +7318,18 @@
     // -----------------------------------------------------------------------
     function is_array(object) {
         return Array.isArray(object);
+    }
+    // -----------------------------------------------------------------------
+    function have_custom_font(term) {
+        var custom_font = $(term).css('--font');
+        if (!custom_font) {
+            return false;
+        }
+        var fonts = Array.from(document.fonts.keys());
+        var font = fonts.find(function(face) {
+            return face.family === custom_font;
+        });
+        return !!font;
     }
     // -----------------------------------------------------------------------
     function get_type(object) {
@@ -11624,7 +11636,6 @@
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
-        $('<div class="terminal-font-forcer terminal-hidden">x<div>').appendTo(self);
         var wrapper = $('<div class="terminal-wrapper"/>').appendTo(scroller);
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
@@ -12180,6 +12191,8 @@
                     pixel_density = get_pixel_size();
                     self.resize();
                 }, options);
+                $('<div class="terminal-font-forcer terminal-hidden">x<div>')
+                    .appendTo(self);
             }
             function bottom_detect(intersections) {
                 is_bottom_detected = intersections[0].intersectionRatio >= 0.9;
@@ -12277,7 +12290,13 @@
             }
             // wait for custom font to load #892
             if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(command_queue.resolve);
+                document.fonts.ready.then(function() {
+                    if (have_custom_font(self)) {
+                        calculate_char_size();
+                        self.resize();
+                    }
+                    command_queue.resolve();
+                });
             } else {
                 command_queue.resolve();
             }
