@@ -22,7 +22,7 @@ type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare namespace JQueryTerminal {
     type interpreterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
-    type terminalObjectFunction = (...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
+    type terminalObjectFunction = (this: JQueryTerminal, ...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
     type Interpreter = string | interpreterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
         [key: string]: ObjectInterpreter | terminalObjectFunction;
