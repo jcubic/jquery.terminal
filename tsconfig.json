@@ -2,7 +2,8 @@
     "compilerOptions": {
         "target": "es6",
         "module": "commonjs",
-        "lib": ["es2015", "ES2018.Promise", "dom"]
+        "lib": ["es2015", "ES2018.Promise", "dom"],
+        "noImplicitThis": true
     },
     "exclude": ["npm"]
 }
