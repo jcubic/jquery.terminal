@@ -4,6 +4,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Update
+        run: sudo apt-get update
       - name: Install ImageMagick
         run: sudo apt-get -y install graphicsmagick
       - name: checkout

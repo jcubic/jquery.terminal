@@ -1,3 +1,7 @@
+## 2.37.2
+### Bugfix
+* fix for TypeScript from [Antoine](https://github.com/antoineol) ([#896](https://github.com/jcubic/jquery.terminal/pull/896)) and [KiddoV](https://github.com/KiddoV) ([#901](https://github.com/jcubic/jquery.terminal/pull/901))
+
 ## 2.37.1
 ### Bugfix
 * fix wrong calculation of characters with custom font [#892](https://github.com/jcubic/jquery.terminal/issues/892)

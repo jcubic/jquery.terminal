@@ -47,6 +47,11 @@ $('.term').terminal([obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter, function(command) {
 }]);
+$('.term').terminal({
+    help: function () {
+        this.echo('Help command');
+    }
+});
 
 class Foo {
     x: string;
