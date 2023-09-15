@@ -828,3 +828,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     scroll_to_bottom(): JQueryTerminal;
     is_bottom(): boolean;
 }
+
+declare module 'jquery.terminal' {
+    const JQTerminal: (window: Window, JQuery: JQueryStatic) => void;
+    export default JQTerminal;
+}
