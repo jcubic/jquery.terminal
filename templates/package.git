@@ -30,7 +30,7 @@
   "contributors": [
     {
       "name": "Jakub T. Jankiewicz",
-      "url": "https://jcubic.pl/me"
+      "url": "https://jcu.bi"
     },
     {
       "name": "Hood Chatham",
@@ -69,6 +69,10 @@
       "url": "https://github.com/fschaefer"
     },
     {
+      "name": "Antoine",
+      "url": "https://github.com/antoineol"
+    },
+    {
       "name": "David Refoua",
       "url": "http://www.Refoua.me"
     },
@@ -93,7 +97,7 @@
       "url": "https://omranic.com"
     },
     {
-      "name": "Anton Vasil'ev",
+      "name": "Anton Vasilev",
       "url": "https://github.com/avdes"
     },
     {
@@ -113,12 +117,24 @@
       "url": "https://br0g.0brg.net"
     },
     {
+      "name": "jpaye",
+      "url": "https://github.com/jpaye"
+    },
+    {
       "name": "Jarry Shaw",
-      "url": "https://www.jarryshaw.me"
+      "url": "https://jarryshaw.me"
+    },
+    {
+      "name": "John Jarvis",
+      "url": "http://www.jarv.org"
     },
     {
       "name": "Jon Steinich",
       "url": "https://github.com/jsteinich"
+    },
+    {
+      "name": "KiddoV",
+      "url": "https://github.com/KiddoV"
     },
     {
       "name": "Martin v. Löwis",
@@ -147,6 +163,10 @@
     {
       "name": "coderaiser",
       "url": "http://coderaiser.github.io"
+    },
+    {
+      "name": "dependabot[bot]",
+      "url": "https://github.com/dependabot[bot]"
     },
     {
       "name": "Dev Kumar Gupta",
