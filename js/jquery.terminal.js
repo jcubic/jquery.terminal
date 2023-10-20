@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 20 Oct 2023 10:39:08 +0000
+ * Date: Fri, 20 Oct 2023 10:59:11 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5278,7 +5278,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 20 Oct 2023 10:39:08 +0000',
+        date: 'Fri, 20 Oct 2023 10:59:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8761,7 +8761,7 @@
             if (is_function(prompt)) {
                 prompt = context_callback_proxy(prompt);
             }
-            var is_dynamic_prompt = is_function(interpreter.prompt)
+            var is_dynamic_prompt = is_function(interpreter.prompt);
             if (prompt !== command_line.prompt() || is_dynamic_prompt) {
                 if (is_dynamic_prompt) {
                     // prevent flicker of old prompt until async prompt finishes

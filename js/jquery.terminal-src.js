@@ -8761,7 +8761,7 @@
             if (is_function(prompt)) {
                 prompt = context_callback_proxy(prompt);
             }
-            var is_dynamic_prompt = is_function(interpreter.prompt)
+            var is_dynamic_prompt = is_function(interpreter.prompt);
             if (prompt !== command_line.prompt() || is_dynamic_prompt) {
                 if (is_dynamic_prompt) {
                     // prevent flicker of old prompt until async prompt finishes
