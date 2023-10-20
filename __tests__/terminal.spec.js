@@ -5663,6 +5663,30 @@ describe('Terminal plugin', function() {
                     done();
                 }, 400);
             });
+            it('should render greetings and auth once #897', async () => {
+                var term = $('<div/>').terminal($.noop, {
+                    login(username, password) {
+                        if (username === 'guest' && password === 'guest') {
+                            return '__TOKEN__';
+                        }
+                        return null;
+                    },
+                    greetings() {
+                        return 'HELLO THERE';
+                    },
+                    memory: true,
+                    prompt() {
+                        return `${this.login_name()}$`
+                    }
+                });
+                await term.exec(['guest', 'guest']);
+                await delay(100);
+                expect(output(term)).toEqual([
+                    'login: guest',
+                    'password: *****',
+                    'HELLO THERE'
+                ]);
+            });
         });
         describe('pause/paused/resume', function() {
             var term = $('<div/>').appendTo('body').terminal();

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 20 Oct 2023 10:59:11 +0000
+ * Date: Fri, 20 Oct 2023 12:55:07 +0000
  */
 /* global define, Map */
 /* eslint-disable */
@@ -5278,7 +5278,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 20 Oct 2023 10:59:11 +0000',
+        date: 'Fri, 20 Oct 2023 12:55:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8441,18 +8441,16 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
-                        if (settings.greetings) {
-                            try {
-                                var defer = new $.Deferred();
-                                var ret = settings.greetings.call(self, defer.resolve);
-                                if (ret) {
-                                    defer.resolve(ret);
-                                }
-                                return defer.promise();
-                            } catch (e) {
-                                settings.greetings = null;
-                                display_exception(e, 'greetings');
+                        try {
+                            var defer = new $.Deferred();
+                            var ret = settings.greetings.call(self, defer.resolve);
+                            if (ret) {
+                                defer.resolve(ret);
                             }
+                            return defer.promise();
+                        } catch (e) {
+                            settings.greetings = null;
+                            display_exception(e, 'greetings');
                         }
                     });
                 } else {
@@ -8762,7 +8760,7 @@
                 prompt = context_callback_proxy(prompt);
             }
             var is_dynamic_prompt = is_function(interpreter.prompt);
-            if (prompt !== command_line.prompt() || is_dynamic_prompt) {
+            if (is_dynamic_prompt || prompt !== command_line.prompt()) {
                 if (is_dynamic_prompt) {
                     // prevent flicker of old prompt until async prompt finishes
                     command_line.prompt('');
@@ -8877,9 +8875,7 @@
                 // for case when showing long error before init
                 if (echo_delay.length) {
                     // for case when greetting is async function
-                    $.when.apply($, echo_delay).then(self.refresh);
-                } else {
-                    self.refresh();
+                    $.when.apply($, echo_delay);
                 }
             }
             function next() {
