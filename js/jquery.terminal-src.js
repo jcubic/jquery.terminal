@@ -8761,8 +8761,9 @@
             if (is_function(prompt)) {
                 prompt = context_callback_proxy(prompt);
             }
-            if (prompt !== command_line.prompt()) {
-                if (is_function(interpreter.prompt)) {
+            var is_dynamic_prompt = is_function(interpreter.prompt)
+            if (prompt !== command_line.prompt() || is_dynamic_prompt) {
+                if (is_dynamic_prompt) {
                     // prevent flicker of old prompt until async prompt finishes
                     command_line.prompt('');
                 }
@@ -9291,7 +9292,7 @@
             var level = self.level();
             // when autologin and onBeforeLogin return false
             clear_token();
-            function popUserPass() {
+            function pop_user_pass() {
                 while (self.level() > level) {
                     self.pop(undefined, true);
                 }
@@ -9312,7 +9313,7 @@
             function login_callback(user, token, silent) {
                 var next;
                 if (token) {
-                    popUserPass();
+                    pop_user_pass();
                     set_token(user, token);
                     in_login = false;
                     fire_event('onAfterLogin', [user, token]);
@@ -9357,7 +9358,7 @@
                     try {
                         validate_login(user, pass, function(valid) {
                             if (valid === false) {
-                                popUserPass();
+                                pop_user_pass();
                                 return;
                             }
                             self.pause();
