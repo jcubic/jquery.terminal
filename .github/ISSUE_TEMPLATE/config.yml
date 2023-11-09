@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question
+    url: https://github.com/jcubic/jquery.terminal/discussions/new/choose
+    about: We use Discussions for these reports
