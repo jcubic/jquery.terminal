@@ -1,6 +1,8 @@
 ## 2.38.0
 ### Features
 * add support for bigInt numbers
+### Bugfix
+* fix \t characters in ascii_table [#902](https://github.com/jcubic/jquery.terminal/issues/902)
 
 ## 2.37.2
 ### Bugfix
