@@ -1,3 +1,7 @@
+## 2.38.0
+### Features
+* add support for bigInt numbers
+
 ## 2.37.2
 ### Bugfix
 * fix for TypeScript from [Antoine](https://github.com/antoineol) ([#896](https://github.com/jcubic/jquery.terminal/pull/896)) and [KiddoV](https://github.com/KiddoV) ([#901](https://github.com/jcubic/jquery.terminal/pull/901))

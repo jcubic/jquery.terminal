@@ -6491,7 +6491,10 @@
                 return new RegExp(regex[1], regex[2]);
             } else if (arg.match(/['"`]/)) {
                 return parse_string(arg);
-            } else if (arg.match(/^-?[0-9]+$/)) {
+            } else if (arg.match(/^-?[0-9]+n?$/)) {
+                if (arg.match(/n$/)) {
+                    return BigInt(arg.replace(/n$/, ''));
+                }
                 return parseInt(arg, 10);
             } else if (arg.match(float_re)) {
                 return parseFloat(arg);
@@ -7304,6 +7307,10 @@
     // -----------------------------------------------------------------------
     function is_promise(object) {
         return is_object(object) && is_function(object.then || object.done);
+    }
+    // -----------------------------------------------------------------------
+    function is_big_int(object) {
+        return typeof object === 'bigint';
     }
     // -----------------------------------------------------------------------
     function is_deferred(object) {
@@ -11704,7 +11711,11 @@
                 } else if (is_array(value)) {
                     value = $.terminal.columns(value, self.cols(), settings.tabs);
                 } else {
+                    var need_suffix = is_big_int(value);
                     value = String(value);
+                    if (need_suffix) {
+                        value += 'n';
+                    }
                 }
             }
             return value;
