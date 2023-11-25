@@ -6,7 +6,7 @@ All contributions are welcome, even non-tech ones. To contribute you need to for
 git clone git@github.com:your-name/jquery.terminal.git
 ```
 
-Please only modify `js/jquery.terminal-src.js`/`css/jquery.terminal-src.css` files. You can run `make` but you may have conflicts. Other contributors push commits with their builds (you may have conflicts because there is a build date and time in the build file). Make sure you're on the devel branch, and create a PR to the devel branch as well. You could make fixes to examples and the README directly to the master, but you could also add them to the devel branch as well.
+Please only modify `js/jquery.terminal-src.js`/`css/jquery.terminal-src.css` files (and extensions). You can run `make` but you may have conflicts. Other contributors push commits with their builds (you may have conflicts because there is a build date and time in the build file). Make sure you're on the devel branch, and create a PR to the devel branch as well. You could make fixes to examples and the README directly to the master, but you could also add them to the devel branch as well.
 
 Non-technical contributions are also welcome. If you find a bug in the documentation on the website, you can file an issue to [jcubic/jquery.terminal-www](https://github.com/jcubic/jquery.terminal-www).
 
