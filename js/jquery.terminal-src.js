@@ -43,7 +43,7 @@
  *
  * Date: {{DATE}}
  */
-/* global define, Map */
+/* global define, Map, BigInt */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
