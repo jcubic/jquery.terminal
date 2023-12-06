@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 20 Oct 2023 10:39:08 +0000
+ * Date: Wed, 06 Dec 2023 14:24:45 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -299,7 +299,7 @@ body.full-screen-terminal .terminal {
     line-height: calc(var(--size, 1) * (13px / var(--pixel-density, 1))) !important;
 }
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
-    background-color: transparent !important;
+    --background: transparent;
 }
 .terminal-output .emoji, .cmd .emoji {
     height: 12px;
@@ -871,6 +871,7 @@ terminal .terminal-output > div {
         top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
     }
     .terminal .inverted, .cmd.cmd.cmd .inverted, .cmd.cmd.cmd .cmd-inverted {
+        --background: #000;
         background-color: var(--color, #aaa) !important;
         color: var(--background, #000) !important;
     }

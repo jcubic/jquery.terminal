@@ -5,6 +5,7 @@
 * fix \t characters in ascii_table [#902](https://github.com/jcubic/jquery.terminal/issues/902)
 * fix race condition in refresh and flush [#897](https://github.com/jcubic/jquery.terminal/issues/897)
 * always execute function prompt after login [#898](https://github.com/jcubic/jquery.terminal/issues/898)
+* fix background color in prompt [#906](https://github.com/jcubic/jquery.terminal/issues/906)
 
 ## 2.37.2
 ### Bugfix
