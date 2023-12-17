@@ -1,6 +1,6 @@
 ## 2.38.0
 ### Features
-* add support for bigInt numbers
+* add support for BigInt numbers when parsing commands
 * add `--line-thickness` CSS variable to cursor animation
 ### Bugfix
 * fix \t characters in ascii_table [#902](https://github.com/jcubic/jquery.terminal/issues/902)
