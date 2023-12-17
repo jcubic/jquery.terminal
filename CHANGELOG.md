@@ -1,6 +1,7 @@
 ## 2.38.0
 ### Features
 * add support for bigInt numbers
+* add `--line-thickness` CSS variable to cursor animation
 ### Bugfix
 * fix \t characters in ascii_table [#902](https://github.com/jcubic/jquery.terminal/issues/902)
 * fix race condition in refresh and flush [#897](https://github.com/jcubic/jquery.terminal/issues/897)

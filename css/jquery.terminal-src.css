@@ -513,7 +513,7 @@ terminal .terminal-output > div {
 @-webkit-keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -522,7 +522,7 @@ terminal .terminal-output > div {
 @-moz-keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -531,7 +531,7 @@ terminal .terminal-output > div {
 @keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -541,7 +541,7 @@ terminal .terminal-output > div {
 @-webkit-keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -550,7 +550,7 @@ terminal .terminal-output > div {
 @-moz-keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -559,7 +559,7 @@ terminal .terminal-output > div {
 @keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -1143,6 +1143,7 @@ terminal .terminal-output > div {
     scrollbar-color: var(--color, #aaa) var(--background, #000);
     scrollbar-width: thin;
 }
+
 /* visially hidden */
 .terminal-hidden {
     position: absolute !important;
