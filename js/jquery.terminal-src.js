@@ -9184,7 +9184,6 @@
                         });
                     } else {
                         var chars = $.terminal.partition(formatted, {wrap: false});
-                        var len = $.terminal.length(formatted);
                     }
                     var stop;
                     var interval = setInterval(function() {
