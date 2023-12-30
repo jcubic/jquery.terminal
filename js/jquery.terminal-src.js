@@ -5865,9 +5865,9 @@
                         }
                         if (settings.trim || settings.keepWords) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
-                            if (!leading_spaces) {
-                                output = output.replace(/^(&nbsp;|\s)+/g, '');
-                            }
+                        }
+                        if (!leading_spaces) {
+                            output = output.replace(/^(&nbsp;|\s)+/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
