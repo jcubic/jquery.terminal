@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 30 Dec 2023 15:05:01 +0000
+ * Date: Sat, 30 Dec 2023 19:12:31 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1727,6 +1727,9 @@
     // -------------------------------------------------------------------------
     OutputLines.prototype.get_snapshot = function() {
         return this._snapshot.reduce(function(acc, arr) {
+            if (!arr) {
+                return acc;
+            }
             return acc.concat(arr);
         }, []).join('\n');
     };
@@ -1788,7 +1791,7 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.data = function() {
-        return this._lines;
+        return this._lines.filter(Boolean);
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.has_newline = function() {
@@ -1814,13 +1817,15 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
-        var len = this._lines.length;
-        return this._lines[len - 1];
+        var lines = this.data();
+        var len = lines.length;
+        return lines[len - 1];
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.update = function(index, value, options) {
         if (value === null) {
-            this._lines.splice(index, 1);
+            delete this._lines[index];
+            delete this._snapshot[index];
         } else {
             this._lines[index][0] = value;
             if (options) {
@@ -5278,7 +5283,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Dec 2023 15:05:01 +0000',
+        date: 'Sat, 30 Dec 2023 19:12:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5864,9 +5869,9 @@
                         }
                         if (settings.trim || settings.keepWords) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
-                            if (!leading_spaces) {
-                                output = output.replace(/^(&nbsp;|\s)+/g, '');
-                            }
+                        }
+                        if (!leading_spaces && !prev_format) {
+                            output = output.replace(/^(&nbsp;|\s)+/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
@@ -9141,7 +9146,7 @@
         // ---------------------------------------------------------------------
         // :: Typing animation generator
         // ---------------------------------------------------------------------
-        function typed(finish_typing_fn) {
+        function typed(finish_typing_fn, optimized) {
             return function typing_animation(message, options) {
                 var formatted = $.terminal.apply_formatters(message, {
                     animation: true
@@ -9151,9 +9156,11 @@
                 if (options && typeof options.keepWords !== 'undefined') {
                     keepWords = options.keepWords;
                 }
-                var formatted_lines = $.terminal.split_equal(formatted, self.cols(), {
-                    keepWords: keepWords
-                });
+                if (optimized) {
+                    var formatted_lines = $.terminal.split_equal(formatted, self.cols(), {
+                        keepWords: keepWords
+                    });
+                }
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -9167,19 +9174,32 @@
                     }
                     var bottom = self.is_bottom();
                     var line = 0;
-                    var lines = formatted_lines.map(function(formatted) {
-                        return {
-                            formatted: formatted,
-                            chars: $.terminal.partition(formatted, {wrap: false}),
-                            len: $.terminal.length(formatted)
-                        };
-                    });
+                    if (optimized) {
+                        var lines = formatted_lines.map(function(formatted) {
+                            return {
+                                formatted: formatted,
+                                chars: $.terminal.partition(formatted, {wrap: false}),
+                                len: $.terminal.length(formatted)
+                            };
+                        });
+                    } else {
+                        var chars = $.terminal.partition(formatted, {wrap: false});
+                        var len = $.terminal.length(formatted);
+                    }
+                    var stop;
                     var interval = setInterval(function() {
+                        var formatted_line, input_chars, input_len;
                         if (!skip) {
-                            var formatted_line = lines[line].formatted;
-                            var chars = lines[line].chars;
-                            var len = lines[line].len;
-                            var chr = chars[char_i];
+                            if (optimized) {
+                                formatted_line = lines[line].formatted;
+                                input_chars = lines[line].chars;
+                                input_len = lines[line].len;
+                            } else {
+                                formatted_line = formatted;
+                                input_chars = chars;
+                                input_len = len;
+                            }
+                            var chr = input_chars[char_i];
                             if (options.mask) {
                                 var mask = command_line.mask();
                                 if (typeof mask === 'string') {
@@ -9194,23 +9214,45 @@
                                 self.scroll_to_bottom();
                             }
                             char_i++;
-                            if (char_i === len) {
-                                ++line;
-                                new_prompt = '';
-                                char_i = 0;
+                            if (char_i === input_len && optimized) {
                                 // swap prompt with line
-                                finish_typing_fn(formatted_line, prompt, options);
+                                var index = self.last_index();
+                                self.set_prompt(prompt);
+                                self.echo(formatted_line, $.extend({}, options, {
+                                    formatters: false,
+                                    finalize: null,
+                                    typing: false
+                                }));
+                                lines[line].index = index + 1;
+                                new_prompt = '';
+                                ++line;
+                                char_i = 0;
                             }
                         } else {
                             self.skip_stop();
                             var chr_rest = $.terminal.substring(formatted, char_i, len);
                             new_prompt += chr_rest;
                             command_line.prompt(new_prompt, {formatters: false});
-                            line = lines.length;
+                            stop = true;
                         }
-                        if (line === lines.length) {
+                        if (optimized) {
+                            stop = line === lines.length;
+                        } else {
+                            stop = char_i === len;
+                        }
+                        if (stop) {
                             clearInterval(interval);
-                            animating = false;
+                            setTimeout(function() {
+                                if (optimized) {
+                                    // clear old lines and make one full line
+                                    // so it can wrap when you resize
+                                    lines.forEach(function(line) {
+                                        self.remove_line(line.index);
+                                    });
+                                }
+                                finish_typing_fn(message, prompt, options);
+                                animating = false;
+                            }, options.delay);
                         }
                     }, options.delay);
                 }
@@ -9220,7 +9262,7 @@
         var typed_prompt = typed(function(message, _, options) {
             self.set_prompt(message);
             options.finalize();
-        });
+        }, true);
         // ---------------------------------------------------------------------
         var typed_insert = (function() {
             var helper = typed(function(message, prompt, options) {
@@ -9238,7 +9280,7 @@
         var typed_message = typed(function(message, prompt, options) {
             self.set_prompt(prompt);
             self.echo(message, $.extend({}, options, {typing: false}));
-        });
+        }, true);
         // ---------------------------------------------------------------------
         var typed_enter = (function() {
             var helper = typed(function(message, prompt, options) {
@@ -10498,8 +10540,7 @@
                                 // this is finalize function from echo
                                 if (options.update) {
                                     lines.update_snapshot(data.index, snapshot);
-                                    var selector = '> div[data-index=' + data.index + ']';
-                                    var node = output.find(selector);
+                                    var node = get_node(data.index);
                                     if (node.html() !== wrapper.html()) {
                                         node.replaceWith(wrapper);
                                     }
@@ -10638,7 +10679,7 @@
                         self.error('Invalid line number ' + line);
                     } else if (value === null) {
                         lines.update(line, null);
-                        output.find('[data-index=' + line + ']').remove();
+                        get_node(line).remove();
                     } else {
                         value = preprocess_value(value, {
                             update: true,

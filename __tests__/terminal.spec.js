@@ -1417,15 +1417,15 @@ describe('Terminal utils', function() {
         }
         it('should handle emoji', function() {
             var input = [
-                "\u263a\ufe0f xxxx \u261d\ufe0f xxxx \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3",
-                "\u263a\ufe0f xxxx \u261d\ufe0f x \u0038\ufe0f\u20e3 xxx\u0038\ufe0f\u20e3"
+                "\u263a\ufe0f_xxxx_\u261d\ufe0f_xxxx_\u0038\ufe0f\u20e3_xxx\u0038\ufe0f\u20e3",
+                "\u263a\ufe0f_xxxx_\u261d\ufe0f_x_\u0038\ufe0f\u20e3_xxx\u0038\ufe0f\u20e3"
             ];
             input.forEach(test_codepoints);
         });
         it('should handle combine characters', function() {
             var input = [
-                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxx',
-                's\u030A\u032A xxxx s\u030A\u032A xxxx s\u030A\u032A xxxs\u030A\u032A'
+                's\u030A\u032A_xxxx_s\u030A\u032A_xxxx_s\u030A\u032A_xxxx',
+                's\u030A\u032A_xxxx_s\u030A\u032A_xxxx_s\u030A\u032A_xxxs\u030A\u032A'
             ];
             input.forEach(test_codepoints);
         });
@@ -7320,11 +7320,10 @@ describe('Terminal plugin', function() {
                 $.terminal.defaults.allowedAttributes.pop();
             });
             it('should remove last line', function() {
-                var index = term.last_index();
+                term.echo('foo bar');
                 term.echo('quux');
-                expect(term.last_index()).toEqual(index + 1);
-                term.update(index + 1, null);
-                expect(term.last_index()).toEqual(index);
+                term.update(-1, null);
+                expect(term.get_output()).toEqual('foo bar');
             });
             it('should call finalize', function() {
                 var options = {
