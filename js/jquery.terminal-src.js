@@ -8726,7 +8726,7 @@
             }
             clear_loging_storage();
             fire_event('onAfterlogout', [], true);
-            self.login(global_login_fn, true, initialize);
+            self.login(global_login_fn, true, start);
         }
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
@@ -8794,7 +8794,6 @@
                 ));
             }
             command_line.set('');
-            init_queue.resolve();
             if (!silent && is_function(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
             }
@@ -8875,9 +8874,13 @@
             }
         }
         // ---------------------------------------------------------------------
-        function initialize() {
+        function start() {
             prepare_top_interpreter();
+            init_queue.resolve();
             show_greetings();
+        }
+        // ---------------------------------------------------------------------
+        function initialize() {
             if (lines.length) {
                 // for case when showing long error before init
                 if (echo_delay.length) {
@@ -11342,6 +11345,8 @@
                     while (interpreters.size() > 1) {
                         interpreters.pop();
                     }
+                    prepare_top_interpreter();
+                    show_greetings();
                     initialize();
                 });
                 return self;
@@ -12315,10 +12320,14 @@
                 self.disable();
             }
             // -------------------------------------------------------------
-            // Run Login
+            // initialization
+            // -------------------------------------------------------------
             if (is_function(global_login_fn)) {
-                self.login(global_login_fn, true, initialize);
+                self.login(global_login_fn, true, start);
+                init_queue.resolve();
+                initialize();
             } else {
+                start();
                 initialize();
             }
             // -------------------------------------------------------------

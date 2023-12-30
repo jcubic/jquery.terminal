@@ -1,4 +1,6 @@
 ## 2.38.0
+### Breaking
+* `onInit` runs before login
 ### Features
 * add support for BigInt numbers when parsing commands
 * add `--line-thickness` CSS variable to cursor animation

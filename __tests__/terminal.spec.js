@@ -5529,6 +5529,20 @@ describe('Terminal plugin', function() {
                 expect(term.token(true)).toEqual(token);
                 expect(term.get_prompt()).toEqual('$$$ ');
             });
+            it('should echo during login #912', async () => {
+                var term = $('<div/>').terminal({}, {
+                    login: function(user, password) {
+                        return 'TOKEN';
+                    },
+                    greetings: false
+                });
+                term.echo('HELLO');
+                expect(term.get_output()).toEqual('HELLO');
+                await term.exec(['foo', 'bar']);
+                term.echo('WORLD');
+                const output = 'HELLO\nlogin: foo\npassword: ***\nWORLD';
+                expect(term.get_output()).toEqual(output);
+            });
         });
         describe('settings', function() {
             var term = $('<div/>').appendTo('body').terminal();
