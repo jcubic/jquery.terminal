@@ -12,6 +12,7 @@
 * fix background color in prompt [#906](https://github.com/jcubic/jquery.terminal/issues/906)
 * update prism code to match function Prism.highlight [#905](https://github.com/jcubic/jquery.terminal/issues/905)
 * fix keepWords during typing animation [#867](https://github.com/jcubic/jquery.terminal/issues/867)
+* fix leading spaces during animation [#825](https://github.com/jcubic/jquery.terminal/issues/825)
 
 ## 2.37.2
 ### Bugfix
