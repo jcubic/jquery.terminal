@@ -9147,11 +9147,18 @@
                     animation: true
                 });
                 formatted = $.terminal.normalize(formatted);
+                var keepWords = false;
+                if (options && typeof options.keepWords !== 'undefined') {
+                    keepWords = options.keepWords;
+                }
+                var formatted_lines = $.terminal.split_equal(formatted, self.cols(), {
+                    keepWords: keepWords
+                });
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
                 var len = $.terminal.length(formatted);
-                if (message.length > 0) {
+                if (len > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
                         new_prompt = options.prompt;
@@ -9159,9 +9166,19 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
-                    var chars = $.terminal.partition(formatted, {wrap: false});
+                    var line = 0;
+                    var lines = formatted_lines.map(function(formatted) {
+                        return {
+                            formatted: formatted,
+                            chars: $.terminal.partition(formatted, {wrap: false}),
+                            len: $.terminal.length(formatted)
+                        };
+                    });
                     var interval = setInterval(function() {
                         if (!skip) {
+                            var formatted_line = lines[line].formatted;
+                            var chars = lines[line].chars;
+                            var len = lines[line].len;
                             var chr = chars[char_i];
                             if (options.mask) {
                                 var mask = command_line.mask();
@@ -9177,20 +9194,23 @@
                                 self.scroll_to_bottom();
                             }
                             char_i++;
+                            if (char_i === len) {
+                                ++line;
+                                new_prompt = '';
+                                char_i = 0;
+                                // swap prompt with line
+                                finish_typing_fn(formatted_line, prompt, options);
+                            }
                         } else {
                             self.skip_stop();
                             var chr_rest = $.terminal.substring(formatted, char_i, len);
                             new_prompt += chr_rest;
                             command_line.prompt(new_prompt, {formatters: false});
-                            char_i = len;
+                            line = lines.length;
                         }
-                        if (char_i === len) {
+                        if (line === lines.length) {
                             clearInterval(interval);
-                            setTimeout(function() {
-                                // swap command with prompt
-                                finish_typing_fn(message, prompt, options);
-                                animating = false;
-                            }, options.delay);
+                            animating = false;
                         }
                     }, options.delay);
                 }

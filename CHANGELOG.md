@@ -4,12 +4,14 @@
 ### Features
 * add support for BigInt numbers when parsing commands
 * add `--line-thickness` CSS variable to cursor animation
+* improve performance with long typing animations [#820](https://github.com/jcubic/jquery.terminal/issues/820)
 ### Bugfix
 * fix \t characters in ascii_table [#902](https://github.com/jcubic/jquery.terminal/issues/902)
 * fix race condition in refresh and flush [#897](https://github.com/jcubic/jquery.terminal/issues/897)
 * always execute function prompt after login [#898](https://github.com/jcubic/jquery.terminal/issues/898)
 * fix background color in prompt [#906](https://github.com/jcubic/jquery.terminal/issues/906)
 * update prism code to match function Prism.highlight [#905](https://github.com/jcubic/jquery.terminal/issues/905)
+* fix keepWords during typing animation [#867](https://github.com/jcubic/jquery.terminal/issues/867)
 
 ## 2.37.2
 ### Bugfix
