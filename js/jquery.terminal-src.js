@@ -1788,7 +1788,7 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.data = function() {
-        return this._lines;
+        return this._lines.filter(Boolean);
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.has_newline = function() {
@@ -1814,13 +1814,14 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
-        var len = this._lines.length;
-        return this._lines[len - 1];
+        var lines = this.data();
+        var len = lines.length;
+        return lines[len - 1];
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.update = function(index, value, options) {
         if (value === null) {
-            this._lines.splice(index, 1);
+            delete this._lines[index];
         } else {
             this._lines[index][0] = value;
             if (options) {
@@ -9195,11 +9196,12 @@
                             }
                             char_i++;
                             if (char_i === len) {
-                                ++line;
-                                new_prompt = '';
-                                char_i = 0;
                                 // swap prompt with line
                                 finish_typing_fn(formatted_line, prompt, options);
+                                lines[line].index = self.last_index();
+                                char_i = 0;
+                                new_prompt = '';
+                                ++line;
                             }
                         } else {
                             self.skip_stop();
@@ -9211,6 +9213,14 @@
                         if (line === lines.length) {
                             clearInterval(interval);
                             animating = false;
+                            setTimeout(function() {
+                                // clear old lines and make one full line
+                                // so it can wrap when you resize
+                                lines.forEach(function(line) {
+                                    self.remove_line(line.index);
+                                });
+                                finish_typing_fn(message, prompt, options);
+                            }, options.delay);
                         }
                     }, options.delay);
                 }
