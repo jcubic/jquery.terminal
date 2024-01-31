@@ -1709,6 +1709,9 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.get_partial = function() {
+        if (!this._snapshot.length) {
+            return [];
+        }
         var last = this._snapshot[this._snapshot.length - 1];
         return last;
     };

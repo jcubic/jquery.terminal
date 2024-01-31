@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 30 Dec 2023 19:15:48 +0000
+ * Date: Wed, 31 Jan 2024 13:30:30 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1709,6 +1709,9 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.get_partial = function() {
+        if (!this._snapshot.length) {
+            return [];
+        }
         var last = this._snapshot[this._snapshot.length - 1];
         return last;
     };
@@ -5283,7 +5286,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 30 Dec 2023 19:15:48 +0000',
+        date: 'Wed, 31 Jan 2024 13:30:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
