@@ -1,14 +1,14 @@
 <h1 align="center">
-  <img src="https://github.com/jcubic/jquery.terminal/blob/master/assets/ascii_art.svg?raw=true&ver=2.37.2"
+  <img src="https://github.com/jcubic/jquery.terminal/blob/devel/assets/ascii_art.svg?raw=true&ver=DEV"
        alt="ASCII Art that represent text jQuery Terminal - JavaScript Library for Web Based Terminal Emulators" />
 </h1>
 
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
-[![npm](https://img.shields.io/badge/npm-2.37.2-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.37.2-yellow.svg)
-[![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&75da0f6ae07388cf17379f7dcd13e04f)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=devel&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&e637f705f0dc86afeff501b675fef37c)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![jsDelivr Downloads](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded&n=1)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![Paid Support](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
@@ -87,7 +87,7 @@ You can test current version at this URL:
 
 or if it doesn't use latest version (because of jsDelivr cache) you can force it with this URL:
 
-* [https://jcubic.github.io/jquery.terminal/?ver=2.37.2](https://jcubic.github.io/jquery.terminal/?ver=2.37.2)
+* [https://jcubic.github.io/jquery.terminal/?ver=DEV](https://jcubic.github.io/jquery.terminal/?ver=DEV)
 
 And development version using:
 
@@ -106,20 +106,20 @@ or use jsDelivr:
 
 ```
 
-Then include js/jquery.terminal-2.37.2.min.js and css/jquery.terminal-2.37.2.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.37.2/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.37.2/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.37.2/css/jquery.terminal.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css"/>
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
@@ -130,6 +130,14 @@ it will redirect to the latest ones:
 <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
 <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
+
+or jsDelivr that is bit faster:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
 
 #### Bleeding Edge Version
 
@@ -147,7 +155,13 @@ but it's not refreshed as fast as rawgit was, because it's CDN and need to be pr
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 ```html
-<script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
+<script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
+```
+
+or
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/js-polyfills/keyboard.js"></script>
 ```
 
 #### Command Line
@@ -193,6 +207,24 @@ jQuery(function($, undefined) {
 Here is a higher level call, using an object as an interpreter, By default the terminal will
 parse commands that a user types and replace number like strings with real numbers
 regex with regexes and process escape characters in double quoted strings.
+
+```javascript
+$('body').terminal({
+    cat: function(width = 200, height = 300) {
+        return $(`<img src="https://placekitten.com/${width}/${height}">`);
+    },
+    title: function() {
+        return fetch('https://terminal.jcubic.pl')
+            .then(r => r.text())
+            .then(html => html.match(/<title>([^>]+)<\/title>/)[1]);
+    }
+}, {
+    checkArity: false,
+    greetings: 'My Terminal\n'
+});
+```
+
+And more advanced example:
 
 ```javascript
 jQuery(function($, undefined) {

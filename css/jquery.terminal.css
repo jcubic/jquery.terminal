@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.37.2
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 15 Sep 2023 15:33:19 +0000
+ * Date: Sat, 30 Dec 2023 19:12:31 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -299,7 +299,7 @@ body.full-screen-terminal .terminal {
     line-height: calc(var(--size, 1) * (13px / var(--pixel-density, 1))) !important;
 }
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
-    background-color: transparent !important;
+    --background: transparent;
 }
 .terminal-output .emoji, .cmd .emoji {
     height: 12px;
@@ -513,7 +513,7 @@ terminal .terminal-output > div {
 @-webkit-keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -522,7 +522,7 @@ terminal .terminal-output > div {
 @-moz-keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -531,7 +531,7 @@ terminal .terminal-output > div {
 @keyframes terminal-bar {
   0%, 50% {
       box-shadow: -2px 0 0 -1px #aaa;
-      box-shadow: -2px 0 0 -1px var(--original-color, #aaa);
+      box-shadow: calc(var(--line-thickness, 2) * -1px) 0 0 -1px var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -541,7 +541,7 @@ terminal .terminal-output > div {
 @-webkit-keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -550,7 +550,7 @@ terminal .terminal-output > div {
 @-moz-keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -559,7 +559,7 @@ terminal .terminal-output > div {
 @keyframes terminal-underline {
   0%, 50% {
       box-shadow: 0 2px 0 #aaa;
-      box-shadow: 0 2px 0 var(--original-color, #aaa);
+      box-shadow: 0 calc(var(--line-thickness, 2) * 1px) 0 var(--original-color, #aaa);
   }
   50.1%, 100% {
       box-shadow: none;
@@ -871,6 +871,7 @@ terminal .terminal-output > div {
         top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
     }
     .terminal .inverted, .cmd.cmd.cmd .inverted, .cmd.cmd.cmd .cmd-inverted {
+        --background: #000;
         background-color: var(--color, #aaa) !important;
         color: var(--background, #000) !important;
     }
@@ -1142,6 +1143,7 @@ terminal .terminal-output > div {
     scrollbar-color: var(--color, #aaa) var(--background, #000);
     scrollbar-width: thin;
 }
+
 /* visially hidden */
 .terminal-hidden {
     position: absolute !important;

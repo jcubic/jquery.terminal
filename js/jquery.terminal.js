@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.37.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,9 +41,9 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 15 Sep 2023 15:33:19 +0000
+ * Date: Wed, 31 Jan 2024 13:30:30 +0000
  */
-/* global define, Map */
+/* global define, Map, BigInt */
 /* eslint-disable */
 /* istanbul ignore next */
 (function(ctx) {
@@ -1709,6 +1709,9 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.get_partial = function() {
+        if (!this._snapshot.length) {
+            return [];
+        }
         var last = this._snapshot[this._snapshot.length - 1];
         return last;
     };
@@ -1727,6 +1730,9 @@
     // -------------------------------------------------------------------------
     OutputLines.prototype.get_snapshot = function() {
         return this._snapshot.reduce(function(acc, arr) {
+            if (!arr) {
+                return acc;
+            }
             return acc.concat(arr);
         }, []).join('\n');
     };
@@ -1788,7 +1794,7 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.data = function() {
-        return this._lines;
+        return this._lines.filter(Boolean);
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.has_newline = function() {
@@ -1814,13 +1820,15 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.last_line = function() {
-        var len = this._lines.length;
-        return this._lines[len - 1];
+        var lines = this.data();
+        var len = lines.length;
+        return lines[len - 1];
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.update = function(index, value, options) {
         if (value === null) {
-            this._lines.splice(index, 1);
+            delete this._lines[index];
+            delete this._snapshot[index];
         } else {
             this._lines[index][0] = value;
             if (options) {
@@ -5277,8 +5285,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.37.2',
-        date: 'Fri, 15 Sep 2023 15:33:19 +0000',
+        version: 'DEV',
+        date: 'Wed, 31 Jan 2024 13:30:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5864,9 +5872,9 @@
                         }
                         if (settings.trim || settings.keepWords) {
                             output = output.replace(/(&nbsp;|\s)+$/g, '');
-                            if (!leading_spaces) {
-                                output = output.replace(/^(&nbsp;|\s)+/g, '');
-                            }
+                        }
+                        if (!leading_spaces && !prev_format) {
+                            output = output.replace(/^(&nbsp;|\s)+/g, '');
                         }
                         first_index = (new_index || data.index) + 1;
                         if (prev_format) {
@@ -6491,7 +6499,10 @@
                 return new RegExp(regex[1], regex[2]);
             } else if (arg.match(/['"`]/)) {
                 return parse_string(arg);
-            } else if (arg.match(/^-?[0-9]+$/)) {
+            } else if (arg.match(/^-?[0-9]+n?$/)) {
+                if (arg.match(/n$/)) {
+                    return BigInt(arg.replace(/n$/, ''));
+                }
                 return parseInt(arg, 10);
             } else if (arg.match(float_re)) {
                 return parseFloat(arg);
@@ -7304,6 +7315,10 @@
     // -----------------------------------------------------------------------
     function is_promise(object) {
         return is_object(object) && is_function(object.then || object.done);
+    }
+    // -----------------------------------------------------------------------
+    function is_big_int(object) {
+        return typeof object === 'bigint';
     }
     // -----------------------------------------------------------------------
     function is_deferred(object) {
@@ -8441,18 +8456,16 @@
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
-                        if (settings.greetings) {
-                            try {
-                                var defer = new $.Deferred();
-                                var ret = settings.greetings.call(self, defer.resolve);
-                                if (ret) {
-                                    defer.resolve(ret);
-                                }
-                                return defer.promise();
-                            } catch (e) {
-                                settings.greetings = null;
-                                display_exception(e, 'greetings');
+                        try {
+                            var defer = new $.Deferred();
+                            var ret = settings.greetings.call(self, defer.resolve);
+                            if (ret) {
+                                defer.resolve(ret);
                             }
+                            return defer.promise();
+                        } catch (e) {
+                            settings.greetings = null;
+                            display_exception(e, 'greetings');
                         }
                     });
                 } else {
@@ -8721,7 +8734,7 @@
             }
             clear_loging_storage();
             fire_event('onAfterlogout', [], true);
-            self.login(global_login_fn, true, initialize);
+            self.login(global_login_fn, true, start);
         }
         // ---------------------------------------------------------------------
         function clear_loging_storage() {
@@ -8761,8 +8774,9 @@
             if (is_function(prompt)) {
                 prompt = context_callback_proxy(prompt);
             }
-            if (prompt !== command_line.prompt()) {
-                if (is_function(interpreter.prompt)) {
+            var is_dynamic_prompt = is_function(interpreter.prompt);
+            if (is_dynamic_prompt || prompt !== command_line.prompt()) {
+                if (is_dynamic_prompt) {
                     // prevent flicker of old prompt until async prompt finishes
                     command_line.prompt('');
                 }
@@ -8788,7 +8802,6 @@
                 ));
             }
             command_line.set('');
-            init_queue.resolve();
             if (!silent && is_function(interpreter.onStart)) {
                 interpreter.onStart.call(self, self);
             }
@@ -8869,16 +8882,18 @@
             }
         }
         // ---------------------------------------------------------------------
-        function initialize() {
+        function start() {
             prepare_top_interpreter();
+            init_queue.resolve();
             show_greetings();
+        }
+        // ---------------------------------------------------------------------
+        function initialize() {
             if (lines.length) {
                 // for case when showing long error before init
                 if (echo_delay.length) {
                     // for case when greetting is async function
-                    $.when.apply($, echo_delay).then(self.refresh);
-                } else {
-                    self.refresh();
+                    $.when.apply($, echo_delay);
                 }
             }
             function next() {
@@ -9134,17 +9149,26 @@
         // ---------------------------------------------------------------------
         // :: Typing animation generator
         // ---------------------------------------------------------------------
-        function typed(finish_typing_fn) {
+        function typed(finish_typing_fn, optimized) {
             return function typing_animation(message, options) {
                 var formatted = $.terminal.apply_formatters(message, {
                     animation: true
                 });
                 formatted = $.terminal.normalize(formatted);
+                var keepWords = false;
+                if (options && typeof options.keepWords !== 'undefined') {
+                    keepWords = options.keepWords;
+                }
+                if (optimized) {
+                    var formatted_lines = $.terminal.split_equal(formatted, self.cols(), {
+                        keepWords: keepWords
+                    });
+                }
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
                 var len = $.terminal.length(formatted);
-                if (message.length > 0) {
+                if (len > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
                         new_prompt = options.prompt;
@@ -9152,10 +9176,32 @@
                         self.set_prompt('');
                     }
                     var bottom = self.is_bottom();
-                    var chars = $.terminal.partition(formatted, {wrap: false});
+                    var line = 0;
+                    if (optimized) {
+                        var lines = formatted_lines.map(function(formatted) {
+                            return {
+                                formatted: formatted,
+                                chars: $.terminal.partition(formatted, {wrap: false}),
+                                len: $.terminal.length(formatted)
+                            };
+                        });
+                    } else {
+                        var chars = $.terminal.partition(formatted, {wrap: false});
+                    }
+                    var stop;
                     var interval = setInterval(function() {
+                        var formatted_line, input_chars, input_len;
                         if (!skip) {
-                            var chr = chars[char_i];
+                            if (optimized) {
+                                formatted_line = lines[line].formatted;
+                                input_chars = lines[line].chars;
+                                input_len = lines[line].len;
+                            } else {
+                                formatted_line = formatted;
+                                input_chars = chars;
+                                input_len = len;
+                            }
+                            var chr = input_chars[char_i];
                             if (options.mask) {
                                 var mask = command_line.mask();
                                 if (typeof mask === 'string') {
@@ -9170,17 +9216,42 @@
                                 self.scroll_to_bottom();
                             }
                             char_i++;
+                            if (char_i === input_len && optimized) {
+                                // swap prompt with line
+                                var index = self.last_index();
+                                self.set_prompt(prompt);
+                                self.echo(formatted_line, $.extend({}, options, {
+                                    formatters: false,
+                                    finalize: null,
+                                    typing: false
+                                }));
+                                lines[line].index = index + 1;
+                                new_prompt = '';
+                                ++line;
+                                char_i = 0;
+                            }
                         } else {
                             self.skip_stop();
                             var chr_rest = $.terminal.substring(formatted, char_i, len);
                             new_prompt += chr_rest;
                             command_line.prompt(new_prompt, {formatters: false});
-                            char_i = len;
+                            stop = true;
                         }
-                        if (char_i === len) {
+                        if (optimized) {
+                            stop = line === lines.length;
+                        } else {
+                            stop = char_i === len;
+                        }
+                        if (stop) {
                             clearInterval(interval);
                             setTimeout(function() {
-                                // swap command with prompt
+                                if (optimized) {
+                                    // clear old lines and make one full line
+                                    // so it can wrap when you resize
+                                    lines.forEach(function(line) {
+                                        self.remove_line(line.index);
+                                    });
+                                }
                                 finish_typing_fn(message, prompt, options);
                                 animating = false;
                             }, options.delay);
@@ -9193,7 +9264,7 @@
         var typed_prompt = typed(function(message, _, options) {
             self.set_prompt(message);
             options.finalize();
-        });
+        }, true);
         // ---------------------------------------------------------------------
         var typed_insert = (function() {
             var helper = typed(function(message, prompt, options) {
@@ -9211,7 +9282,7 @@
         var typed_message = typed(function(message, prompt, options) {
             self.set_prompt(prompt);
             self.echo(message, $.extend({}, options, {typing: false}));
-        });
+        }, true);
         // ---------------------------------------------------------------------
         var typed_enter = (function() {
             var helper = typed(function(message, prompt, options) {
@@ -9291,7 +9362,7 @@
             var level = self.level();
             // when autologin and onBeforeLogin return false
             clear_token();
-            function popUserPass() {
+            function pop_user_pass() {
                 while (self.level() > level) {
                     self.pop(undefined, true);
                 }
@@ -9312,7 +9383,7 @@
             function login_callback(user, token, silent) {
                 var next;
                 if (token) {
-                    popUserPass();
+                    pop_user_pass();
                     set_token(user, token);
                     in_login = false;
                     fire_event('onAfterLogin', [user, token]);
@@ -9357,7 +9428,7 @@
                     try {
                         validate_login(user, pass, function(valid) {
                             if (valid === false) {
-                                popUserPass();
+                                pop_user_pass();
                                 return;
                             }
                             self.pause();
@@ -10471,8 +10542,7 @@
                                 // this is finalize function from echo
                                 if (options.update) {
                                     lines.update_snapshot(data.index, snapshot);
-                                    var selector = '> div[data-index=' + data.index + ']';
-                                    var node = output.find(selector);
+                                    var node = get_node(data.index);
                                     if (node.html() !== wrapper.html()) {
                                         node.replaceWith(wrapper);
                                     }
@@ -10611,7 +10681,7 @@
                         self.error('Invalid line number ' + line);
                     } else if (value === null) {
                         lines.update(line, null);
-                        output.find('[data-index=' + line + ']').remove();
+                        get_node(line).remove();
                     } else {
                         value = preprocess_value(value, {
                             update: true,
@@ -11338,6 +11408,8 @@
                     while (interpreters.size() > 1) {
                         interpreters.pop();
                     }
+                    prepare_top_interpreter();
+                    show_greetings();
                     initialize();
                 });
                 return self;
@@ -11707,7 +11779,11 @@
                 } else if (is_array(value)) {
                     value = $.terminal.columns(value, self.cols(), settings.tabs);
                 } else {
+                    var need_suffix = is_big_int(value);
                     value = String(value);
+                    if (need_suffix) {
+                        value += 'n';
+                    }
                 }
             }
             return value;
@@ -12307,10 +12383,14 @@
                 self.disable();
             }
             // -------------------------------------------------------------
-            // Run Login
+            // initialization
+            // -------------------------------------------------------------
             if (is_function(global_login_fn)) {
-                self.login(global_login_fn, true, initialize);
+                self.login(global_login_fn, true, start);
+                init_queue.resolve();
+                initialize();
             } else {
+                start();
                 initialize();
             }
             // -------------------------------------------------------------

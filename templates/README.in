@@ -119,7 +119,7 @@ or
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/css/jquery.terminal.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@{{VER}}/css/jquery.terminal.min.css"/>
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
@@ -130,6 +130,14 @@ it will redirect to the latest ones:
 <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
 <link href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
+
+or jsDelivr that is bit faster:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
+```
+
 
 #### Bleeding Edge Version
 
@@ -147,7 +155,13 @@ but it's not refreshed as fast as rawgit was, because it's CDN and need to be pr
 **NOTE:** From version 1.0.0 if you want to support old browsers then you'll need to use [key event property polyfill](https://rawgit.com/inexorabletash/polyfill/master/keyboard.js). You can check the support for it on [can I use](https://caniuse.com/#feat=keyboardevent-key).
 
 ```html
-<script src="https://unpkg.com/js-polyfills@0.x.x/keyboard.js"></script>
+<script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
+```
+
+or
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/js-polyfills/keyboard.js"></script>
 ```
 
 #### Command Line
@@ -193,6 +207,24 @@ jQuery(function($, undefined) {
 Here is a higher level call, using an object as an interpreter, By default the terminal will
 parse commands that a user types and replace number like strings with real numbers
 regex with regexes and process escape characters in double quoted strings.
+
+```javascript
+$('body').terminal({
+    cat: function(width = 200, height = 300) {
+        return $(`<img src="https://placekitten.com/${width}/${height}">`);
+    },
+    title: function() {
+        return fetch('https://terminal.jcubic.pl')
+            .then(r => r.text())
+            .then(html => html.match(/<title>([^>]+)<\/title>/)[1]);
+    }
+}, {
+    checkArity: false,
+    greetings: 'My Terminal\n'
+});
+```
+
+And more advanced example:
 
 ```javascript
 jQuery(function($, undefined) {

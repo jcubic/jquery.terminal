@@ -191,9 +191,15 @@
         }
         if (language && _.languages[language]) {
             string = $.terminal.unescape_brackets(string);
-            var grammar = _.languages[language];
-            var tokens = _.tokenize(string, grammar);
-            string = _.Token.stringify(tokens, language);
+            var env = {
+                code: string,
+                grammar: _.languages[language],
+                language: language
+            };
+            _.hooks.run('before-tokenize', env);
+            env.tokens = _.tokenize(env.code, env.grammar);
+            _.hooks.run('after-tokenize', env);
+            string = _.Token.stringify(env.tokens, env.language);
             string = string.split(format_split_re).filter(Boolean).map(function(string) {
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');

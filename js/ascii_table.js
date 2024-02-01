@@ -79,7 +79,8 @@
             var row = array[i];
             var stacks = [];
             for (var j = 0; j < row.length; j++) {
-                var new_lines = row[j].toString().replace(/\r/g).split("\n");
+                var item = row[j].toString().replace(/\t/g, '    ');
+                var new_lines = item.replace(/\r/g).split('\n');
                 row[j] = new_lines.shift();
                 stacks.push(new_lines);
             }
@@ -89,19 +90,14 @@
             var new_rows_count = Math.max.apply(Math, stack_lengths);
             for (var k = new_rows_count - 1; k >= 0; k--) {
                 array.splice(i + 1, 0, stacks.map(function(column) {
-                    return column[k] || "";
+                    return column[k] || '';
                 }));
             }
         }
         var lengths = array[0].map(function(_, i) {
             var col = array.map(function(row) {
                 if (row[i] != undefined) {
-                    var len = strlen(row[i]);
-                    if (row[i].match(/\t/g)) {
-                        // tab is 4 spaces
-                        len += row[i].match(/\t/g).length*3;
-                    }
-                    return len;
+                    return strlen(row[i]);
                 } else {
                     return 0;
                 }
@@ -112,10 +108,6 @@
         array = array.map(function(row) {
             return '| ' + row.map(function(item, i) {
                 var size = strlen(item);
-                if (item.match(/\t/g)) {
-                    // tab is 4 spaces
-                    size += item.match(/\t/g).length*3;
-                }
                 if (size < lengths[i]) {
                     item += new Array(lengths[i] - size + 1).join(' ');
                 }

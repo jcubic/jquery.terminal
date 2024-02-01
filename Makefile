@@ -86,7 +86,10 @@ emoji:
 	./scripts/mkemoji $(VERSION) > css/emoji.css
 
 test:
-	$(JEST) --coverage --env=jsdom --testMatch '**/__tests__/*.spec.js'
+	$(JEST) --coverage
+
+test-watch:
+	$(JEST) --coverage --watch
 
 assets/ascii_art.svg: templates/ascii_art.svg .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/ascii_art.svg > assets/ascii_art.svg
