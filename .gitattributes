@@ -7,6 +7,7 @@ css/jquery.terminal-[0-9.]* binary
 css/jquery.terminal.min.css binary
 css/jquery.terminal.css binary
 __tests__/package-lock.json binary
+package-lock.json binary
 css/*map binary
 js/*map binary
 __tests__/__snapshots__/*.snap binary
