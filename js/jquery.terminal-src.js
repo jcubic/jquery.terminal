@@ -283,13 +283,13 @@
         clone_object: function(object) {
             var tmp = {};
             if (typeof object === 'object') {
-                if ($.isArray(object)) {
+                if (Array.isArray(object)) {
                     return this.clone_array(object);
                 } else if (object === null) {
                     return object;
                 } else {
                     for (var key in object) {
-                        if ($.isArray(object[key])) {
+                        if (Array.isArray(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] === 'object') {
                             tmp[key] = this.clone_object(object[key]);
@@ -625,7 +625,7 @@
                     if (value === undefined || value === null) {
                         return null;
                     }
-                    var result = this.regex.exec(jQuery.trim(value.toString()));
+                    var result = this.regex.exec(value.toString().trim());
                     if (result[2]) {
                         var num = parseInt(result[1], 10);
                         var mult = this.powers[result[2]] || 1;
@@ -637,7 +637,7 @@
                 add: function(element, interval, label, fn, times, belay) {
                     var counter = 0;
 
-                    if (jQuery.isFunction(label)) {
+                    if (typeof label === 'function') {
                         if (!times) {
                             times = fn;
                         }
@@ -7107,7 +7107,7 @@
             };
         }
         function validJSONRPC(response) {
-            return $.isNumeric(response.id) &&
+            return typeof response.id === 'number' &&
                 (typeof response.result !== 'undefined' ||
                  typeof response.error !== 'undefined');
         }
@@ -8102,7 +8102,7 @@
                     object = {
                         interpreter: make_basic_json_rpc(user_intrp, login)
                     };
-                    if ($.isArray(settings.completion)) {
+                    if (Array.isArray(settings.completion)) {
                         object.completion = settings.completion;
                     }
                     finalize(object);
@@ -9410,7 +9410,7 @@
                 // will be used internaly since users know
                 // when login success (they decide when
                 // it happen by calling the callback -
-                // this funtion)
+                // this function)
                 if (is_function(next)) {
                     next();
                 }
@@ -9611,7 +9611,7 @@
                 } else {
                     save_state.push(self.export_view());
                 }
-                if (!$.isArray(hash_commands)) {
+                if (!Array.isArray(hash_commands)) {
                     hash_commands = [];
                 }
                 if (command !== undefined && !ignore_hash) {
@@ -9665,7 +9665,7 @@
                 }
                 var d = exec_settings.deferred;
                 cmd_ready(function ready() {
-                    if ($.isArray(command)) {
+                    if (Array.isArray(command)) {
                         (function recur() {
                             var cmd = command.shift();
                             if (cmd) {
@@ -11237,7 +11237,7 @@
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if (push_settings.completion === true) {
-                            if ($.isArray(ret.completion)) {
+                            if (Array.isArray(ret.completion)) {
                                 interpreters.top().completion = ret.completion;
                             } else if (!ret.completion) {
                                 interpreters.top().completion = false;

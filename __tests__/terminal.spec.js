@@ -3082,7 +3082,7 @@ describe('Terminal plugin', function() {
                 });
                 expect(term.find('.cmd-prompt').text()).toEqual('>>>');
             });
-            it('should render funtion that return promise', async () => {
+            it('should render function that return promise', async () => {
                 var term = $('<div/>').terminal($.noop, {
                     prompt: function() {
                         return Promise.resolve('>>>');
@@ -3091,7 +3091,7 @@ describe('Terminal plugin', function() {
                 await delay(10);
                 expect(term.find('.cmd-prompt').text()).toEqual('>>>');
             });
-            it('should render funtion that call callback', () => {
+            it('should render function that call callback', () => {
                 var term = $('<div/>').terminal($.noop, {
                     prompt: function(fn) {
                         fn('>>>');
@@ -4081,7 +4081,7 @@ describe('Terminal plugin', function() {
         $.ajax = function(obj) {
             function done() {
                 if (!canceled) {
-                    if ($.isFunction(obj.success)) {
+                    if (typeof obj.success === 'function') {
                         obj.success(response, 'OK', {
                             getResponseHeader: function(header) {
                                 if (header == 'Content-Type') {
@@ -4104,7 +4104,7 @@ describe('Terminal plugin', function() {
                 };
                 $(document).trigger("ajaxSend", [ jqXHR, obj ] );
                 try {
-                    if ($.isFunction(obj.beforeSend)) {
+                    if (typeof obj.beforeSend === 'function') {
                         obj.beforeSend({}, obj);
                     }
                     if (options.async) {
@@ -4142,7 +4142,7 @@ describe('Terminal plugin', function() {
             var proc = {
                 name: key
             };
-            if ($.isFunction(object[key])) {
+            if (typeof object[key] === 'function') {
                 var re = /function[^\(]+\(([^\)]+)\)/;
                 var m = object[key].toString().match(re);
                 if (m) {
@@ -4153,7 +4153,7 @@ describe('Terminal plugin', function() {
         }
         $.ajax = function(obj) {
             function done() {
-                if ($.isFunction(obj.success)) {
+                if (typeof obj.success === 'function') {
                     obj.success(resp, 'OK', {
                         getResponseHeader: function(header) {
                             if (header == 'Content-Type') {
@@ -4192,7 +4192,7 @@ describe('Terminal plugin', function() {
                         var error = null;
                         var ret = null;
                         try {
-                            if ($.isFunction(object[req.method])) {
+                            if (typeof object[req.method] === 'function') {
                                 ret = object[req.method].apply(null, req.params);
                             } else {
                                 ret = null;
@@ -5566,7 +5566,7 @@ describe('Terminal plugin', function() {
                 var term = $('<div/>').appendTo('body').terminal(interpreter);
                 expect(term.commands()).toEqual(interpreter);
                 term.push('/test');
-                expect($.isFunction(term.commands())).toEqual(true);
+                expect(typeof term.commands() === 'function').toEqual(true);
                 term.destroy().remove();
             });
         });

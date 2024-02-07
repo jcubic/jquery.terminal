@@ -218,7 +218,7 @@
             term.removeClass('terminal-less');
             $output.css('height', '');
             var exit = options.exit || options.onExit;
-            if ($.isFunction(exit)) {
+            if (typeof exit === 'function') {
                 exit();
             }
         }
@@ -299,7 +299,7 @@
                     });
                 }
             }
-            if ($.isFunction(text)) {
+            if (typeof text === 'function') {
                 text(cols, run);
             } else {
                 run(text);
