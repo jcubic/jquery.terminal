@@ -9,17 +9,17 @@ jobs:
       - name: Install ImageMagick
         run: sudo apt-get -y install graphicsmagick
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
       - run: npm install
       - run: make
       - run: make lint
       - run: make skipped_tests
       - run: make test
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
