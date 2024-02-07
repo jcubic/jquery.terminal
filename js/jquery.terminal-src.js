@@ -10630,11 +10630,11 @@
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
-                                '--terminal-scroll': self.prop('scrollTop')
+                                '--terminal-scroll': scroller.prop('scrollTop')
                             });
                             if (enabled) {
-                                // Firefox won't reflow the cursor automatically, so
-                                // hide it briefly then reshow it
+                                // Firefox won't reflow the cursor automatically,
+                                // so we hide it briefly then reshow it
                                 cmd_cursor.hide();
                                 self.oneTime(1, 'flush', function() {
                                     cmd_cursor.show();
@@ -12020,6 +12020,13 @@
                             if (!move) {
                                 if (!enabled) {
                                     clip.focus();
+                                    window.visualViewport.addEventListener('resize', function(event) {
+                                        self.scroll_to_bottom();
+                                        var scroll_pos = scroller.prop('scrollTop');
+                                        css(self[0], {
+                                            '--terminal-scroll': scroll_pos
+                                        });
+                                    }, { once: true });
                                     self.focus();
                                 } else {
                                     clip.blur();
@@ -12536,7 +12543,7 @@
                         ret = settings.touchscroll(event, delta, self);
                     }
                     css(self[0], {
-                        '--terminal-scroll': self.prop('scrollTop')
+                        '--terminal-scroll': scroller.prop('scrollTop')
                     });
                     if (ret === true) {
                         return;
