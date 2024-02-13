@@ -1,3 +1,7 @@
+## 2.39.0
+### Features
+* Add support for jQuery 4.0
+
 ## 2.38.0
 ### Breaking
 * `onInit` runs before login

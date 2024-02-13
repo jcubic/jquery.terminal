@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.38.0
+ *           \/              /____/                              version 2.39.0
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 13 Feb 2024 21:16:32 +0000
+ * Date: Tue, 13 Feb 2024 21:18:12 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5285,8 +5285,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.38.0',
-        date: 'Tue, 13 Feb 2024 21:16:32 +0000',
+        version: '2.39.0',
+        date: 'Tue, 13 Feb 2024 21:18:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
