@@ -1,3 +1,7 @@
+## 2.39.1
+### Bugfix
+* fix visible CMD textarea when page use box-shadow
+
 ## 2.39.0
 ### Features
 * Add support for jQuery 4.0

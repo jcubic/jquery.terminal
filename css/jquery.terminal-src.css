@@ -36,6 +36,7 @@
     outline: none !important;
     padding: 0 !important;
     resize: none !important;
+    box-shadow: none !important;
     z-index: 1000 !important;
     overflow: hidden !important;
     white-space: pre !important;
