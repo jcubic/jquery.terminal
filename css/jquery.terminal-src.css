@@ -75,7 +75,6 @@
     line-height: initial;
     --base-background: var(--background, #000);
     --base-color: var(--color);
-    contain: content;
 }
 .terminal-scroller {
     position: relative;
