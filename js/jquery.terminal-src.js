@@ -1260,7 +1260,7 @@
     })();
     // -------------------------------------------------------------------------
     var is_css_variables_supported = root.CSS && root.CSS.supports &&
-            root.CSS.supports('--fake-var', 0);
+            root.CSS.supports('(--fake-var: 0)');
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
@@ -10644,12 +10644,16 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        self.stopTime('flush').oneTime(1, 'flush', function() {
+                        self.stopTime('flush').oneTime(10, 'flush', function() {
+                            const top = output.height();
+                            const height = command_line.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
-                                '--terminal-scroll': scroller.prop('scrollTop')
+                                '--terminal-scroll': scroller.prop('scrollTop'),
+                                '--cmd-top': top,
+                                '--cmd-height': height
                             });
                             if (enabled && !is_mobile) {
                                 // Firefox won't reflow the cursor automatically, so

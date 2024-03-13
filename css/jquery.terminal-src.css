@@ -1120,11 +1120,11 @@ terminal .terminal-output > div {
     display: inline-block;
 }
 .cmd-editable {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: calc(var(--cmd-top) * 1px);
+    bottom: 0;
     right: 0;
     left: 0;
-    bottom: 0;
     z-index: 500;
     color: transparent;
     background: transparent;
