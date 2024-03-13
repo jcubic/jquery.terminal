@@ -10089,7 +10089,7 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
-                const padding = get_padding();
+                var padding = get_padding();
                 return {
                     terminal: {
                         padding: {
