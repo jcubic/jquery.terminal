@@ -2368,7 +2368,9 @@
                 }
                 var tmp = command;
                 // fix scroll the page where there is no scrollbar
-                clip.$node.blur();
+                if (!is_mobile) {
+                    clip.$node.blur();
+                }
                 history.reset();
 
                 // for next input event on firefox/android with google keyboard
@@ -2388,7 +2390,9 @@
                 }
                 self.set('');
                 clip.val('');
-                clip.$node.focus();
+                if (!is_mobile) {
+                    clip.$node.focus();
+                }
                 return false;
             },
             'SHIFT+ENTER': function() {
@@ -5282,6 +5286,21 @@
                 rest: ''
             };
         }
+    }
+    // -------------------------------------------------------------------------
+    // :: handler to trigger when window change size. The most important
+    // :: is that it's triggers when virtual keyboard is toggled
+    // -------------------------------------------------------------------------
+    function on_height_change(callback) {
+        var height = window.visualViewport.height;
+        callback(height);
+        window.visualViewport.addEventListener('resize', function() {
+            var newHeight = window.visualViewport.height;
+            if (height !== newHeight) {
+                height = newHeight;
+                callback(height);
+            }
+        });
     }
     // -------------------------------------------------------------------------
     $.terminal = {
@@ -10630,9 +10649,9 @@
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
-                                '--terminal-scroll': self.prop('scrollTop')
+                                '--terminal-scroll': scroller.prop('scrollTop')
                             });
-                            if (enabled) {
+                            if (enabled && !is_mobile) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
@@ -12021,6 +12040,9 @@
                                 if (!enabled) {
                                     clip.focus();
                                     self.focus();
+                                    setTimeout(function() {
+                                        self.scroll_to_bottom();
+                                    }, 100);
                                 } else {
                                     clip.blur();
                                     self.disable();
@@ -12031,6 +12053,13 @@
                         start = null;
                     });
                 })();
+                if ('visualViewport' in window) {
+                    on_height_change(function(height) {
+                        css(document.documentElement, {
+                            '--terminal-force-height': height
+                        });
+                    });
+                }
             } else {
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
@@ -12536,7 +12565,7 @@
                         ret = settings.touchscroll(event, delta, self);
                     }
                     css(self[0], {
-                        '--terminal-scroll': self.prop('scrollTop')
+                        '--terminal-scroll': scroller.prop('scrollTop')
                     });
                     if (ret === true) {
                         return;
