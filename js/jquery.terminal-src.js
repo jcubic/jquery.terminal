@@ -10645,8 +10645,8 @@
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
                         self.stopTime('flush').oneTime(10, 'flush', function() {
-                            const top = output.height();
-                            const height = command_line.height();
+                            var top = output.height();
+                            var height = command_line.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
