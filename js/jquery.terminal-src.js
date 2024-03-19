@@ -11670,7 +11670,7 @@
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height;
+        var old_width, old_height, old_pixel_density;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend(
             {},
@@ -12265,9 +12265,9 @@
                 if (self.is(':visible')) {
                     var width = scroller.width();
                     var height = filler.height();
-                    var new_pixel_density = get_pixel_size();
+                    pixel_density = get_pixel_size();
                     css(self[0], {
-                        '--pixel-density': new_pixel_density
+                        '--pixel-density': pixel_density
                     });
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
@@ -12279,12 +12279,12 @@
                     // prevent too many calculations in IE
                     if (old_height !== height ||
                         old_width !== width ||
-                        pixel_density !== new_pixel_density) {
+                        pixel_density !== old_pixel_density) {
                         self.resize();
                     }
                     old_height = height;
                     old_width = width;
-                    pixel_density = new_pixel_density;
+                    old_pixel_density = pixel_density;
                 }
             }
             function create_resizers() {

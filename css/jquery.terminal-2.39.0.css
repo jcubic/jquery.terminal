@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Wed, 13 Mar 2024 13:11:10 +0000
+ * Date: Tue, 19 Mar 2024 18:45:14 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -1120,11 +1120,11 @@ terminal .terminal-output > div {
     display: inline-block;
 }
 .cmd-editable {
-    position: fixed;
-    top: 0;
+    position: absolute;
+    top: calc(var(--cmd-top) * 1px);
+    bottom: 0;
     right: 0;
     left: 0;
-    bottom: 0;
     z-index: 500;
     color: transparent;
     background: transparent;

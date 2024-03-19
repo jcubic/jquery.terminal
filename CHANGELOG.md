@@ -1,6 +1,7 @@
 ## 2.39.1
 ### Bugfix
 * fix visible CMD textarea when page use box-shadow
+* fix when CSS is loaded after creation of the terminal
 
 ## 2.39.0
 ### Features

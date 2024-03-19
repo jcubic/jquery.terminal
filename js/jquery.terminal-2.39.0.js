@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 13 Mar 2024 13:11:10 +0000
+ * Date: Tue, 19 Mar 2024 18:45:14 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1260,7 +1260,7 @@
     })();
     // -------------------------------------------------------------------------
     var is_css_variables_supported = root.CSS && root.CSS.supports &&
-            root.CSS.supports('--fake-var', 0);
+            root.CSS.supports('(--fake-var: 0)');
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
@@ -5305,7 +5305,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 13 Mar 2024 13:11:10 +0000',
+        date: 'Tue, 19 Mar 2024 18:45:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10644,12 +10644,16 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        self.stopTime('flush').oneTime(1, 'flush', function() {
+                        self.stopTime('flush').oneTime(10, 'flush', function() {
+                            var top = output.height();
+                            var height = command_line.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
-                                '--terminal-scroll': scroller.prop('scrollTop')
+                                '--terminal-scroll': scroller.prop('scrollTop'),
+                                '--cmd-top': top,
+                                '--cmd-height': height
                             });
                             if (enabled && !is_mobile) {
                                 // Firefox won't reflow the cursor automatically, so
@@ -11666,7 +11670,7 @@
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height;
+        var old_width, old_height, old_pixel_density;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend(
             {},
@@ -12261,9 +12265,9 @@
                 if (self.is(':visible')) {
                     var width = scroller.width();
                     var height = filler.height();
-                    var new_pixel_density = get_pixel_size();
+                    pixel_density = get_pixel_size();
                     css(self[0], {
-                        '--pixel-density': new_pixel_density
+                        '--pixel-density': pixel_density
                     });
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
@@ -12275,12 +12279,12 @@
                     // prevent too many calculations in IE
                     if (old_height !== height ||
                         old_width !== width ||
-                        pixel_density !== new_pixel_density) {
+                        pixel_density !== old_pixel_density) {
                         self.resize();
                     }
                     old_height = height;
                     old_width = width;
-                    pixel_density = new_pixel_density;
+                    old_pixel_density = pixel_density;
                 }
             }
             function create_resizers() {
