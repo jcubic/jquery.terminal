@@ -1,3 +1,8 @@
+## 2.39.1
+### Bugfix
+* fix visible CMD textarea when page use box-shadow
+* fix when CSS is loaded after creation of the terminal
+
 ## 2.39.0
 ### Features
 * Add support for jQuery 4.0
@@ -108,7 +113,7 @@
 * fix resolving promise from echo typing animation when previous command was async [#797](https://github.com/jcubic/jquery.terminal/issues/797)
 * fix double exception in terminal::destroy
 * fix double call to finalize function when echo DOM nodes
-* fix $.terminal.substring [#792](https://github.com/jcubic/jquery.terminal/issues/792)
+* fix `$.terminal.substring` [#792](https://github.com/jcubic/jquery.terminal/issues/792)
 
 ## 2.33.3
 ### Bugfix
@@ -749,7 +754,7 @@
 
 ## 2.3.0
 ### Features
-* add experimental $.terminal.pipe function
+* add experimental `$.terminal.pipe` function
 * allow to return string from onPaste (not only a promise)
 * add CTRL+Home and CTRL+End keys + HOME and END move cursor to the end and beginning of the line [#479](https://github.com/jcubic/jquery.terminal/issues/479)
 * zoom page when using mousewheel + CTRL key (browser default) [#468](https://github.com/jcubic/jquery.terminal/issues/468)
@@ -847,7 +852,7 @@
 * fix escape bracket in command line
 * fix relative and absolute urls with default `anyLinks: false`
 * fix android and iPhone issues [#443](https://github.com/jcubic/jquery.terminal/issues/443) [#414](https://github.com/jcubic/jquery.terminal/issues/414)
-* fix ANSI escapes in unix_formatting [$444](https://github.com/jcubic/jquery.terminal/issues/444)
+* fix ANSI escapes in unix_formatting [#444](https://github.com/jcubic/jquery.terminal/issues/444)
 * fix jumping cursor when there are no text before cursor line in Chrome
 * fix selection menu in latest Android
 * fix wrong number of chars per line when insert called after init and scrollbar appear
@@ -911,7 +916,7 @@
 * embed emoji regex by Mathias Bynens for better emoji detection
 * allow to execute extended commands including terminal and cmd methods from formatters
 * support for true colors (24bit) in unix formatting [#433](https://github.com/jcubic/jquery.terminal/issues/433)
-* expose split_characters in $.terminal namespace
+* expose split_characters in `$.terminal` namespace
 * cmd commands option functions to have cmd as this context
 
 ### Bugfix
@@ -995,7 +1000,7 @@
 ### Features
 * add TypeScript definition file
 * update formatters API to have a way to return position after replace from function formatter
-* regex formatters and $.tracking_replace now accept function as replacement
+* regex formatters and `$.tracking_replace` now accept function as replacement
 * update unix formatters to use new API so they work with command line
 * set exit to false if no login provided
 
@@ -1009,8 +1014,8 @@
 ## 1.18.0
 ### Feature
 * looping regex formatters that replace until they don't match the regex
-* add tracking_replace to $.terminal namespace
-* $.terminal.syntax helper
+* add tracking_replace to `$.terminal` namespace
+* `$.terminal.syntax` helper
 * new language for prism: "website" that handle html, javascript and css syntax
 
 ### Bugs
@@ -1023,10 +1028,10 @@
 ### Features
 * add ascii_table utility in separated file
 * per user command line history
-* add $.terminal.parse_options which return same object as yargs parser
-* $.jrpc helper now return its own created promise instead of $.ajax
+* add `$.terminal.parse_options` which return same object as yargs parser
+* `$.jrpc` helper now return its own created promise instead of `$.ajax`
 * add wcwidth as dependency so it will always show wider characters correctly (in browsers will work the same as optional)
-* expose terminal exception in $.terminal namespace
+* expose terminal exception in `$.terminal` namespace
 * new API option doubleTab [#405](https://github.com/jcubic/jquery.terminal/issues/405)
 
 ### Bugfix
@@ -1051,7 +1056,7 @@
 ### Bugs
 * fix paste/select all when click below .cmd
 * second fix to jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
-* change $.terminal.prism_formatting to $.terminal.prism
+* change `$.terminal.prism_formatting` to `$.terminal.prism`
 
 ## 1.16.0
 
@@ -1068,8 +1073,8 @@
 
 ### Bugs
 * fix resizer in Firefox [#395](https://github.com/jcubic/jquery.terminal/issues/395)
-* fix $.terminal.columns and echo array [#394](https://github.com/jcubic/jquery.terminal/issues/394)
-* fix $.terminal.columns for wider characters and terminal formatting
+* fix `$.terminal.columns` and echo array [#394](https://github.com/jcubic/jquery.terminal/issues/394)
+* fix `$.terminal.columns` for wider characters and terminal formatting
 * fix rows() when using --size [#398](https://github.com/jcubic/jquery.terminal/issues/398)
 * fix null in JSON hash
 * fix jumping on right click (context menu) [#399](https://github.com/jcubic/jquery.terminal/issues/399)
@@ -1216,7 +1221,7 @@
 
 ## 1.9.0
 ### Features
-* new api utils $.terminal.length and $.terminal.columns
+* new api utils `$.terminal.length` and `$.terminal.columns`
 * echo array (resizable in columns that fit the width, using settings.tabs as pad right)
 * callback function parseObject that's called on object different then string (on render)
 * calling option method with numRows or numChars redraw terminal output (for testing)
@@ -1277,7 +1282,7 @@
 ## 1.7.0
 ### Features
 * add option caseSensitiveAutocomplete default to true [#332](https://github.com/jcubic/jquery.terminal/issues/332)
-* expose Stack/Cycle/History in $.terminal so they can be tested
+* expose Stack/Cycle/History in `$.terminal` so they can be tested
 * make `:focus-within .prompt` selector work with terminal (work also on codepen)
 ### Bugs
 * fix jumping of terminal when created one after another and changing the one that have focus in Edge
@@ -1501,7 +1506,7 @@
 * add option softPause to control pause visible option - it don't hide the prompt when set to true
 * add wordAutocomplete option (default true)
 * add complete and `before_cursor` api methods and use it for autocomplete
-* formatting for command line (you can't type formatting but you can use $.terminal.formatters to
+* formatting for command line (you can't type formatting but you can use `$.terminal.formatters` to
 * format command you're writing)
 * new option formatters for echo (error method by default disable formatters)
 * interpeter and terminal accept extra option that can be use in onPop or onPush
@@ -1769,8 +1774,8 @@
 * paste text from selection using middle mouse button
 * fix login, history and exec
 * disable few things when in login function
-* all Strings are in $.terminal.defaults.strings
-* more functions in $.terminal object
+* all Strings are in `$.terminal.defaults.strings`
+* more functions in `$.terminal` object
 
 ## 0.7.12
 * fix terminal when start as invisible, rest property to parseCommand

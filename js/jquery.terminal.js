@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.39.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 13 Feb 2024 21:18:12 +0000
+ * Date: Tue, 19 Mar 2024 18:45:14 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1260,7 +1260,7 @@
     })();
     // -------------------------------------------------------------------------
     var is_css_variables_supported = root.CSS && root.CSS.supports &&
-            root.CSS.supports('--fake-var', 0);
+            root.CSS.supports('(--fake-var: 0)');
     // -------------------------------------------------------------------------
     var is_android = navigator.userAgent.toLowerCase().indexOf('android') !== -1;
     // -------------------------------------------------------------------------
@@ -2368,7 +2368,9 @@
                 }
                 var tmp = command;
                 // fix scroll the page where there is no scrollbar
-                clip.$node.blur();
+                if (!is_mobile) {
+                    clip.$node.blur();
+                }
                 history.reset();
 
                 // for next input event on firefox/android with google keyboard
@@ -2388,7 +2390,9 @@
                 }
                 self.set('');
                 clip.val('');
-                clip.$node.focus();
+                if (!is_mobile) {
+                    clip.$node.focus();
+                }
                 return false;
             },
             'SHIFT+ENTER': function() {
@@ -5284,9 +5288,24 @@
         }
     }
     // -------------------------------------------------------------------------
+    // :: handler to trigger when window change size. The most important
+    // :: is that it's triggers when virtual keyboard is toggled
+    // -------------------------------------------------------------------------
+    function on_height_change(callback) {
+        var height = window.visualViewport.height;
+        callback(height);
+        window.visualViewport.addEventListener('resize', function() {
+            var newHeight = window.visualViewport.height;
+            if (height !== newHeight) {
+                height = newHeight;
+                callback(height);
+            }
+        });
+    }
+    // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.39.0',
-        date: 'Tue, 13 Feb 2024 21:18:12 +0000',
+        version: 'DEV',
+        date: 'Tue, 19 Mar 2024 18:45:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10070,7 +10089,7 @@
             // :: Return size of the terminal instance
             // -------------------------------------------------------------
             geometry: function() {
-                const padding = get_padding();
+                var padding = get_padding();
                 return {
                     terminal: {
                         padding: {
@@ -10625,14 +10644,18 @@
                         var cmd_cursor = self.find('.cmd-cursor');
                         var offset = self.find('.cmd').offset();
                         var self_offset = self.offset();
-                        self.stopTime('flush').oneTime(1, 'flush', function() {
+                        self.stopTime('flush').oneTime(10, 'flush', function() {
+                            var top = output.height();
+                            var height = command_line.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
-                                '--terminal-scroll': self.prop('scrollTop')
+                                '--terminal-scroll': scroller.prop('scrollTop'),
+                                '--cmd-top': top,
+                                '--cmd-height': height
                             });
-                            if (enabled) {
+                            if (enabled && !is_mobile) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
@@ -11647,7 +11670,7 @@
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height;
+        var old_width, old_height, old_pixel_density;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend(
             {},
@@ -12021,6 +12044,9 @@
                                 if (!enabled) {
                                     clip.focus();
                                     self.focus();
+                                    setTimeout(function() {
+                                        self.scroll_to_bottom();
+                                    }, 100);
                                 } else {
                                     clip.blur();
                                     self.disable();
@@ -12031,6 +12057,13 @@
                         start = null;
                     });
                 })();
+                if ('visualViewport' in window) {
+                    on_height_change(function(height) {
+                        css(document.documentElement, {
+                            '--terminal-force-height': height
+                        });
+                    });
+                }
             } else {
                 // work weird on mobile
                 $win.on('focus.terminal_' + self.id(), focus_terminal).
@@ -12232,9 +12265,9 @@
                 if (self.is(':visible')) {
                     var width = scroller.width();
                     var height = filler.height();
-                    var new_pixel_density = get_pixel_size();
+                    pixel_density = get_pixel_size();
                     css(self[0], {
-                        '--pixel-density': new_pixel_density
+                        '--pixel-density': pixel_density
                     });
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
@@ -12246,12 +12279,12 @@
                     // prevent too many calculations in IE
                     if (old_height !== height ||
                         old_width !== width ||
-                        pixel_density !== new_pixel_density) {
+                        pixel_density !== old_pixel_density) {
                         self.resize();
                     }
                     old_height = height;
                     old_width = width;
-                    pixel_density = new_pixel_density;
+                    old_pixel_density = pixel_density;
                 }
             }
             function create_resizers() {
@@ -12536,7 +12569,7 @@
                         ret = settings.touchscroll(event, delta, self);
                     }
                     css(self[0], {
-                        '--terminal-scroll': self.prop('scrollTop')
+                        '--terminal-scroll': scroller.prop('scrollTop')
                     });
                     if (ret === true) {
                         return;
