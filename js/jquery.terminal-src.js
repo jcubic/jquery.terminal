@@ -12060,7 +12060,7 @@
                 if ('visualViewport' in window) {
                     on_height_change(function(height) {
                         css(document.documentElement, {
-                            '--terminal-force-height': height
+                            '--terminal-force-height': height + 'px'
                         });
                     });
                 }

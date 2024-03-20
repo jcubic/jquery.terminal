@@ -103,8 +103,7 @@ body.full-screen-terminal .terminal {
 }
 body.full-screen-terminal {
     height: 100%;
-    height: 100dvh;
-    height: calc(var(--terminal-force-height) * 1px);
+    height: var(--terminal-force-height, 100dvh);
 }
 .terminal > div.terminal-fill {
     min-height: 100%;
