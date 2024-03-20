@@ -1,7 +1,10 @@
+## 2.39.2
+### Bugfix
+* fix when CSS is loaded after creation of the terminal (mostly for ReactJS)
+
 ## 2.39.1
 ### Bugfix
 * fix visible CMD textarea when page use box-shadow
-* fix when CSS is loaded after creation of the terminal
 
 ## 2.39.0
 ### Features

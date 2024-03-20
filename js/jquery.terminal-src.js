@@ -997,7 +997,7 @@
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        handler();
+                        requestAnimationFrame(handler);
                     }
                     first = false;
                 });
@@ -12298,7 +12298,7 @@
                 }, options);
                 pixel_resizer.resizer('unbind').resizer(function() {
                     pixel_density = get_pixel_size();
-                    self.resize();
+                    self.refresh();
                 }, options);
                 $('<div class="terminal-font-forcer terminal-hidden">x<div>')
                     .appendTo(self);

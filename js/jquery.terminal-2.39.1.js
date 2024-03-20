@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 19 Mar 2024 18:49:02 +0000
+ * Date: Wed, 20 Mar 2024 18:05:21 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -997,7 +997,7 @@
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        handler();
+                        requestAnimationFrame(handler);
                     }
                     first = false;
                 });
@@ -5305,7 +5305,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.39.1',
-        date: 'Tue, 19 Mar 2024 18:49:02 +0000',
+        date: 'Wed, 20 Mar 2024 18:05:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12298,7 +12298,7 @@
                 }, options);
                 pixel_resizer.resizer('unbind').resizer(function() {
                     pixel_density = get_pixel_size();
-                    self.resize();
+                    self.refresh();
                 }, options);
                 $('<div class="terminal-font-forcer terminal-hidden">x<div>')
                     .appendTo(self);
