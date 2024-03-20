@@ -997,7 +997,7 @@
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        requestAnimationFrame(handler);
+                        setTimeout(handler, 0);
                     }
                     first = false;
                 });
