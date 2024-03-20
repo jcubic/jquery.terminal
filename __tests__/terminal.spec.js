@@ -2912,14 +2912,17 @@ describe('sub plugins', function() {
                 expect(window.ResizeObserver).toHaveBeenCalled();
                 expect(typeof callback).toBe('function');
             });
-            it('should call callback', function() {
+            it('should call callback', function(done) {
                 div.resizer(test.a);
                 div.resizer(test.b);
                 // original ResizeObserver is called on init and plugin skip it
                 callback();
                 callback();
-                expect(test.a).toHaveBeenCalled();
-                expect(test.b).toHaveBeenCalled();
+                setTimeout(() => {
+                    expect(test.a).toHaveBeenCalled();
+                    expect(test.b).toHaveBeenCalled();
+                    done();
+                }, 0);
             });
             it('should remove resizer', function() {
                 div.resizer(test.a);
