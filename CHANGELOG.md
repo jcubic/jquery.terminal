@@ -1,3 +1,7 @@
+## 2.39.4
+### Bugfix
+* fix init and resize of long prompt [#919](https://github.com/jcubic/jquery.terminal/issues/919)
+
 ## 2.39.3
 ### Bugfix
 * fix broken full screen terminal height on Desktop

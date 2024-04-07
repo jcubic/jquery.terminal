@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 07 Apr 2024 16:50:24 +0000
+ * Date: Sun, 07 Apr 2024 17:14:02 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -83,6 +83,7 @@
     scrollbar-gutter: stable;
     height: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
 }
 terminal.terminal-temp {
     visibility: hidden;
@@ -286,6 +287,9 @@ body.full-screen-terminal {
     content: '\0200B';
     width: 0;
     display: inline-block;
+}
+.cmd .cmd-line {
+    white-space: nowrap;
 }
 .terminal span[data-text],
 .cmd span[data-text] {
