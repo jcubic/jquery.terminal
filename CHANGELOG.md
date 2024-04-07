@@ -1,3 +1,7 @@
+## 2.39.3
+### Bugfix
+* fix broken full screen terminal height on Desktop
+
 ## 2.39.2
 ### Bugfix
 * fix when CSS is loaded after creation of the terminal (mostly for ReactJS)

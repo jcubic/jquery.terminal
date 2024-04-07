@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 20 Mar 2024 22:25:10 +0000
+ * Date: Sun, 07 Apr 2024 16:50:23 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5305,7 +5305,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 20 Mar 2024 22:25:10 +0000',
+        date: 'Sun, 07 Apr 2024 16:50:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12060,7 +12060,7 @@
                 if ('visualViewport' in window) {
                     on_height_change(function(height) {
                         css(document.documentElement, {
-                            '--terminal-force-height': height
+                            '--terminal-force-height': height + 'px'
                         });
                     });
                 }

@@ -2922,7 +2922,7 @@ describe('sub plugins', function() {
                     expect(test.a).toHaveBeenCalled();
                     expect(test.b).toHaveBeenCalled();
                     done();
-                }, 0);
+                }, 10);
             });
             it('should remove resizer', function() {
                 div.resizer(test.a);
