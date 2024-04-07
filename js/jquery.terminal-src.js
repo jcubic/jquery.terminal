@@ -4021,6 +4021,8 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(settings.name || settings.prompt || '');
+        char_width = get_char_width();
+        num_chars = get_num_chars(char_width);
         if (settings.prompt !== false) {
             prompt = settings.prompt;
             draw_prompt();
@@ -4028,8 +4030,6 @@
         if (settings.enabled === true) {
             self.enable();
         }
-        char_width = get_char_width();
-        num_chars = get_num_chars(char_width);
         if (!settings.history) {
             history.disable();
         }

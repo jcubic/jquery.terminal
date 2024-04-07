@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 07 Apr 2024 16:50:23 +0000
+ * Date: Sun, 07 Apr 2024 16:52:49 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4021,6 +4021,8 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(settings.name || settings.prompt || '');
+        char_width = get_char_width();
+        num_chars = get_num_chars(char_width);
         if (settings.prompt !== false) {
             prompt = settings.prompt;
             draw_prompt();
@@ -4028,8 +4030,6 @@
         if (settings.enabled === true) {
             self.enable();
         }
-        char_width = get_char_width();
-        num_chars = get_num_chars(char_width);
         if (!settings.history) {
             history.disable();
         }
@@ -5305,7 +5305,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Apr 2024 16:50:23 +0000',
+        date: 'Sun, 07 Apr 2024 16:52:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
