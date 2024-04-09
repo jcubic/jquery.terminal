@@ -243,7 +243,7 @@ body.full-screen-terminal {
 .cmd .cmd-prompt > span, .cmd .cmd-prompt > a, .cmd .cmd-prompt:empty {
     float: left;
 }
-.cmd-prompt [data-text] > span {
+.cmd-prompt [data-text] > span, .cmd-wrapper > div {
     white-space: pre;
 }
 .cmd [data-text] span,
