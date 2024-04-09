@@ -3184,7 +3184,8 @@
         }
         // ---------------------------------------------------------------------
         function is_multiline(str) {
-            return strlen(text(str)) > num_chars - prompt_len - 1 ||
+            var len = strlen(text(str));
+            return len > 0 && len > num_chars - prompt_len - 1 ||
                 str.match(/\n/);
         }
         // ---------------------------------------------------------------------
@@ -3516,7 +3517,7 @@
             function format_prompt(prompt) {
                 if (!prompt) {
                     just_prompt_len = 0;
-                    prompt_len = just_prompt_len + prompt_offset;
+                    prompt_len = prompt_offset;
                     return prompt;
                 }
                 var prompt_marker = get_prompt_marker();
@@ -3934,8 +3935,8 @@
                 }
                 if (num_chars !== new_num_chars || arguments[0] === true) {
                     num_chars = new_num_chars;
-                    redraw();
                     draw_prompt();
+                    redraw();
                 }
                 return self;
             },

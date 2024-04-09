@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 07 Apr 2024 17:14:01 +0000
+ * Date: Tue, 09 Apr 2024 18:42:45 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -3184,7 +3184,8 @@
         }
         // ---------------------------------------------------------------------
         function is_multiline(str) {
-            return strlen(text(str)) > num_chars - prompt_len - 1 ||
+            var len = strlen(text(str));
+            return len > 0 && len > num_chars - prompt_len - 1 ||
                 str.match(/\n/);
         }
         // ---------------------------------------------------------------------
@@ -3516,7 +3517,7 @@
             function format_prompt(prompt) {
                 if (!prompt) {
                     just_prompt_len = 0;
-                    prompt_len = just_prompt_len + prompt_offset;
+                    prompt_len = prompt_offset;
                     return prompt;
                 }
                 var prompt_marker = get_prompt_marker();
@@ -3934,8 +3935,8 @@
                 }
                 if (num_chars !== new_num_chars || arguments[0] === true) {
                     num_chars = new_num_chars;
-                    redraw();
                     draw_prompt();
+                    redraw();
                 }
                 return self;
             },
@@ -5305,7 +5306,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Apr 2024 17:14:01 +0000',
+        date: 'Tue, 09 Apr 2024 18:42:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
