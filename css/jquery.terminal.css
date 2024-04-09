@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 07 Apr 2024 17:14:02 +0000
+ * Date: Tue, 09 Apr 2024 17:11:45 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -50,6 +50,7 @@
     overflow: hidden;
     position: absolute;
     white-space: nowrap;
+    user-select: none;
     width: 1px;
     top: 0;
     left: 0;

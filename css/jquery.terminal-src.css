@@ -50,6 +50,7 @@
     overflow: hidden;
     position: absolute;
     white-space: nowrap;
+    user-select: none;
     width: 1px;
     top: 0;
     left: 0;

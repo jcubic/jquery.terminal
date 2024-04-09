@@ -1,6 +1,7 @@
 ## 2.39.4
 ### Bugfix
 * fix init and resize of long prompt [#919](https://github.com/jcubic/jquery.terminal/issues/919)
+* fix occasional selecting Accessibility label (about clipboard textarea) in CMD
 
 ## 2.39.3
 ### Bugfix
