@@ -2498,6 +2498,7 @@
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': delete_backward({clipboard: true, hold: false}),
+            'CTRL+BACKSPACE': delete_backward({clipboard: true, hold: false}),
             'HOLD+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'HOLD+SHIFT+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'CTRL+H': function() {
