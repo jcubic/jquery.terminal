@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 09 Apr 2024 18:42:45 +0000
+ * Date: Sun, 14 Apr 2024 19:34:37 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2498,6 +2498,7 @@
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': delete_backward({clipboard: true, hold: false}),
+            'CTRL+BACKSPACE': delete_backward({clipboard: true, hold: false}),
             'HOLD+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'HOLD+SHIFT+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'CTRL+H': function() {
@@ -5306,7 +5307,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 09 Apr 2024 18:42:45 +0000',
+        date: 'Sun, 14 Apr 2024 19:34:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8655,6 +8656,9 @@
                         return $.when(result).done(show).catch(error);
                     }
                 } else {
+                    if (exec) {
+                        command_line.refresh();
+                    }
                     if (paused) {
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code

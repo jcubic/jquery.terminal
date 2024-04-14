@@ -8656,6 +8656,9 @@
                         return $.when(result).done(show).catch(error);
                     }
                 } else {
+                    if (exec) {
+                        command_line.refresh();
+                    }
                     if (paused) {
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code
