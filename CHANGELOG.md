@@ -3,6 +3,7 @@
 * fix init and resize of long prompt [#919](https://github.com/jcubic/jquery.terminal/issues/919)
 * fix occasional selecting Accessibility label (about clipboard textarea) in CMD
 * fix sync commands and dynamic prompt [#923](https://github.com/jcubic/jquery.terminal/issues/923) [#922](https://github.com/jcubic/jquery.terminal/issues/922)
+* fix calling `onCommandChange` when command don't change
 
 ## 2.39.3
 ### Bugfix

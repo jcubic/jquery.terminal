@@ -3710,13 +3710,14 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
+                    var command_changed = string !== command;
                     command = string;
                     if (!stay) {
                         self.position(bare_text(command).length);
                     }
                     redraw();
                     fix_textarea();
-                    if (!silent) {
+                    if (!silent && command_changed) {
                         fire_change_command();
                     }
                 }
