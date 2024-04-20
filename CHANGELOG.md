@@ -1,4 +1,6 @@
-## 2.39.4
+## 2.40.0
+### Features
+* Don't force any attributes when using xml (`span`, `img`, and `a` tags) [#913](https://github.com/jcubic/jquery.terminal/issues/913)
 ### Bugfix
 * fix init and resize of long prompt [#919](https://github.com/jcubic/jquery.terminal/issues/919)
 * fix occasional selecting Accessibility label (about clipboard textarea) in CMD

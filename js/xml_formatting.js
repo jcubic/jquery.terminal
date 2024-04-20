@@ -80,8 +80,12 @@
             return '[[;' + color + ';' + background + ';;;' + style + ']';
         },
         img: function(attrs) {
+            var cls = attrs.class || '';
             var alt = attrs.alt || '';
-            return '[[@;;;' + attrs.class + ';' + attrs.src + ']' + alt + ']';
+            var src = attrs.src || '';
+            delete attrs.alt;
+            var formatting = ['@', '', '', cls, src, JSON.stringify(attrs)];
+            return '[[' + formatting.join(';') + ']' + alt + ']';
         },
         bold: function() {
             return '[[b;rgba(255,255,255,0.9);]';
@@ -102,10 +106,15 @@
             return '[[i;;]';
         },
         span: function(attrs) {
-            return '[[;;;' + attrs.class + ']';
+            var cls = attrs.class || '';
+            var formatting = ['', '', '', cls, '', JSON.stringify(attrs)];
+            return '[[' + formatting.join(';') + ']';
         },
         link: function(attrs) {
-            return '[[!;;;' + attrs.class + ';' + attrs.href + ';]';
+            var cls = attrs.class || '';
+            var href = attrs.href || '';
+            var formatting = ['!', '', '', cls, href, JSON.stringify(attrs)];
+            return '[[' + formatting.join(';') + ']';
         }
     };
     // short aliases
