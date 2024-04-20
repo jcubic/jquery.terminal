@@ -4,6 +4,7 @@
 * fix occasional selecting Accessibility label (about clipboard textarea) in CMD
 * fix sync commands and dynamic prompt [#923](https://github.com/jcubic/jquery.terminal/issues/923) [#922](https://github.com/jcubic/jquery.terminal/issues/922)
 * fix calling `onCommandChange` when command don't change
+* fix sequence of animations in echo without newline [#930](https://github.com/jcubic/jquery.terminal/issues/930)
 
 ## 2.39.3
 ### Bugfix

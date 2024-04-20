@@ -9203,7 +9203,7 @@
                     var bottom = self.is_bottom();
                     var line = 0;
                     if (optimized) {
-                        var lines = formatted_lines.map(function(formatted) {
+                        var anim_lines = formatted_lines.map(function(formatted) {
                             return {
                                 formatted: formatted,
                                 chars: $.terminal.partition(formatted, {wrap: false}),
@@ -9218,9 +9218,9 @@
                         var formatted_line, input_chars, input_len;
                         if (!skip) {
                             if (optimized) {
-                                formatted_line = lines[line].formatted;
-                                input_chars = lines[line].chars;
-                                input_len = lines[line].len;
+                                formatted_line = anim_lines[line].formatted;
+                                input_chars = anim_lines[line].chars;
+                                input_len = anim_lines[line].len;
                             } else {
                                 formatted_line = formatted;
                                 input_chars = chars;
@@ -9245,12 +9245,13 @@
                                 // swap prompt with line
                                 var index = self.last_index();
                                 self.set_prompt(prompt);
+                                var is_partial = !!lines.get_partial().length;
                                 self.echo(formatted_line, $.extend({}, options, {
                                     formatters: false,
                                     finalize: null,
                                     typing: false
                                 }));
-                                lines[line].index = index + 1;
+                                anim_lines[line].index = index + 1;
                                 new_prompt = '';
                                 ++line;
                                 char_i = 0;
@@ -9263,21 +9264,28 @@
                             stop = true;
                         }
                         if (optimized) {
-                            stop = line === lines.length;
+                            stop = line === anim_lines.length;
                         } else {
                             stop = char_i === len;
                         }
                         if (stop) {
                             clearInterval(interval);
                             setTimeout(function() {
-                                if (optimized) {
-                                    // clear old lines and make one full line
-                                    // so it can wrap when you resize
-                                    lines.forEach(function(line) {
-                                        self.remove_line(line.index);
-                                    });
+                                if (is_partial || options.newline === false) {
+                                    // HACK: fix sequance of animations #930
+                                    index = self.last_index();
+                                    var node = output.find('[data-index="' + index + '"]');
+                                    options.finalize(node);
+                                } else {
+                                    if (optimized) {
+                                        // clear old lines and make one full line
+                                        // so it can wrap when you resize
+                                        anim_lines.forEach(function(line) {
+                                            self.remove_line(line.index);
+                                        });
+                                    }
+                                    finish_typing_fn(message, prompt, options);
                                 }
-                                finish_typing_fn(message, prompt, options);
                                 animating = false;
                             }, options.delay);
                         }
@@ -10538,6 +10546,7 @@
                         var appending_to_partial = false;
                         var partial = $();
                         var snapshot;
+                        var finalizations = [];
                         if (!options.update) {
                             partial = self.find('.partial');
                             snapshot = lines.get_partial();
@@ -10580,13 +10589,16 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
+                                finalizations.push({
+                                    node: wrapper,
+                                    finalize: data.finalize
+                                });
                                 if (appending_to_partial) {
                                     partial = wrapper;
                                 } else if (data.newline && partial.length) {
                                     wrapper = $('<div/>');
                                     partial = $();
                                 }
-                                data.finalize(wrapper);
                             } else {
                                 var line = data.line;
                                 var div;
@@ -10614,6 +10626,9 @@
                             }
                         });
                         partial = self.find('.partial');
+                        finalizations.forEach(function(data) {
+                            data.finalize(data.node);
+                        });
                         var last_row;
                         if (partial.length === 0) {
                             css(command_line[0], {
@@ -10810,18 +10825,18 @@
                             if (is_node(arg)) {
                                 return;
                             }
-                            locals.finalize = function(div) {
+                            locals.finalize = function(node) {
                                 if (locals.raw) {
-                                    div.addClass('raw');
+                                    node.addClass('raw');
                                 }
                                 if (locals.ansi) {
-                                    div.addClass('ansi');
+                                    node.addClass('ansi');
                                 }
                                 try {
                                     if (is_function(finalize)) {
-                                        finalize.call(self, div);
+                                        finalize.call(self, node);
                                     }
-                                    div.on_load({
+                                    node.on_load({
                                         error: function(element) {
                                             element.replaceWith(use_broken_image);
                                         },
