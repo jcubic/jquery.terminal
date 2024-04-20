@@ -6846,12 +6846,11 @@
                 return [];
             }
             // -----------------------------------------------------------------
-            function attrs_to_string(style, attrs, vaid_attrs) {
+            function attrs_to_string(style, attrs, valid_attrs) {
                 if (attrs) {
-                    var keys = filter_attr_names(Object.keys(attrs));
-                    if (keys.length) {
+                    if (valid_attrs.length) {
                         var style_attrs;
-                        var result = keys.map(function(name) {
+                        var result = valid_attrs.map(function(name) {
                             if (attrs[name] === null) {
                                 return '';
                             }
