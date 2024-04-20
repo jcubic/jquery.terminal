@@ -6868,7 +6868,7 @@
                         if (!result.length) {
                             return '';
                         }
-                        if (!style_attrs) {
+                        if (!style_attrs && style) {
                             // if there are not style attr we need to add style
                             result.push('style="' + style + '"');
                         }

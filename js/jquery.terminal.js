@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 20 Apr 2024 19:14:28 +0000
+ * Date: Sat, 20 Apr 2024 20:11:42 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5308,7 +5308,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 20 Apr 2024 19:14:28 +0000',
+        date: 'Sat, 20 Apr 2024 20:11:42 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6868,7 +6868,7 @@
                         if (!result.length) {
                             return '';
                         }
-                        if (!style_attrs) {
+                        if (!style_attrs && style) {
                             // if there are not style attr we need to add style
                             result.push('style="' + style + '"');
                         }
