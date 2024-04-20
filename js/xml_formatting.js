@@ -134,7 +134,7 @@
                 var attrs = {};
                 if (m[2]) {
                     var string_attrs = m[2];
-                    var re = /([a-zA-Z]+)\s*=\s*"([^"]+)"/g;
+                    var re = /([\w-]+)\s*=\s*"([^"]+)"/g;
                     var match;
                     while (match = re.exec(string_attrs)) {
                         var attr_name = match[1];

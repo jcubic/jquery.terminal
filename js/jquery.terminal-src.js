@@ -6846,10 +6846,11 @@
                 return [];
             }
             // -----------------------------------------------------------------
-            function attrs_to_string(style, attrs) {
+            function attrs_to_string(style, attrs, vaid_attrs) {
                 if (attrs) {
                     var keys = filter_attr_names(Object.keys(attrs));
                     if (keys.length) {
+                        var style_attrs;
                         var result = keys.map(function(name) {
                             if (attrs[name] === null) {
                                 return '';
@@ -6861,11 +6862,16 @@
                             if (name === 'style') {
                                 // merge style attr and colors #617
                                 value = value ? style + ';' + value : style;
+                                style_attrs = true;
                             }
                             return name + '="' + value + '"';
                         }).filter(Boolean);
                         if (!result.length) {
                             return '';
+                        }
+                        if (!style_attrs) {
+                            // if there are not style attr we need to add style
+                            result.push('style="' + style + '"');
                         }
                         return result.join(' ');
                     }

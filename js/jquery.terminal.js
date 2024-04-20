@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 20 Apr 2024 17:30:08 +0000
+ * Date: Sat, 20 Apr 2024 18:36:45 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5308,7 +5308,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 20 Apr 2024 17:30:08 +0000',
+        date: 'Sat, 20 Apr 2024 18:36:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6846,10 +6846,11 @@
                 return [];
             }
             // -----------------------------------------------------------------
-            function attrs_to_string(style, attrs) {
+            function attrs_to_string(style, attrs, vaid_attrs) {
                 if (attrs) {
                     var keys = filter_attr_names(Object.keys(attrs));
                     if (keys.length) {
+                        var style_attrs;
                         var result = keys.map(function(name) {
                             if (attrs[name] === null) {
                                 return '';
@@ -6861,11 +6862,16 @@
                             if (name === 'style') {
                                 // merge style attr and colors #617
                                 value = value ? style + ';' + value : style;
+                                style_attrs = true;
                             }
                             return name + '="' + value + '"';
                         }).filter(Boolean);
                         if (!result.length) {
                             return '';
+                        }
+                        if (!style_attrs) {
+                            // if there are not style attr we need to add style
+                            result.push('style="' + style + '"');
                         }
                         return result.join(' ');
                     }
