@@ -9273,8 +9273,8 @@
                             setTimeout(function() {
                                 if (is_partial || options.newline === false) {
                                     // HACK: fix sequance of animations #930
-                                    index = self.last_index();
-                                    var node = output.find('[data-index="' + index + '"]');
+                                    var idx = self.last_index();
+                                    var node = output.find('[data-index="' + idx + '"]');
                                     options.finalize(node);
                                 } else {
                                     if (optimized) {
