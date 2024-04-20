@@ -145,7 +145,9 @@
                 if (tags[name]) {
                     return tags[name](attrs);
                 } else {
-                    return '[[;' + name + ';]';
+                    var cls = attrs.class || '';
+                    var formatting = ['', name, '', cls, '', JSON.stringify(attrs)];
+                    return '[[' + formatting.join(';') + ']';
                 }
             }
             return string.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
