@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 20 Mar 2024 22:51:18 +0000
+ * Date: Sun, 21 Apr 2024 10:20:56 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2498,6 +2498,7 @@
             'SHIFT+INSERT': paste_event,
             'CTRL+SHIFT+T': return_true, // open closed tab
             'CTRL+W': delete_backward({clipboard: true, hold: false}),
+            'CTRL+BACKSPACE': delete_backward({clipboard: true, hold: false}),
             'HOLD+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'HOLD+SHIFT+BACKSPACE': delete_backward({clipboard: false, hold: true}),
             'CTRL+H': function() {
@@ -3184,7 +3185,8 @@
         }
         // ---------------------------------------------------------------------
         function is_multiline(str) {
-            return strlen(text(str)) > num_chars - prompt_len - 1 ||
+            var len = strlen(text(str));
+            return len > 0 && len > num_chars - prompt_len - 1 ||
                 str.match(/\n/);
         }
         // ---------------------------------------------------------------------
@@ -3516,7 +3518,7 @@
             function format_prompt(prompt) {
                 if (!prompt) {
                     just_prompt_len = 0;
-                    prompt_len = just_prompt_len + prompt_offset;
+                    prompt_len = prompt_offset;
                     return prompt;
                 }
                 var prompt_marker = get_prompt_marker();
@@ -3708,13 +3710,14 @@
             },
             set: function(string, stay, silent) {
                 if (string !== undefined) {
+                    var command_changed = string !== command;
                     command = string;
                     if (!stay) {
                         self.position(bare_text(command).length);
                     }
                     redraw();
                     fix_textarea();
-                    if (!silent) {
+                    if (!silent && command_changed) {
                         fire_change_command();
                     }
                 }
@@ -3934,8 +3937,8 @@
                 }
                 if (num_chars !== new_num_chars || arguments[0] === true) {
                     num_chars = new_num_chars;
-                    redraw();
                     draw_prompt();
+                    redraw();
                 }
                 return self;
             },
@@ -4021,6 +4024,8 @@
         // :: INIT
         // ---------------------------------------------------------------------
         self.name(settings.name || settings.prompt || '');
+        char_width = get_char_width();
+        num_chars = get_num_chars(char_width);
         if (settings.prompt !== false) {
             prompt = settings.prompt;
             draw_prompt();
@@ -4028,8 +4033,6 @@
         if (settings.enabled === true) {
             self.enable();
         }
-        char_width = get_char_width();
-        num_chars = get_num_chars(char_width);
         if (!settings.history) {
             history.disable();
         }
@@ -5305,7 +5308,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.39.3',
-        date: 'Wed, 20 Mar 2024 22:51:18 +0000',
+        date: 'Sun, 21 Apr 2024 10:20:56 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6843,11 +6846,11 @@
                 return [];
             }
             // -----------------------------------------------------------------
-            function attrs_to_string(style, attrs) {
+            function attrs_to_string(style, attrs, valid_attrs) {
                 if (attrs) {
-                    var keys = filter_attr_names(Object.keys(attrs));
-                    if (keys.length) {
-                        var result = keys.map(function(name) {
+                    if (valid_attrs.length) {
+                        var style_attrs;
+                        var result = valid_attrs.map(function(name) {
                             if (attrs[name] === null) {
                                 return '';
                             }
@@ -6858,11 +6861,16 @@
                             if (name === 'style') {
                                 // merge style attr and colors #617
                                 value = value ? style + ';' + value : style;
+                                style_attrs = true;
                             }
                             return name + '="' + value + '"';
                         }).filter(Boolean);
                         if (!result.length) {
                             return '';
+                        }
+                        if (!style_attrs && style) {
+                            // if there are not style attr we need to add style
+                            result.push('style="' + style + '"');
                         }
                         return result.join(' ');
                     }
@@ -8654,6 +8662,9 @@
                         return $.when(result).done(show).catch(error);
                     }
                 } else {
+                    if (exec) {
+                        command_line.refresh();
+                    }
                     if (paused) {
                         resume_callbacks.push(function() {
                             // exec with resume/pause in user code
@@ -9197,7 +9208,7 @@
                     var bottom = self.is_bottom();
                     var line = 0;
                     if (optimized) {
-                        var lines = formatted_lines.map(function(formatted) {
+                        var anim_lines = formatted_lines.map(function(formatted) {
                             return {
                                 formatted: formatted,
                                 chars: $.terminal.partition(formatted, {wrap: false}),
@@ -9212,9 +9223,9 @@
                         var formatted_line, input_chars, input_len;
                         if (!skip) {
                             if (optimized) {
-                                formatted_line = lines[line].formatted;
-                                input_chars = lines[line].chars;
-                                input_len = lines[line].len;
+                                formatted_line = anim_lines[line].formatted;
+                                input_chars = anim_lines[line].chars;
+                                input_len = anim_lines[line].len;
                             } else {
                                 formatted_line = formatted;
                                 input_chars = chars;
@@ -9239,12 +9250,13 @@
                                 // swap prompt with line
                                 var index = self.last_index();
                                 self.set_prompt(prompt);
+                                var is_partial = !!lines.get_partial().length;
                                 self.echo(formatted_line, $.extend({}, options, {
                                     formatters: false,
                                     finalize: null,
                                     typing: false
                                 }));
-                                lines[line].index = index + 1;
+                                anim_lines[line].index = index + 1;
                                 new_prompt = '';
                                 ++line;
                                 char_i = 0;
@@ -9257,21 +9269,28 @@
                             stop = true;
                         }
                         if (optimized) {
-                            stop = line === lines.length;
+                            stop = line === anim_lines.length;
                         } else {
                             stop = char_i === len;
                         }
                         if (stop) {
                             clearInterval(interval);
                             setTimeout(function() {
-                                if (optimized) {
-                                    // clear old lines and make one full line
-                                    // so it can wrap when you resize
-                                    lines.forEach(function(line) {
-                                        self.remove_line(line.index);
-                                    });
+                                if (is_partial || options.newline === false) {
+                                    // HACK: fix sequance of animations #930
+                                    var idx = self.last_index();
+                                    var node = output.find('[data-index="' + idx + '"]');
+                                    options.finalize(node);
+                                } else {
+                                    if (optimized) {
+                                        // clear old lines and make one full line
+                                        // so it can wrap when you resize
+                                        anim_lines.forEach(function(line) {
+                                            self.remove_line(line.index);
+                                        });
+                                    }
+                                    finish_typing_fn(message, prompt, options);
                                 }
-                                finish_typing_fn(message, prompt, options);
                                 animating = false;
                             }, options.delay);
                         }
@@ -10532,6 +10551,7 @@
                         var appending_to_partial = false;
                         var partial = $();
                         var snapshot;
+                        var finalizations = [];
                         if (!options.update) {
                             partial = self.find('.partial');
                             snapshot = lines.get_partial();
@@ -10574,13 +10594,16 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
+                                finalizations.push({
+                                    node: wrapper,
+                                    finalize: data.finalize
+                                });
                                 if (appending_to_partial) {
                                     partial = wrapper;
                                 } else if (data.newline && partial.length) {
                                     wrapper = $('<div/>');
                                     partial = $();
                                 }
-                                data.finalize(wrapper);
                             } else {
                                 var line = data.line;
                                 var div;
@@ -10608,6 +10631,9 @@
                             }
                         });
                         partial = self.find('.partial');
+                        finalizations.forEach(function(data) {
+                            data.finalize(data.node);
+                        });
                         var last_row;
                         if (partial.length === 0) {
                             css(command_line[0], {
@@ -10804,18 +10830,18 @@
                             if (is_node(arg)) {
                                 return;
                             }
-                            locals.finalize = function(div) {
+                            locals.finalize = function(node) {
                                 if (locals.raw) {
-                                    div.addClass('raw');
+                                    node.addClass('raw');
                                 }
                                 if (locals.ansi) {
-                                    div.addClass('ansi');
+                                    node.addClass('ansi');
                                 }
                                 try {
                                     if (is_function(finalize)) {
-                                        finalize.call(self, div);
+                                        finalize.call(self, node);
                                     }
-                                    div.on_load({
+                                    node.on_load({
                                         error: function(element) {
                                             element.replaceWith(use_broken_image);
                                         },

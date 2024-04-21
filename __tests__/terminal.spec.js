@@ -2326,8 +2326,8 @@ describe('Terminal utils', function() {
                 }
             }));
             return term.exec('output | grep /foo/').then(function() {
-                expect(get_lines(term)).toEqual(['foo']);
-            }).catch(e => console.log(e));
+                return expect(get_lines(term)).toEqual(['foo']);
+            });
         });
         it('should escape pipe', async function() {
             var term = $('<div/>').terminal($.terminal.pipe({
@@ -2767,13 +2767,13 @@ describe('extensions', function() {
                 expect(output(term)).toEqual(['hello, world']);
             }
         });
-        it('finalize with newline : false', function() {
+        it('finalize with newline: false', function() {
             term.echo('foo', {
-                finalize: (a) => a.children().children().css("color", "red"),
+                finalize: (node) => node.css("color", "red"),
                 newline : false
             });
-            var color = term[0].querySelector(`[data-index='${term.last_index()}`).firstChild.firstChild.style.color;
-            expect(color).toEqual("red");
+            const node = term.find(`[data-index='${term.last_index()}']`).get(0);
+            expect(node.style.color).toEqual("red");
         });
         it('should print multiple !flush && !newline', function() {
             term.echo('foo, ', {newline: false, flush: false});
@@ -2793,6 +2793,12 @@ describe('extensions', function() {
             term.flush();
             expect(term.get_output()).toMatchSnapshot();
             expect(output(term)).toMatchSnapshot();
+        });
+        it('should create sequance of animations (#930)', async function() {
+            await term.echo("Hello, ", { typing: true, delay: 0, newline: false });
+            await term.echo("jQuery ", { typing: true, delay: 0, newline: false });
+            await term.echo("Terminal", { typing: true, delay: 0 });
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
         });
     });
     describe('autocomplete_menu', function() {
