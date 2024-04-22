@@ -12006,7 +12006,8 @@
                     return;
                 }
                 e = e.originalEvent;
-                if (e) {
+                // we only need to handle real user clicks
+                if (e && e.isTrusted) {
                     // e.terget is body when click outside of context menu to close it
                     // even if you click on terminal
                     var node = document.elementFromPoint(e.clientX, e.clientY);

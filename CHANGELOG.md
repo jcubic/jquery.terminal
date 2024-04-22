@@ -1,3 +1,7 @@
+## 2.40.2
+### Bugfix
+* fix usage with libraries that invoke fake click events [#931](https://github.com/jcubic/jquery.terminal/issues/931)
+
 ## 2.40.1
 ### Bugfix
 * fix visible formatting in prompt when return string from command [#922](https://github.com/jcubic/jquery.terminal/issues/922)
