@@ -2383,7 +2383,9 @@
                 }
                 if (is_function(prompt)) {
                     if (promise && is_function(promise.then)) {
-                        promise.then(draw_prompt);
+                        promise.then(function() {
+                            draw_prompt();
+                        });
                     } else {
                         draw_prompt();
                     }

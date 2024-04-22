@@ -1,3 +1,7 @@
+## 2.40.1
+### Bugfix
+* fix visible formatting in prompt when return string from command [#922](https://github.com/jcubic/jquery.terminal/issues/922)
+
 ## 2.40.0
 ### Features
 * don't force any attributes when using xml (`span`, `img`, and `a` tags) [#913](https://github.com/jcubic/jquery.terminal/issues/913)
@@ -5,7 +9,7 @@
 ### Bugfix
 * fix init and resize of long prompt [#919](https://github.com/jcubic/jquery.terminal/issues/919)
 * fix occasional selecting Accessibility label (about clipboard textarea) in CMD
-* fix sync commands and dynamic prompt [#923](https://github.com/jcubic/jquery.terminal/issues/923) [#922](https://github.com/jcubic/jquery.terminal/issues/922)
+* fix sync commands and dynamic prompt [#923](https://github.com/jcubic/jquery.terminal/issues/923)
 * fix calling `onCommandChange` when command don't change
 * fix sequence of animations in echo without newline [#930](https://github.com/jcubic/jquery.terminal/issues/930)
 * fix flash of old dynamic prompt on enter [#926](https://github.com/jcubic/jquery.terminal/issues/926)
