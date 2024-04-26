@@ -8668,7 +8668,9 @@
                     } else {
                         after_exec();
                     }
-                    return deferred.promise();
+                    if (exec) {
+                        return deferred.promise();
+                    }
                 }
             }
             // -----------------------------------------------------------------
@@ -8734,10 +8736,7 @@
                     self.clear();
                     after_exec();
                 } else {
-                    var ret = invoke();
-                    if (ret) {
-                        return ret;
-                    }
+                    return invoke();
                 }
                 return deferred.promise();
             } catch (e) {

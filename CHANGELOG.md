@@ -1,3 +1,7 @@
+## 2.40.4
+### Bugfix
+* fix flash of old dynamic prompt on enter [#926](https://github.com/jcubic/jquery.terminal/issues/926)
+
 ## 2.40.3
 ### Bugfix
 * fix `new_formatter` to allow usage of XML tags in formatter
@@ -20,7 +24,6 @@
 * fix sync commands and dynamic prompt [#923](https://github.com/jcubic/jquery.terminal/issues/923)
 * fix calling `onCommandChange` when command don't change
 * fix sequence of animations in echo without newline [#930](https://github.com/jcubic/jquery.terminal/issues/930)
-* fix flash of old dynamic prompt on enter [#926](https://github.com/jcubic/jquery.terminal/issues/926)
 * fix ignoring colors and style when using JSON attributes in formatting
 
 ## 2.39.3
