@@ -2051,15 +2051,6 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.new_formatter', function() {
-        function nested_index() {
-            var formatters = $.terminal.defaults.formatters;
-            for (let i in formatters) {
-                if (formatters[i] === $.terminal.nested_formatting) {
-                    return i;
-                }
-            }
-            return -1;
-        }
         var formatters;
         beforeEach(function() {
             formatters = $.terminal.defaults.formatters.slice();
@@ -2070,30 +2061,11 @@ describe('Terminal utils', function() {
         it('should add new formatters', function() {
             var formatter_1 = function() {};
             var formatter_2 = [/xxx/, 'xxx'];
-            $.terminal.new_formatter(formatter_1);
             var formatters = $.terminal.defaults.formatters;
-            var n = nested_index();
-            expect(n !== -1).toBeTruthy();
-            expect(formatters[n]).toBe($.terminal.nested_formatting);
-            expect(formatters[n - 1]).toBe(formatter_1);
-            $.terminal.new_formatter(formatter_2);
-            n = nested_index();
-            expect(formatters[n]).toBe($.terminal.nested_formatting);
-            expect(formatters[n - 1]).toBe(formatter_2);
-            expect(formatters[n - 2]).toBe(formatter_1);
-        });
-        it('should add formatter when no nested_formatting', function() {
-            var formatter_1 = function() {};
-            var formatter_2 = [/xxx/, 'xxx'];
-            var formatters = $.terminal.defaults.formatters;
-            var n = nested_index();
-            expect(n !== -1).toBeTruthy();
-            formatters.splice(n, 1);
-            expect(nested_index()).toEqual(-1);
             $.terminal.new_formatter(formatter_1);
             $.terminal.new_formatter(formatter_2);
-            expect(formatters[formatters.length - 2]).toBe(formatter_1);
-            expect(formatters[formatters.length - 1]).toBe(formatter_2);
+            expect(formatters.includes(formatter_1)).toBeTruthy();
+            expect(formatters.includes(formatter_2)).toBeTruthy();
         });
     });
     describe('$.terminal.less', function() {

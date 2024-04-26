@@ -6755,17 +6755,10 @@
             });
         },
         // ---------------------------------------------------------------------
-        // :: helper function that add formatter before nested_formatting
+        // :: helper function that add new formatter
         // ---------------------------------------------------------------------
         new_formatter: function(formatter) {
-            var formatters = $.terminal.defaults.formatters;
-            for (var i = 0; i < formatters.length; ++i) {
-                if (formatters[i] === $.terminal.nested_formatting) {
-                    formatters.splice(i, 0, formatter);
-                    return;
-                }
-            }
-            formatters.push(formatter);
+            $.terminal.defaults.formatters.unshift(formatter);
         }
     };
     (function() {

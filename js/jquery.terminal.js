@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 22 Apr 2024 19:31:20 +0000
+ * Date: Fri, 26 Apr 2024 20:59:39 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5310,7 +5310,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.40.2',
-        date: 'Mon, 22 Apr 2024 19:31:20 +0000',
+        date: 'Fri, 26 Apr 2024 20:59:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6755,17 +6755,10 @@
             });
         },
         // ---------------------------------------------------------------------
-        // :: helper function that add formatter before nested_formatting
+        // :: helper function that add new formatter
         // ---------------------------------------------------------------------
         new_formatter: function(formatter) {
-            var formatters = $.terminal.defaults.formatters;
-            for (var i = 0; i < formatters.length; ++i) {
-                if (formatters[i] === $.terminal.nested_formatting) {
-                    formatters.splice(i, 0, formatter);
-                    return;
-                }
-            }
-            formatters.push(formatter);
+            $.terminal.defaults.formatters.unshift(formatter);
         }
     };
     (function() {
