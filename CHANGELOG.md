@@ -1,3 +1,7 @@
+## 2.40.5
+### Bugfix
+* fix visible prompt during multiline typing animation [#934](https://github.com/jcubic/jquery.terminal/issues/934)
+
 ## 2.40.4
 ### Bugfix
 * fix flash of old dynamic prompt on enter [#926](https://github.com/jcubic/jquery.terminal/issues/926)

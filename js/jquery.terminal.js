@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 26 Apr 2024 22:28:43 +0000
+ * Date: Sat, 27 Apr 2024 14:21:29 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5310,7 +5310,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.40.4',
-        date: 'Fri, 26 Apr 2024 22:28:43 +0000',
+        date: 'Sat, 27 Apr 2024 14:21:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9241,9 +9241,14 @@
                             }
                             char_i++;
                             if (char_i === input_len && optimized) {
-                                // swap prompt with line
                                 var index = self.last_index();
-                                self.set_prompt(prompt);
+                                if (line === anim_lines.length - 1) {
+                                    // swap prompt with line
+                                    self.set_prompt(prompt);
+                                } else {
+                                    // clear prompt for multiline string #934
+                                    self.set_prompt('');
+                                }
                                 var is_partial = !!lines.get_partial().length;
                                 self.echo(formatted_line, $.extend({}, options, {
                                     formatters: false,
@@ -9271,7 +9276,7 @@
                             clearInterval(interval);
                             setTimeout(function() {
                                 if (is_partial || options.newline === false) {
-                                    // HACK: fix sequance of animations #930
+                                    // HACK: fix sequence of animations #930
                                     var idx = self.last_index();
                                     var node = output.find('[data-index="' + idx + '"]');
                                     options.finalize(node);
