@@ -1,6 +1,6 @@
 ## 2.40.6
 ### Bugfix
-* fix resize of long animation after finish
+* fix resize of text from long animation after finish
 
 ## 2.40.5
 ### Bugfix
