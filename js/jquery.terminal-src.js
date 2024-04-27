@@ -9249,7 +9249,7 @@
                                     // clear prompt for multiline string #934
                                     self.set_prompt('');
                                 }
-                                var is_partial = !!lines.get_partial().length;
+                                var is_partial = !!output.find('.partial').length;
                                 self.echo(formatted_line, $.extend({}, options, {
                                     formatters: false,
                                     finalize: null,

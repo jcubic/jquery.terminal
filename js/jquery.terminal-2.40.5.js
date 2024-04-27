@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 27 Apr 2024 14:23:24 +0000
+ * Date: Sat, 27 Apr 2024 14:48:57 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5310,7 +5310,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.40.5',
-        date: 'Sat, 27 Apr 2024 14:23:24 +0000',
+        date: 'Sat, 27 Apr 2024 14:48:57 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9249,7 +9249,7 @@
                                     // clear prompt for multiline string #934
                                     self.set_prompt('');
                                 }
-                                var is_partial = !!lines.get_partial().length;
+                                var is_partial = !!output.find('.partial').length;
                                 self.echo(formatted_line, $.extend({}, options, {
                                     formatters: false,
                                     finalize: null,

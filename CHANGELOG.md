@@ -1,3 +1,7 @@
+## 2.40.6
+### Bugfix
+* fix resize of long animation after finish
+
 ## 2.40.5
 ### Bugfix
 * fix visible prompt during multiline typing animation [#934](https://github.com/jcubic/jquery.terminal/issues/934)
