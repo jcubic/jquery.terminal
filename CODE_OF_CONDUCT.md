@@ -10,4 +10,4 @@ By beeing part of this comminty you agree to follow this short list of rules
 
 ## Violation
 
-If you violate any of the above rules in any way, you may be banned to contribute into a project.
+If you violate any of the above rules in any way, you may be banned to contribute into the project.
