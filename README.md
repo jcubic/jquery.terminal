@@ -1,12 +1,12 @@
 <h1 align="center">
-  <img src="https://github.com/jcubic/jquery.terminal/blob/master/assets/ascii_art.svg?raw=true&ver=2.40.5"
+  <img src="https://github.com/jcubic/jquery.terminal/blob/master/assets/ascii_art.svg?raw=true&ver=2.40.6"
        alt="ASCII Art that represent text jQuery Terminal - JavaScript Library for Web Based Terminal Emulators" />
 </h1>
 
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
-[![npm](https://img.shields.io/badge/npm-2.40.5-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.40.5-yellow.svg)
+[![npm](https://img.shields.io/badge/npm-2.40.6-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-2.40.6-yellow.svg)
 [![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&de53a76e58fa938d09d172e6ddf1bb8c)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
 ![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
@@ -87,7 +87,7 @@ You can test current version at this URL:
 
 or if it doesn't use latest version (because of jsDelivr cache) you can force it with this URL:
 
-* [https://jcubic.github.io/jquery.terminal/?ver=2.40.5](https://jcubic.github.io/jquery.terminal/?ver=2.40.5)
+* [https://jcubic.github.io/jquery.terminal/?ver=2.40.6](https://jcubic.github.io/jquery.terminal/?ver=2.40.6)
 
 And development version using:
 
@@ -106,20 +106,20 @@ or use jsDelivr:
 
 ```
 
-Then include js/jquery.terminal-2.40.5.min.js and css/jquery.terminal-2.40.5.min.css
+Then include js/jquery.terminal-2.40.6.min.js and css/jquery.terminal-2.40.6.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.40.5/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.40.5/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.40.6/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.40.6/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.5/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.5/css/jquery.terminal.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.6/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.6/css/jquery.terminal.min.css"/>
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
