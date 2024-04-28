@@ -5297,14 +5297,16 @@
     // :: is that it's triggers when virtual keyboard is toggled
     // -------------------------------------------------------------------------
     function on_height_change(callback) {
+        var height = window.visualViewport.height;
         var scale = window.visualViewport.scale;
-        var height = Math.round(window.visualViewport.height * scale);
+        height = Math.round(height * scale);
         callback(height);
         window.visualViewport.addEventListener('resize', function() {
+            var newHeight = window.visualViewport.height;
             var newScale = window.visualViewport.scale;
-            var newHeight = Math.round(window.visualViewport.height * newScale);
             if (height !== newHeight) {
-                callback(newHeight);
+                height = Math.round(newHeight * newScale);
+                callback(height);
             }
         });
     }
