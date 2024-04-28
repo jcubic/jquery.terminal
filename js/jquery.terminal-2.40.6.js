@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.40.6
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 27 Apr 2024 14:57:31 +0000
+ * Date: Sun, 28 Apr 2024 12:14:00 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5309,8 +5309,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.40.6',
-        date: 'Sat, 27 Apr 2024 14:57:31 +0000',
+        version: 'DEV',
+        date: 'Sun, 28 Apr 2024 12:14:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6916,7 +6916,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function pre_process_image(data) {
+            function pre_process_image(data, text) {
                 var result = '<img';
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
@@ -7005,7 +7005,7 @@
                 if (style.indexOf('!') !== -1) {
                     result = pre_process_link(data, attrs, valid_attrs);
                 } else if (style.indexOf('@') !== -1) {
-                    result = pre_process_image(data);
+                    result = pre_process_image(data, text);
                 } else {
                     result = '<span';
                 }

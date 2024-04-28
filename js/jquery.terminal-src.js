@@ -6916,7 +6916,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function pre_process_image(data) {
+            function pre_process_image(data, text) {
                 var result = '<img';
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
@@ -7005,7 +7005,7 @@
                 if (style.indexOf('!') !== -1) {
                     result = pre_process_link(data, attrs, valid_attrs);
                 } else if (style.indexOf('@') !== -1) {
-                    result = pre_process_image(data);
+                    result = pre_process_image(data, text);
                 } else {
                     result = '<span';
                 }
