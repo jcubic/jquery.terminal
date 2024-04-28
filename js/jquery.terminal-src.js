@@ -5298,11 +5298,14 @@
     // -------------------------------------------------------------------------
     function on_height_change(callback) {
         var height = window.visualViewport.height;
+        var scale = window.visualViewport.scale;
+        height = Math.round(height * scale);
         callback(height);
         window.visualViewport.addEventListener('resize', function() {
             var newHeight = window.visualViewport.height;
+            var newScale = window.visualViewport.scale;
             if (height !== newHeight) {
-                height = newHeight;
+                height = Math.round(newHeight * newScale);
                 callback(height);
             }
         });
