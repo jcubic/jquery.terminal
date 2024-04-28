@@ -1,3 +1,9 @@
+## 2.41.0
+### Features
+* allow to use class and other attributes in style XML tags (like `<bold/>` or `<glow/>`)
+### Bugfix
+* fix alt image attribute
+
 ## 2.40.6
 ### Bugfix
 * fix resize of text from long animation after finish
