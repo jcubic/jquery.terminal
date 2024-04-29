@@ -9197,7 +9197,9 @@
                 if (len > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
-                        new_prompt = options.prompt;
+                        new_prompt = $.terminal.apply_formatters(options.prompt, {
+                            prompt: true
+                        });
                     } else {
                         self.set_prompt('');
                     }

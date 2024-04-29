@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 29 Apr 2024 13:29:38 +0000
+ * Date: Mon, 29 Apr 2024 13:41:31 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 29 Apr 2024 13:29:38 +0000',
+        date: 'Mon, 29 Apr 2024 13:41:31 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9197,7 +9197,9 @@
                 if (len > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
-                        new_prompt = options.prompt;
+                        new_prompt = $.terminal.apply_formatters(options.prompt, {
+                            prompt: true
+                        });
                     } else {
                         self.set_prompt('');
                     }
