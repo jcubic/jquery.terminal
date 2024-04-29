@@ -12,6 +12,7 @@
 * fix visible formatting in prompt after animated exec [#938](https://github.com/jcubic/jquery.terminal/issues/938)
 * fix visible formatting in prompt during typing animation
 * cleanup duplicated attributes from XML formatter output
+* fix zoom on mobile (PR by [Riccardo Mura](https://github.com/cowuake)) [#935](https://github.com/jcubic/jquery.terminal/pull/935)
 
 ## 2.40.6
 ### Bugfix
