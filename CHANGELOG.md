@@ -6,6 +6,7 @@
 * fix alt image attribute
 * fix visible formatting in prompt after animated exec [#938](https://github.com/jcubic/jquery.terminal/issues/938)
 * fix visible formatting in prompt during typing animation
+* cleanup duplicated attributes from XML formatter output
 
 ## 2.40.6
 ### Bugfix
