@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 29 Apr 2024 15:00:50 +0000
+ * Date: Mon, 29 Apr 2024 15:05:54 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 29 Apr 2024 15:00:50 +0000',
+        date: 'Mon, 29 Apr 2024 15:05:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8498,7 +8498,7 @@
                 self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
-                if (type === 'string' || type instanceof String) {
+                if (type === 'string' || settings.greetings instanceof String) {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
