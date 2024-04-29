@@ -8476,7 +8476,7 @@
                 self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
-                if (type === 'string') {
+                if (type === 'string' || type instanceof String) {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {

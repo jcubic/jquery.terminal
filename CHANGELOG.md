@@ -1,6 +1,7 @@
 ## 2.41.0
 ### Features
 * allow to use class and other attributes in style XML tags (like `<bold/>` or `<glow/>`)
+* allow usage of String instance in greetings [#936](https://github.com/jcubic/jquery.terminal/issues/936)
 ### Bugfix
 * fix alt image attribute
 * fix visible formatting in prompt after animated exec [#938](https://github.com/jcubic/jquery.terminal/issues/938)
