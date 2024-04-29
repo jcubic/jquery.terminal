@@ -5301,10 +5301,10 @@
         var height = Math.round(window.visualViewport.height * scale);
         callback(height);
         window.visualViewport.addEventListener('resize', function() {
-            var newScale = window.visualViewport.scale;
-            var newHeight = Math.round(window.visualViewport.height * newScale);
-            if (height !== newHeight) {
-                height = newHeight;
+            var new_scale = window.visualViewport.scale;
+            var new_height = Math.round(window.visualViewport.height * new_scale);
+            if (height !== new_height) {
+                height = new_height;
                 callback(height);
             }
         });
