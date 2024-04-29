@@ -5,7 +5,7 @@
 ### Bugfix
 * fix alt image attribute
 * fix visible formatting in prompt after animated exec [#938](https://github.com/jcubic/jquery.terminal/issues/938)
-* fix visible formatting in promot during typing animation
+* fix visible formatting in prompt during typing animation
 
 ## 2.40.6
 ### Bugfix
