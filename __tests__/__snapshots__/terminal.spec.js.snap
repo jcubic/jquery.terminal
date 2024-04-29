@@ -806,7 +806,7 @@ exports[`Terminal utils xml formatting should render colors 2`] = `"<div data-in
 exports[`Terminal utils xml formatting should render links 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><a href=\\"https://example.com\\" target=\\"_blank\\" class=\\"link\\" data-text=\\"\\">example.com</a></div><div style=\\"width: 100%;\\"><a href=\\"example.com\\" data-text=\\"\\">example.com</a></div><div class=\\"cmd-end-line\\" style=\\"width: 100%;\\"><a href=\\"https://example.com\\" style=\\";background:red\\" data-text=\\"\\">Error:&nbsp;invalid&nbsp;message</a></div></div>"`;
 
 exports[`Terminal utils xml formatting should render tags 1`] = `
-"[[;;;foo;;{\\"class\\":\\"foo\\",\\"style\\":\\"color:red\\"}]text]
+"[[;;;foo;;{\\"style\\":\\"color:red\\"}]text]
 [[;;;;;{\\"style\\":\\"color:red\\"}]text]
 [[i;;;;;{}]lorem]
 [[g;;;;;{}]ipsum]

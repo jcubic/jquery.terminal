@@ -87,6 +87,8 @@
             var alt = attrs.alt || '';
             var src = attrs.src || '';
             delete attrs.alt;
+            delete attrs.class;
+            delete attrs.src;
             var formatting = ['@', '', '', cls, src, JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']' + alt + ']';
         },
@@ -98,12 +100,15 @@
         italic: style('i'),
         span: function(attrs) {
             var cls = attrs.class || '';
+            delete attrs.class;
             var formatting = ['', '', '', cls, '', JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         },
         link: function(attrs) {
             var cls = attrs.class || '';
             var href = attrs.href || '';
+            delete attrs.class;
+            delete attrs.href;
             var formatting = ['!', '', '', cls, href, JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         }
@@ -111,6 +116,7 @@
     function style(value) {
         return function(attrs) {
             var cls = attrs.class || '';
+            delete attrs.class;
             var formatting = [value, '', '', cls, '', JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         };
