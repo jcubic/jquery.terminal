@@ -9328,6 +9328,7 @@
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
                     var command = mask_command(message);
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                     command = $.terminal.apply_formatters(command, {command: true});
                     var output = prompt + command;
                     options = $.extend({}, options, {

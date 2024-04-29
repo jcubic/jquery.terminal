@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 29 Apr 2024 13:06:58 +0000
+ * Date: Mon, 29 Apr 2024 13:29:38 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 29 Apr 2024 13:06:58 +0000',
+        date: 'Mon, 29 Apr 2024 13:29:38 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9328,6 +9328,7 @@
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
                     var command = mask_command(message);
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                     command = $.terminal.apply_formatters(command, {command: true});
                     var output = prompt + command;
                     options = $.extend({}, options, {

@@ -3,6 +3,7 @@
 * allow to use class and other attributes in style XML tags (like `<bold/>` or `<glow/>`)
 ### Bugfix
 * fix alt image attribute
+* fix visible formatting in prompt durig animated exec [#938](https://github.com/jcubic/jquery.terminal/issues/938)
 
 ## 2.40.6
 ### Bugfix
