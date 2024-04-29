@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 28 Apr 2024 12:14:00 +0000
+ * Date: Mon, 29 Apr 2024 13:06:58 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5297,12 +5297,14 @@
     // :: is that it's triggers when virtual keyboard is toggled
     // -------------------------------------------------------------------------
     function on_height_change(callback) {
-        var height = window.visualViewport.height;
+        var scale = window.visualViewport.scale;
+        var height = Math.round(window.visualViewport.height * scale);
         callback(height);
         window.visualViewport.addEventListener('resize', function() {
-            var newHeight = window.visualViewport.height;
-            if (height !== newHeight) {
-                height = newHeight;
+            var new_scale = window.visualViewport.scale;
+            var new_height = Math.round(window.visualViewport.height * new_scale);
+            if (height !== new_height) {
+                height = new_height;
                 callback(height);
             }
         });
@@ -5310,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 28 Apr 2024 12:14:00 +0000',
+        date: 'Mon, 29 Apr 2024 13:06:58 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
