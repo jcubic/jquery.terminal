@@ -1106,6 +1106,17 @@ describe('Terminal utils', function() {
             });
             expect(output).toMatchSnapshot();
         });
+        it('should handle images with html entties', () => {
+            const url = 'https://images.unsplash.com/photo-1564865878688-9a…4NzEyMjB8MA&amp;ixlib=rb-4.0.3&amp;q=80&amp;w=400';
+            const style = 'border:1px solid red'
+            const input = `[[@;;;;${url};{"style":"${style}"}]black Android smartphone]`;
+            const output = $.terminal.format(input, {
+                allowedAttributes: ['style']
+            });
+            const $img = $(output);
+            expect($img.attr('src')).toEqual(url.replace(/&amp;/g, '&'));
+            expect($img.attr('style')).toEqual(style);
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {

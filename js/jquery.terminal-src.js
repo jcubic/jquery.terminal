@@ -6857,7 +6857,9 @@
                             var value = escape_html_attr(attrs[name]);
                             if (name === 'style') {
                                 // merge style attr and colors #617
-                                value = value ? style + ';' + value : style;
+                                if (style) {
+                                    value = value ? style + ';' + value : style;
+                                }
                                 style_attrs = true;
                             }
                             return name + '="' + value + '"';
