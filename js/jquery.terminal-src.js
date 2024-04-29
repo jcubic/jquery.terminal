@@ -6929,20 +6929,40 @@
                 return result;
             }
             // -----------------------------------------------------------------
+            function find_semicolon(text) {
+                var index = 0;
+                var inside_entity = false;
+
+                while (index < text.length) {
+                    if (text[index] === '&') {
+                        inside_entity = true;
+                    } else if (text[index] === ';' && !inside_entity) {
+                        return index;
+                    } else if (text[index] === ';') {
+                        inside_entity = false;
+                    }
+                    index++;
+                }
+
+                return -1;
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 var valid_attrs = [];
                 if (data_text.match(/;/)) {
                     try {
-                        var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';')
-                            .replace(/&nbsp;/g, ' ')
-                            .replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>');
-                        if (str.match(/^\s*\{[^}]*\}\s*$/)) {
-                            attrs = JSON.parse(str);
-                            valid_attrs = filter_attr_names(Object.keys(attrs));
-                            data_text = splitted[0];
+                        var semicolon = find_semicolon(data_text);
+                        if (semicolon !== -1) {
+                            var json = data_text.substring(semicolon + 1);
+                            json = json.replace(/&nbsp;/g, ' ')
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>');
+                            if (json.match(/^\s*\{[^}]*\}\s*$/)) {
+                                attrs = JSON.parse(json);
+                                valid_attrs = filter_attr_names(Object.keys(attrs));
+                                data_text = data_text.substring(0, semicolon);
+                            }
                         }
                     } catch (e) {
                     }
