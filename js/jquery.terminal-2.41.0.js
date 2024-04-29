@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 29 Apr 2024 15:50:20 +0000
+ * Date: Mon, 29 Apr 2024 16:19:54 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.41.0',
-        date: 'Mon, 29 Apr 2024 15:50:20 +0000',
+        date: 'Mon, 29 Apr 2024 16:19:54 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7355,6 +7355,10 @@
         return get_type(object) === 'function';
     }
     // -----------------------------------------------------------------------
+    function is_string(object) {
+        return get_type(object) === 'string';
+    }
+    // -----------------------------------------------------------------------
     function is_object(object) {
         return object && typeof object === 'object';
     }
@@ -7402,6 +7406,9 @@
         }
         if (Array.isArray(object)) {
             return 'array';
+        }
+        if (object instanceof String) {
+            return 'string';
         }
         if (typeof object === 'object') {
             return 'object';
@@ -7723,7 +7730,7 @@
             if (render(object)) {
                 return;
             }
-            if (typeof object === 'string') {
+            if (is_string(object)) {
                 self.echo(object);
             } else if (is_array(object)) {
                 self.echo($.map(object, function(object) {
@@ -8497,10 +8504,9 @@
                 // signature have ascii art so it's not suite for screen readers
                 self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
-                var type = typeof settings.greetings;
-                if (type === 'string' || settings.greetings instanceof String) {
+                if (is_string(settings.greetings)) {
                     self.echo(settings.greetings);
-                } else if (type === 'function') {
+                } else if (is_function(settings.greetings)) {
                     self.echo(function() {
                         try {
                             var defer = new $.Deferred();
@@ -10870,6 +10876,9 @@
                                     node.on_load({
                                         error: function(element) {
                                             element.replaceWith(use_broken_image);
+                                            if (should_pause) {
+                                                self.resume();
+                                            }
                                         },
                                         done: function(has_elements) {
                                             if (has_elements && should_pause) {

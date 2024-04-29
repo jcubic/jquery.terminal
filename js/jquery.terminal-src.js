@@ -10876,6 +10876,9 @@
                                     node.on_load({
                                         error: function(element) {
                                             element.replaceWith(use_broken_image);
+                                            if (should_pause) {
+                                                self.resume();
+                                            }
                                         },
                                         done: function(has_elements) {
                                             if (has_elements && should_pause) {

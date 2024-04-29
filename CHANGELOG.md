@@ -1,5 +1,6 @@
 ## 2.41.1
 ### Bugfix
+* fix paused terminal when echo broken image
 * fix returning String instance from interpreter
 
 ## 2.41.0
