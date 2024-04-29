@@ -1,3 +1,7 @@
+## 2.41.1
+### Bugfix
+* fix returning String instance from interpreter
+
 ## 2.41.0
 ### Features
 * allow to use class and other attributes in style XML tags (like `<bold/>` or `<glow/>`)
