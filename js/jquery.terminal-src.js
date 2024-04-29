@@ -5297,12 +5297,14 @@
     // :: is that it's triggers when virtual keyboard is toggled
     // -------------------------------------------------------------------------
     function on_height_change(callback) {
-        var height = window.visualViewport.height;
+        var scale = window.visualViewport.scale;
+        var height = Math.round(window.visualViewport.height * scale);
         callback(height);
         window.visualViewport.addEventListener('resize', function() {
-            var newHeight = window.visualViewport.height;
-            if (height !== newHeight) {
-                height = newHeight;
+            var new_scale = window.visualViewport.scale;
+            var new_height = Math.round(window.visualViewport.height * new_scale);
+            if (height !== new_height) {
+                height = new_height;
                 callback(height);
             }
         });
@@ -6855,7 +6857,9 @@
                             var value = escape_html_attr(attrs[name]);
                             if (name === 'style') {
                                 // merge style attr and colors #617
-                                value = value ? style + ';' + value : style;
+                                if (style) {
+                                    value = value ? style + ';' + value : style;
+                                }
                                 style_attrs = true;
                             }
                             return name + '="' + value + '"';
@@ -6916,7 +6920,7 @@
                 }
             }
             // -----------------------------------------------------------------
-            function pre_process_image(data) {
+            function pre_process_image(data, text) {
                 var result = '<img';
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
@@ -6927,20 +6931,40 @@
                 return result;
             }
             // -----------------------------------------------------------------
+            function find_semicolon(text) {
+                var index = 0;
+                var inside_entity = false;
+
+                while (index < text.length) {
+                    if (text[index] === '&') {
+                        inside_entity = true;
+                    } else if (text[index] === ';' && !inside_entity) {
+                        return index;
+                    } else if (text[index] === ';') {
+                        inside_entity = false;
+                    }
+                    index++;
+                }
+
+                return -1;
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 var valid_attrs = [];
                 if (data_text.match(/;/)) {
                     try {
-                        var splitted = data_text.split(';');
-                        var str = splitted.slice(1).join(';')
-                            .replace(/&nbsp;/g, ' ')
-                            .replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>');
-                        if (str.match(/^\s*\{[^}]*\}\s*$/)) {
-                            attrs = JSON.parse(str);
-                            valid_attrs = filter_attr_names(Object.keys(attrs));
-                            data_text = splitted[0];
+                        var semicolon = find_semicolon(data_text);
+                        if (semicolon !== -1) {
+                            var json = data_text.substring(semicolon + 1);
+                            json = json.replace(/&nbsp;/g, ' ')
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>');
+                            if (json.match(/^\s*\{[^}]*\}\s*$/)) {
+                                attrs = JSON.parse(json);
+                                valid_attrs = filter_attr_names(Object.keys(attrs));
+                                data_text = data_text.substring(0, semicolon);
+                            }
                         }
                     } catch (e) {
                     }
@@ -7005,7 +7029,7 @@
                 if (style.indexOf('!') !== -1) {
                     result = pre_process_link(data, attrs, valid_attrs);
                 } else if (style.indexOf('@') !== -1) {
-                    result = pre_process_image(data);
+                    result = pre_process_image(data, text);
                 } else {
                     result = '<span';
                 }
@@ -8474,7 +8498,7 @@
                 self.echo(self.signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 var type = typeof settings.greetings;
-                if (type === 'string') {
+                if (type === 'string' || settings.greetings instanceof String) {
                     self.echo(settings.greetings);
                 } else if (type === 'function') {
                     self.echo(function() {
@@ -9195,7 +9219,9 @@
                 if (len > 0) {
                     var new_prompt = '';
                     if (options.prompt) {
-                        new_prompt = options.prompt;
+                        new_prompt = $.terminal.apply_formatters(options.prompt, {
+                            prompt: true
+                        });
                     } else {
                         self.set_prompt('');
                     }
@@ -9326,6 +9352,7 @@
                 self.set_prompt(prompt);
                 with_prompt(prompt, function(prompt) {
                     var command = mask_command(message);
+                    prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                     command = $.terminal.apply_formatters(command, {command: true});
                     var output = prompt + command;
                     options = $.extend({}, options, {

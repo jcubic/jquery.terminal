@@ -247,6 +247,7 @@ global.URL = window.URL = {
 
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
+require('../js/xml_formatting')(global.$);
 require('../js/pipe')(global.$);
 require('../js/autocomplete_menu')(global.$);
 require('../js/less')(global.$);
@@ -473,6 +474,78 @@ describe('Terminal utils', function() {
                 var cmd = jQuery.terminal.parse_command(input);
                 expect(cmd).toMatchSnapshot();
             });
+        });
+    });
+    describe('xml formatting', function() {
+        let term;
+        beforeEach(() => {
+            term = $('<div/>').terminal({}, {greetings: false});
+        });
+        afterEach(() => {
+            term.destroy();
+        });
+        it('should render tags', () => {
+            const input = [
+                '<span class="foo" style="color: red">text</span>',
+                '<span style="color: red">text</span>',
+                '<italic>lorem</italic>',
+                '<glow>ipsum</glow>',
+                '<underline>dolor</underline>',
+                '<strike>sit</strike>',
+                '<overline>amet</overline>',
+                '<bold>foo</bold>'
+            ].join('\n');
+            expect($.terminal.apply_formatters(input)).toMatchSnapshot();
+        });
+        it('should handle invalid xml', () => {
+            const lines = [
+                '<<< First Line [[[[ of Text ><><> is little ]]] bit longer',
+                '<<<<>>>> Second ]]]] Line of Text ',
+                '<<<< Thrid Line of Text'
+            ];
+            expect($.terminal.apply_formatters(lines.join('\n'))).toMatchSnapshot();
+        });
+        it('should render an image', () => {
+            const url = './__tests__/__fixtures__/Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg';
+            const cls = 'foo';
+            const alt = 'this is an image';
+            term.echo(`<img src="${url}" class="${cls}" alt="${alt}"/>`);
+            const $img = term.find('img');
+            expect($img.attr('src')).toEqual(url);
+            expect($img.attr('alt')).toEqual(nbsp(alt));
+            expect($img.attr('class')).toEqual(cls);
+        });
+        it('should render an empty image', () => {
+            expect($.terminal.apply_formatters('<img/>')).toMatchSnapshot();
+        });
+        it('should format font', () => {
+            const input = [
+                '<font spacing="2" size="1.2" background="red" color="white">Hello World</font>',
+                '<font background="red">Hello World</font>',
+                '<font spacing="2" size="1.2">Hello World</font>'
+            ].join('\n');
+            expect($.terminal.apply_formatters(input)).toMatchSnapshot();
+            term.echo(input);
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should render colors', () => {
+            const input = [
+                '<white class="command">ls</white>',
+                '<green>ls</green>',
+                '<red class="error" style="background:red">Error: invalid message</red>'
+            ].join('\n');
+            expect($.terminal.apply_formatters(input)).toMatchSnapshot();
+            term.echo(input);
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should render links', () => {
+            const input = [
+                '<a href="https://example.com" target="_blank" class="link">example.com</a>',
+                '<a>example.com</a>',
+                '<a href="https://example.com" style="background:red">Error: invalid message</a>'
+            ].join('\n');
+            term.echo(input);
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
         });
     });
     describe('$.terminal.from_ansi', function() {
@@ -1032,6 +1105,17 @@ describe('Terminal utils', function() {
                 allowedAttributes: []
             });
             expect(output).toMatchSnapshot();
+        });
+        it('should handle images with html entties', () => {
+            const url = 'https://images.unsplash.com/photo-1564865878688-9a…4NzEyMjB8MA&amp;ixlib=rb-4.0.3&amp;q=80&amp;w=400';
+            const style = 'border:1px solid red'
+            const input = `[[@;;;;${url};{"style":"${style}"}]black Android smartphone]`;
+            const output = $.terminal.format(input, {
+                allowedAttributes: ['style']
+            });
+            const $img = $(output);
+            expect($img.attr('src')).toEqual(url.replace(/&amp;/g, '&'));
+            expect($img.attr('style')).toEqual(style);
         });
     });
     describe('$.terminal.strip', function() {
@@ -2066,6 +2150,9 @@ describe('Terminal utils', function() {
             $.terminal.new_formatter(formatter_2);
             expect(formatters.includes(formatter_1)).toBeTruthy();
             expect(formatters.includes(formatter_2)).toBeTruthy();
+        });
+        it('should use xml formatting', () => {
+            $.terminal.new_formatter([/foo/g, '<white>foo</white>']);
         });
     });
     describe('$.terminal.less', function() {
@@ -3261,17 +3348,23 @@ describe('Terminal plugin', function() {
             var term = $('<div/>').terminal($.noop, {
                 raw: true
             });
-            beforeEach(function() {
+            let formatters;
+            beforeEach(() => {
+                formatters = $.terminal.defaults.formatters;
+                $.terminal.defaults.formatters = [];
                 term.clear();
             });
-            var img = '<img src="http://lorempixel.com/300/200/cats/"/>';
+            afterEach(() => {
+                $.terminal.defaults.formatters = formatters;
+            });
+            const img = '<img src="http://lorempixel.com/300/200/cats/"/>';
             it('should display html when no raw echo option is specified', function() {
                 term.echo(img);
                 expect(last_div(term).find('img').length).toEqual(1);
             });
             it('should display html as text when using raw echo option', function() {
                 term.echo(img, {raw: false});
-                var output = last_div(term);
+                const output = last_div(term);
                 expect(output.find('img').length).toEqual(0);
                 expect(output.text().replace(/\s/g, ' ')).toEqual(img);
             });
@@ -3804,8 +3897,10 @@ describe('Terminal plugin', function() {
     });
     describe('cmd plugin', function() {
         var string = '';
-        var term, cmd, line, history;
+        var term, cmd, line, history, formatting;
         beforeEach(function() {
+            formatting = $.terminal.defaults.formatters;
+            $.terminal.defaults.formatters = [];
             term = $('<div/>').appendTo('body').css('overflow-y', 'scroll').terminal($.noop, {
                 name: 'cmd',
                 numChars: 150,
@@ -3820,6 +3915,7 @@ describe('Terminal plugin', function() {
         });
         afterEach(function() {
             term.destroy().remove();
+            $.terminal.defaults.formatters = formatting;
         });
         it('text should have 2 lines', function() {
             expect(line.is('div')).toBe(true);

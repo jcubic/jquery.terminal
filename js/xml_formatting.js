@@ -16,6 +16,7 @@
 /* global define */
 (function(factory) {
     var root;
+    /* istanbul ignore next */
     if (typeof window !== 'undefined') {
         root = window;
     } else if (typeof self !== 'undefined') {
@@ -25,6 +26,7 @@
     } else {
         throw new Error('Unknow context');
     }
+    /* istanbul ignore next */
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
@@ -59,6 +61,7 @@
         factory(root.jQuery);
     }
 })(function($) {
+    /* istanbul ignore next */
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
@@ -84,44 +87,45 @@
             var alt = attrs.alt || '';
             var src = attrs.src || '';
             delete attrs.alt;
+            delete attrs.class;
+            delete attrs.src;
             var formatting = ['@', '', '', cls, src, JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']' + alt + ']';
         },
-        bold: function() {
-            return '[[b;rgba(255,255,255,0.9);]';
-        },
-        overline: function() {
-            return '[[o;;]';
-        },
-        strike: function() {
-            return '[[s;;]';
-        },
-        underline: function() {
-            return '[[u;;]';
-        },
-        glow: function() {
-            return '[[g;;]';
-        },
-        italic: function() {
-            return '[[i;;]';
-        },
+        bold: style('b'),
+        overline: style('o'),
+        strike: style('s'),
+        underline: style('u'),
+        glow: style('g'),
+        italic: style('i'),
         span: function(attrs) {
             var cls = attrs.class || '';
+            delete attrs.class;
             var formatting = ['', '', '', cls, '', JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         },
         link: function(attrs) {
             var cls = attrs.class || '';
             var href = attrs.href || '';
+            delete attrs.class;
+            delete attrs.href;
             var formatting = ['!', '', '', cls, href, JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         }
     };
+    function style(value) {
+        return function(attrs) {
+            var cls = attrs.class || '';
+            delete attrs.class;
+            var formatting = [value, '', '', cls, '', JSON.stringify(attrs)];
+            return '[[' + formatting.join(';') + ']';
+        };
+    }
     // short aliases
     tags.b = tags.bold;
     tags.a = tags.link;
     tags.i = tags.italic;
-    var tag_re = /(<\/?\s*[a-zA-Z]+(?: [^>]+)?>)/;
+    var tag_re = /(<\/?\s*[a-zA-Z]+(?:\s?[^>]+)?>)/;
     function xml_formatter(string) {
         return string.split(tag_re).map(function(string) {
             if (string.match(tag_re)) {
@@ -130,6 +134,10 @@
                 }
                 string = string.replace(/^<|>$/g, '');
                 var m = string.match(/^([a-zA-Z]+)(?:\s*(.+))?/);
+                if (!m) {
+                    // invalid XML
+                    return string;
+                }
                 var name = m[1].toLowerCase();
                 var attrs = {};
                 if (m[2]) {
