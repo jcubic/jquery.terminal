@@ -335,7 +335,10 @@
                     var quote = cmd.args_quotes[i];
                     return quote + unparse(arg) + quote;
                 }
-                return arg.replace(/ /g, '\\ ');
+                if (typeof arg === 'string') {
+                    return arg.replace(/ /g, '\\ ');
+                }
+                return arg;
             }).join(' ');
         }
         // -------------------------------------------------------------------------------
