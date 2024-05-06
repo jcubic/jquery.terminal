@@ -1,8 +1,12 @@
+## 2.41.2
+### Bugfix
+* fix commands in pipe operator with non string arguments
+* fix text selection of raw HTML [#939](https://github.com/jcubic/jquery.terminal/issues/939)
+
 ## 2.41.1
 ### Bugfix
 * fix paused terminal when echo broken image
 * fix returning String instance from interpreter
-* fix commands in pipe operator with non string arguments
 
 ## 2.41.0
 ### Features
