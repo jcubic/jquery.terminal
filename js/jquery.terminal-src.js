@@ -9451,40 +9451,42 @@
                 storage.remove(name + 'login');
             }
             function login_callback(user, token, silent) {
-                var next;
-                if (token) {
-                    pop_user_pass();
-                    set_token(user, token);
-                    in_login = false;
-                    fire_event('onAfterLogin', [user, token]);
-                    next = success;
-                } else {
-                    if (infinite) {
-                        if (!silent) {
-                            self.error(strings().wrongPasswordTryAgain);
-                        }
-                        self.pop(undefined, true).set_mask(false);
-                    } else {
+                cmd_ready(function ready() {
+                    var next;
+                    if (token) {
+                        pop_user_pass();
+                        set_token(user, token);
                         in_login = false;
-                        if (!silent) {
-                            self.error(strings().wrongPassword);
+                        fire_event('onAfterLogin', [user, token]);
+                        next = success;
+                    } else {
+                        if (infinite) {
+                            if (!silent) {
+                                self.error(strings().wrongPasswordTryAgain);
+                            }
+                            self.pop(undefined, true).set_mask(false);
+                        } else {
+                            in_login = false;
+                            if (!silent) {
+                                self.error(strings().wrongPassword);
+                            }
+                            self.pop(undefined, true).pop(undefined, true);
                         }
-                        self.pop(undefined, true).pop(undefined, true);
+                        // used only to call pop in push
+                        next = error;
                     }
-                    // used only to call pop in push
-                    next = error;
-                }
-                if (self.paused()) {
-                    self.resume();
-                }
-                // will be used internaly since users know
-                // when login success (they decide when
-                // it happen by calling the callback -
-                // this function)
-                if (is_function(next)) {
-                    next();
-                }
-                self.off('terminal.autologin');
+                    if (self.paused()) {
+                        self.resume();
+                    }
+                    // will be used internaly since users know
+                    // when login success (they decide when
+                    // it happen by calling the callback -
+                    // this function)
+                    if (is_function(next)) {
+                        next();
+                    }
+                    self.off('terminal.autologin');
+                });
             }
             self.on('terminal.autologin', function(event, user, token, silent) {
                 validate_login(user, token, function(valid) {

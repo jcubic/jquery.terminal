@@ -2,6 +2,7 @@
 ### Bugfix
 * fix commands in pipe operator with non string arguments
 * fix text selection of raw HTML [#939](https://github.com/jcubic/jquery.terminal/issues/939)
+* fix resume of exec on auth with sync token
 
 ## 2.41.1
 ### Bugfix
