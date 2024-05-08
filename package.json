@@ -369,9 +369,10 @@
     "@jcubic/lily": "^0.3.0",
     "@types/jquery": "^3.5.29",
     "ansidec": "^0.3.4",
-    "coveralls-next": "^4.2.0",
+    "coveralls-next": "^4.2.1",
     "iconv-lite": "^0.6.3",
     "jquery": "^3.7.1",
+    "node-fetch": "^3.3.2",
     "prismjs": "^1.27.0",
     "wcwidth": "^1.0.1"
   },
@@ -383,7 +384,6 @@
     "jest": "^27.5.1",
     "jsonlint-mod": "^1.7.6",
     "postcss": "^8.4.12",
-    "request": "^2.88.2",
     "typescript": "^4.6.2",
     "uglify-js": "^3.15.3"
   },

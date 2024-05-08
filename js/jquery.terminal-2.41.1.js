@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.41.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 29 Apr 2024 16:20:55 +0000
+ * Date: Wed, 08 May 2024 16:48:43 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5311,8 +5311,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.41.1',
-        date: 'Mon, 29 Apr 2024 16:20:55 +0000',
+        version: 'DEV',
+        date: 'Wed, 08 May 2024 16:48:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9451,40 +9451,42 @@
                 storage.remove(name + 'login');
             }
             function login_callback(user, token, silent) {
-                var next;
-                if (token) {
-                    pop_user_pass();
-                    set_token(user, token);
-                    in_login = false;
-                    fire_event('onAfterLogin', [user, token]);
-                    next = success;
-                } else {
-                    if (infinite) {
-                        if (!silent) {
-                            self.error(strings().wrongPasswordTryAgain);
-                        }
-                        self.pop(undefined, true).set_mask(false);
-                    } else {
+                cmd_ready(function ready() {
+                    var next;
+                    if (token) {
+                        pop_user_pass();
+                        set_token(user, token);
                         in_login = false;
-                        if (!silent) {
-                            self.error(strings().wrongPassword);
+                        fire_event('onAfterLogin', [user, token]);
+                        next = success;
+                    } else {
+                        if (infinite) {
+                            if (!silent) {
+                                self.error(strings().wrongPasswordTryAgain);
+                            }
+                            self.pop(undefined, true).set_mask(false);
+                        } else {
+                            in_login = false;
+                            if (!silent) {
+                                self.error(strings().wrongPassword);
+                            }
+                            self.pop(undefined, true).pop(undefined, true);
                         }
-                        self.pop(undefined, true).pop(undefined, true);
+                        // used only to call pop in push
+                        next = error;
                     }
-                    // used only to call pop in push
-                    next = error;
-                }
-                if (self.paused()) {
-                    self.resume();
-                }
-                // will be used internaly since users know
-                // when login success (they decide when
-                // it happen by calling the callback -
-                // this function)
-                if (is_function(next)) {
-                    next();
-                }
-                self.off('terminal.autologin');
+                    if (self.paused()) {
+                        self.resume();
+                    }
+                    // will be used internaly since users know
+                    // when login success (they decide when
+                    // it happen by calling the callback -
+                    // this function)
+                    if (is_function(next)) {
+                        next();
+                    }
+                    self.off('terminal.autologin');
+                });
             }
             self.on('terminal.autologin', function(event, user, token, silent) {
                 validate_login(user, token, function(valid) {

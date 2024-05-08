@@ -313,8 +313,12 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 
 If you want to start with jQuery Terminal you can look at those tutorials:
 
-* [How to create interactive terminal like website?](https://itnext.io/how-to-create-interactive-terminal-like-website-888bb0972288)
-* [How to Build Simple Terminal like Website using jQuery?](https://www.geeksforgeeks.org/how-to-build-simple-terminal-like-website-using-jquery/)
+* [How to create interactive terminal like website?](https://itnext.io/how-to-create-interactive-terminal-like-website-888bb0972288) (beginner level)
+* [How to Create an Interactive Terminal-Based Portfolio](https://www.freecodecamp.org/news/how-to-create-interactive-terminal-based-portfolio/) (intermediate level)
+
+The first tutorial is have all the basics, even if you're new to programming and JavaScript. The
+second one explain everything but it assume that you know the basics. If you pick the second and and
+stuck you can reference the first one. It's worth checking the first one anyway.
 
 ### Security
 

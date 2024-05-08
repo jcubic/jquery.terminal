@@ -8,6 +8,6 @@ module.exports = {
         "\\/\\.#"
     ],
     testMatch: [
-        '**/__tests__/*.spec.js'
+        "<rootDir>/__tests__/*.spec.js"
     ]
 };
