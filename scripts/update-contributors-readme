@@ -6,7 +6,7 @@ marker=$3
 file=$4
 
 
-CONTRIBUTORS=`./scripts/contributors.js -r $repo -f $input -m | tr '\n' '☺'`
+CONTRIBUTORS=`./scripts/contributors.mjs -r $repo -f $input -m | tr '\n' '☺'`
 if echo "$CONTRIBUTORS" | grep ERROR > /dev/null; then
     echo "$CONTRIBUTORS" | tr '☺' '\n'
 else

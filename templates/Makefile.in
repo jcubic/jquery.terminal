@@ -135,10 +135,10 @@ publish-guthub: .github.token
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/package.git > package.json
 
 contributors.json:
-	./scripts/contributors.js -u jcubic -r jquery.terminal > contributors.json
+	./scripts/contributors.mjs -u jcubic -r jquery.terminal > contributors.json
 
 contributors-www.json:
-	./scripts/contributors.js -u jcubic -r jquery.terminal-www > contributors-www.json
+	./scripts/contributors.mjs -u jcubic -r jquery.terminal-www > contributors-www.json
 
 contributors: contributors-www.json contributors.json
 	./scripts/update-contributors-readme jquery.terminal contributors.json "CONTRIBUTORS" templates/README.in

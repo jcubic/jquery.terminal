@@ -9,14 +9,14 @@ import lily from '@jcubic/lily';
 const argv = lily(process.argv.slice(2));
 
 function split_equal(array, length) {
-    const result = [];
-    const len = array.length;
+    var result = [];
+    var len = array.length;
     if (len < length) {
         return [array];
     } else if (length < 0) {
         throw new Error("split_equal: length can't be negative");
     }
-    for (let i = 0; i < len; i += length) {
+    for (var i = 0; i < len; i += length) {
         result.push(array.slice(i, i + length));
     }
     return result;
@@ -65,10 +65,10 @@ function get_file(filename) {
 }
 
 function get_api(argv) {
-    const user = argv.u;
-    const repo = argv.r;
-    const path = '/repos/' + user + '/' + repo + '/contributors';
-    const query = {
+    var user = argv.u;
+    var repo = argv.r;
+    var path = '/repos/' + user + '/' + repo + '/contributors';
+    var query = {
         "per_page": 100
     };
     if (argv.t) {
@@ -76,10 +76,10 @@ function get_api(argv) {
     }
     return get('https://api.github.com' + path, query).then(function(contributors) {
         return Promise.all(contributors.map(function(contributor) {
-            const path = contributor.url.replace(/https:\/\/[^\/]+/, '');
+            var path = contributor.url.replace(/https:\/\/[^\/]+/, '');
             return get('https://api.github.com' + path, query).then(function(user) {
                 if (user.name || user.login) {
-                    const object = {
+                    var object = {
                         name: user.name || user.login
                     };
                     if (user.email) {
@@ -103,9 +103,9 @@ function get_api(argv) {
 if (((argv.f && argv.m) || (argv.u && argv.r)) && argv.r) {
     (argv.f ? get_file(argv.f) : get_api(argv)).then(function(contributors) {
         if (argv.m) {
-            const split = split_equal(contributors, 7);
-            const align = new Array(split[0].length + 1).join('| :---: ') + ' |';
-            const rows = split.map(function(list) {
+            var split = split_equal(contributors, 7);
+            var align = new Array(split[0].length + 1).join('| :---: ') + ' |';
+            var rows = split.map(function(list) {
                 return '| ' + list.map(function(contributor) {
                     return '[<img src="' + contributor.avatar + '" width="100px;"/>' +
                         '<br /><sub>' + contributor.name + '</sub>](' +
@@ -122,7 +122,7 @@ if (((argv.f && argv.m) || (argv.u && argv.r)) && argv.r) {
         console.log('ERROR: ' + error);
     });
 } else {
-    const script = path.basename(process.argv[1]);
+    var script = path.basename(process.argv[1]);
     console.log('usage: \n' + script + '-u <user> -r <repo> ' +
                 '[--auth githubUsername:githubPassword] [-m]\n' +
                 script + ' -f <json filename> -m');
