@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.41.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 08 May 2024 16:59:34 +0000
+ * Date: Mon, 13 May 2024 10:03:02 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5311,8 +5311,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.41.2',
-        date: 'Wed, 08 May 2024 16:59:34 +0000',
+        version: 'DEV',
+        date: 'Mon, 13 May 2024 10:03:02 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9299,10 +9299,12 @@
                             command_line.prompt(new_prompt, {formatters: false});
                             stop = true;
                         }
-                        if (optimized) {
-                            stop = line === anim_lines.length;
-                        } else {
-                            stop = char_i === len;
+                        if (!stop) {
+                            if (optimized) {
+                                stop = line === anim_lines.length;
+                            } else {
+                                stop = char_i === len;
+                            }
                         }
                         if (stop) {
                             clearInterval(interval);
@@ -9317,7 +9319,10 @@
                                         // clear old lines and make one full line
                                         // so it can wrap when you resize
                                         anim_lines.forEach(function(line) {
-                                            self.remove_line(line.index);
+                                            // ignore skipped lines
+                                            if (typeof line.index !== 'undefined') {
+                                                self.remove_line(line.index);
+                                            }
                                         });
                                     }
                                     finish_typing_fn(message, prompt, options);

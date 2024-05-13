@@ -1,3 +1,8 @@
+## 2.41.3
+### Bugfix
+* fix typing animation on emtpy lines [#946](https://github.com/jcubic/jquery.terminal/issues/946)
+* fix skip typing animation [#945](https://github.com/jcubic/jquery.terminal/issues/945)
+
 ## 2.41.2
 ### Bugfix
 * fix commands in pipe operator with non string arguments

@@ -9299,10 +9299,12 @@
                             command_line.prompt(new_prompt, {formatters: false});
                             stop = true;
                         }
-                        if (optimized) {
-                            stop = line === anim_lines.length;
-                        } else {
-                            stop = char_i === len;
+                        if (!stop) {
+                            if (optimized) {
+                                stop = line === anim_lines.length;
+                            } else {
+                                stop = char_i === len;
+                            }
                         }
                         if (stop) {
                             clearInterval(interval);
@@ -9317,7 +9319,10 @@
                                         // clear old lines and make one full line
                                         // so it can wrap when you resize
                                         anim_lines.forEach(function(line) {
-                                            self.remove_line(line.index);
+                                            // ignore skipped lines
+                                            if (typeof line.index !== 'undefined') {
+                                                self.remove_line(line.index);
+                                            }
                                         });
                                     }
                                     finish_typing_fn(message, prompt, options);
