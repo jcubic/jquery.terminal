@@ -92,7 +92,7 @@ exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>
 
 exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span style=\\"width: 2ch;\\">&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline\\" data-text=\\"Baz\\"><span>Baz</span></span>"`;
+exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline\\" data-text=\\"Baz\\"><span>Baz</span></span><span class=\\"terminal-inverted\\" data-text=\\"Quux\\"><span>Quux</span></span>"`;
 
 exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`] = `"<span title=\\"foo\\" data-text=\\"foo\\"><span>foo</span></span>"`;
 

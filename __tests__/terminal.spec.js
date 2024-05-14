@@ -904,8 +904,8 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.format', function() {
-        var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
         it('should create html span tags with style and classes', function() {
+            var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz][[r;;]Quux]';
             var string = $.terminal.format(format);
             expect(string).toMatchSnapshot();
         });

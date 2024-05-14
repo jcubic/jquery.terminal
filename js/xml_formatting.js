@@ -98,6 +98,7 @@
         underline: style('u'),
         glow: style('g'),
         italic: style('i'),
+        reverse: style('r'),
         span: function(attrs) {
             var cls = attrs.class || '';
             delete attrs.class;
@@ -125,6 +126,7 @@
     tags.b = tags.bold;
     tags.a = tags.link;
     tags.i = tags.italic;
+    tags.r = tags.reverse;
     var tag_re = /(<\/?\s*[a-zA-Z]+(?:\s?[^>]+)?>)/;
     function xml_formatter(string) {
         return string.split(tag_re).map(function(string) {

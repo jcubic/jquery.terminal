@@ -1,4 +1,6 @@
-## 2.41.3
+## 2.42.0
+### Features
+* add reverse style to formatting and XML [#943](https://github.com/jcubic/jquery.terminal/issues/943)
 ### Bugfix
 * fix typing animation on emtpy lines [#946](https://github.com/jcubic/jquery.terminal/issues/946)
 * fix skip typing animation [#945](https://github.com/jcubic/jquery.terminal/issues/945)
