@@ -476,7 +476,7 @@ describe('Terminal utils', function() {
             });
         });
     });
-    fdescribe('xml formatting', function() {
+    describe('xml formatting', function() {
         let term;
         let keys = {};
         beforeEach(() => {
