@@ -787,6 +787,12 @@ exports[`Terminal utils xml formatting should format font 1`] = `
 
 exports[`Terminal utils xml formatting should format font 2`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span style=\\"color:white;--color:white;--original-color:white;background-color:red;--background:red;--size:1.2;letter-spacing:2\\" data-text=\\"Hello&nbsp;World\\"><span>Hello&nbsp;World</span></span></div><div style=\\"width: 100%;\\"><span style=\\"background-color:red;--background:red\\" data-text=\\"Hello World\\"><span>Hello&nbsp;World</span></span></div><div class=\\"cmd-end-line\\" style=\\"width: 100%;\\"><span style=\\"--size:1.2;letter-spacing:2\\" data-text=\\"Hello&nbsp;World\\"><span>Hello&nbsp;World</span></span></div></div>"`;
 
+exports[`Terminal utils xml formatting should format for give target 1`] = `"[[;white;;;;{}]hello]"`;
+
+exports[`Terminal utils xml formatting should format for give target 2`] = `"[[;white;;;;{}]hello]"`;
+
+exports[`Terminal utils xml formatting should format for give target 3`] = `"[[;white;;;;{}]hello]"`;
+
 exports[`Terminal utils xml formatting should handle invalid xml 1`] = `
 "<< First Line [[[[ of Text <><> is little ]]] bit longer
 <<<<>>>> Second ]]]] Line of Text 

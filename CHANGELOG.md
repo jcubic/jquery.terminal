@@ -1,9 +1,11 @@
 ## 2.42.0
 ### Features
 * add reverse style to formatting and XML [#943](https://github.com/jcubic/jquery.terminal/issues/943)
+* add XML formatting targets [#944](https://github.com/jcubic/jquery.terminal/issues/944)
 ### Bugfix
 * fix typing animation on emtpy lines [#946](https://github.com/jcubic/jquery.terminal/issues/946)
 * fix skip typing animation [#945](https://github.com/jcubic/jquery.terminal/issues/945)
+* fix use of `$.terminal.apply_formatters` with prism
 
 ## 2.41.2
 ### Bugfix

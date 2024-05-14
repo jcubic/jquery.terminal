@@ -128,7 +128,28 @@
     tags.i = tags.italic;
     tags.r = tags.reverse;
     var tag_re = /(<\/?\s*[a-zA-Z]+(?:\s?[^>]+)?>)/;
-    function xml_formatter(string) {
+    function no_target(options) {
+        if (!options) {
+            return true;
+        }
+        return Object.keys(options).length === 1 && 'position' in options;
+    }
+    function should_render(options) {
+        if (no_target(options)) {
+            return true;
+        }
+        for (var i = targets.length; i--;) {
+            var prop = targets[i];
+            if (options[prop] === true && $.terminal.xml_formatter[prop] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+    function xml_formatter(string, options) {
+        if (!should_render(options)) {
+            return string;
+        }
         return string.split(tag_re).map(function(string) {
             if (string.match(tag_re)) {
                 if (string[1] === '/') {
@@ -165,6 +186,12 @@
     }
     xml_formatter.__no_warn__ = true;
     xml_formatter.tags = tags;
+
+    var targets = ['echo', 'prompt', 'animation', 'command'];
+    targets.forEach(function(target) {
+        xml_formatter[target] = true;
+    });
+
     $.terminal.defaults.allowedAttributes.push('style');
     $.terminal.xml_formatter = xml_formatter;
     $.terminal.new_formatter(xml_formatter);
