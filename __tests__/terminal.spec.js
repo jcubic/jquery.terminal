@@ -478,10 +478,17 @@ describe('Terminal utils', function() {
     });
     describe('xml formatting', function() {
         let term;
+        let keys = {};
         beforeEach(() => {
+            Object.keys($.terminal.xml_formatter).forEach(key => {
+                keys[key] = $.terminal.xml_formatter[key];
+            });
             term = $('<div/>').terminal({}, {greetings: false});
         });
         afterEach(() => {
+            Object.keys(keys).forEach(key => {
+                $.terminal.xml_formatter[key] = keys[key];
+            });
             term.destroy();
         });
         it('should render tags', () => {
@@ -534,9 +541,35 @@ describe('Terminal utils', function() {
                 '<green>ls</green>',
                 '<red class="error" style="background:red">Error: invalid message</red>'
             ].join('\n');
-            expect($.terminal.apply_formatters(input)).toMatchSnapshot();
+            expect($.terminal.xml_formatter(input)).toMatchSnapshot();
             term.echo(input);
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should format for give target', () => {
+            var input = '<white>hello</white>';
+            var targets = [
+                { echo: true },
+                { command: true },
+                { animation: true }
+            ];
+            targets.forEach(target => {
+                expect($.terminal.xml_formatter(input, target)).toMatchSnapshot();
+            });
+        });
+        it('should ignore formatting', () => {
+            ['echo', 'animation', 'prompt', 'command'].forEach(key => {
+                $.terminal.xml_formatter[key] = false;
+            });
+            var input = '<white>hello</white>';
+            var targets = [
+                { echo: true },
+                { command: true },
+                { prompt: true },
+                { animation: true }
+            ];
+            targets.forEach(target => {
+                expect($.terminal.xml_formatter(input, target)).toEqual(input);
+            });
         });
         it('should render links', () => {
             const input = [
@@ -904,8 +937,8 @@ describe('Terminal utils', function() {
         });
     });
     describe('$.terminal.format', function() {
-        var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz]';
         it('should create html span tags with style and classes', function() {
+            var format = '[[biugs;#fff;#000]Foo][[i;;;foo]Bar][[ous;;]Baz][[r;;]Quux]';
             var string = $.terminal.format(format);
             expect(string).toMatchSnapshot();
         });

@@ -399,6 +399,10 @@ for cross-device testing opportunity.
 ### Paid Support
 You can request paid support, you can find details at [support.jcubic.pl](https://support.jcubic.pl/).
 
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=jcubic/jquery.terminal&type=Date&branch={{BRANCH}})](https://star-history.com/#jcubic/jquery.terminal&Date)
+
 ### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license

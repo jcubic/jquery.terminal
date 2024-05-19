@@ -739,6 +739,7 @@ terminal .terminal-output > div {
 .terminal .terminal-output span[data-text]::selection,
 .terminal .terminal-output span[data-text]:not(.far):not(.fa):not(.fas) span::selection,
 .terminal .terminal-output .raw div::selection,
+.terminal-revese,
 .cmd span[data-text]:not(.far):not(.fa):not(.fas) span::selection {
     /*
      * use rgba to fix transparent selection in chrome
@@ -747,6 +748,7 @@ terminal .terminal-output > div {
     background-color: rgba(170, 170, 170, 0.99);
     color: #000;
 }
+
 .terminal-output .emoji::-moz-selection,
 .terminal-output .emoji span::-moz-selection,
 .cmd .emoji::-moz-selection,
@@ -864,10 +866,16 @@ terminal .terminal-output > div {
     .cmd .clipboard {
         top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
     }
-    .terminal .inverted, .cmd.cmd.cmd .inverted, .cmd.cmd.cmd .cmd-inverted {
-        --background: #000;
+    .terminal span[style*="--background"],
+    .cmd span[style*="--background"] {
+        --base-background: var(--background);
+    }
+    .terminal .inverted > span,
+    .terminal .terminal-inverted > span,
+    .cmd.cmd.cmd .inverted,
+    .cmd.cmd.cmd .cmd-inverted {
         background-color: var(--color, #aaa) !important;
-        color: var(--background, #000) !important;
+        color: var(--base-background, #000) !important;
     }
     .cmd .cmd-cursor.cmd-blink {
         color: var(--color, #aaa);

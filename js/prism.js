@@ -152,8 +152,14 @@
     /* eslint-disable */
     var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
     /* eslint-enable */
+    function no_target(options) {
+        if (!options) {
+            return true;
+        }
+        return Object.keys(options).length === 1 && 'position' in options;
+    }
     function should_render(options) {
-        if (!options || !Object.keys(options).length) {
+        if (no_target(options)) {
             return true;
         }
         var props = Object.keys($.terminal.prism_formatters);
