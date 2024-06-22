@@ -10992,7 +10992,7 @@
                                     // so we have line breaks #952
                                     if (self.find('.partial').length) {
                                         var last_line = lines.last_line();
-                                        self.update(-1, last_line[0], last_line[1]);
+                                        //self.update(-1, last_line[0], last_line[1]);
                                     }
                                     fire_event('onAfterEcho', [arg]);
                                 }

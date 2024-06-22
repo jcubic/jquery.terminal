@@ -843,3 +843,7 @@ Array [
   "foo, bar, baz, ",
 ]
 `;
+
+exports[`extensions echo_newline should wrap lines with multiple echo 1`] = `"<div data-index=\\"0\\" class=\\"partial\\"><div style=\\"width: 100%;\\"><span data-text=\\"qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty\\">qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span></div></div>"`;
+
+exports[`extensions echo_newline should wrap lines with multiple echo 2`] = `"width: 100%;--prompt-offset: 8ch;top: 0px;"`;

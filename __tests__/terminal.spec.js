@@ -2777,7 +2777,9 @@ describe('Terminal utils', function() {
 });
 describe('extensions', function() {
     describe('echo_newline', function() {
-        var term = $('<div/>').terminal();
+        var term = $('<div/>').terminal($.noop, {
+            numChars: 100
+        });
         beforeEach(function() {
             term.clear();
         });
@@ -2891,6 +2893,14 @@ describe('extensions', function() {
             await term.echo("jQuery ", { typing: true, delay: 0, newline: false });
             await term.echo("Terminal", { typing: true, delay: 0 });
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should wrap lines with multiple echo', () => {
+            term.echo('qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty' +
+                      'qwertyqwertyqwertyqwertyqwerty', { newline: false });
+            term.echo('qwerty', { newline: false });
+            term.echo('qwerty', { newline: false });
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+            expect(term.find('.cmd').attr('style')).toMatchSnapshot();
         });
     });
     describe('autocomplete_menu', function() {
