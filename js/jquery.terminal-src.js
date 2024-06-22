@@ -10987,6 +10987,13 @@
                                 // once in echo and not on redraw
                                 if (locals.flush) {
                                     self.flush();
+                                    // HACK: when rendering multiple partials
+                                    // we need to force and update them all at once
+                                    // so we have line breaks #952
+                                    if (self.find('.partial').length) {
+                                        var last_line = lines.last_line();
+                                        self.update(-1, last_line[0], last_line[1]);
+                                    }
                                     fire_event('onAfterEcho', [arg]);
                                 }
                                 cont();

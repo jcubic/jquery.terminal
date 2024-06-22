@@ -1,3 +1,7 @@
+## 2.42.1
+### Bugfix
+* fix line wrapping when calling multiple echo `newline:false` [#952](https://github.com/jcubic/jquery.terminal/issues/952)
+
 ## 2.42.0
 ### Features
 * add reverse style to formatting and XML [#943](https://github.com/jcubic/jquery.terminal/issues/943)

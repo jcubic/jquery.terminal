@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Jun 2024 18:59:17 +0000
+ * Date: Sat, 22 Jun 2024 19:43:28 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 22 Jun 2024 18:59:17 +0000',
+        date: 'Sat, 22 Jun 2024 19:43:28 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10987,6 +10987,13 @@
                                 // once in echo and not on redraw
                                 if (locals.flush) {
                                     self.flush();
+                                    // HACK: when rendering multiple partials
+                                    // we need to force and update them all at once
+                                    // so we have line breaks #952
+                                    if (self.find('.partial').length) {
+                                        var last_line = lines.last_line();
+                                        self.update(-1, last_line[0], last_line[1]);
+                                    }
                                     fire_event('onAfterEcho', [arg]);
                                 }
                                 cont();
