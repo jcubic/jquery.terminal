@@ -9,7 +9,7 @@
  *
  * This is object enchancment that will add pipe operator and redirects to commands
  *
- * Copyright (c) 2014-2023 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2024 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

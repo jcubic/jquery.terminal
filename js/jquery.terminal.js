@@ -4,11 +4,11 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.42.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 19 May 2024 09:25:25 +0000
+ * Date: Sat, 22 Jun 2024 18:59:17 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5311,8 +5311,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.42.0',
-        date: 'Sun, 19 May 2024 09:25:25 +0000',
+        version: 'DEV',
+        date: 'Sat, 22 Jun 2024 18:59:17 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7426,7 +7426,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2023 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2011-2024 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -7437,7 +7437,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2023 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2024 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
