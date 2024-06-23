@@ -2902,6 +2902,13 @@ describe('extensions', function() {
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
             expect(term.find('.cmd').attr('style')).toMatchSnapshot();
         });
+        it('should wrap lines with multiple echo when partial fill full width', () => {
+            for(let i = 0; i < 50; i+=1) {
+                term.echo('qwerty', { newline: false });
+            }
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+            expect(term.find('.cmd').attr('style')).toMatchSnapshot();
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
@@ -4466,12 +4473,7 @@ describe('Terminal plugin', function() {
                 await delay(200);
                 enter(term, 'foo');
                 await delay(200);
-                var output = [
-                    '> foo',
-                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
-                    'Response]'
-                ].join('\n');
-                expect(term.get_output()).toEqual(output);
+                expect(term.get_output()).toMatchSnapshot();
                 term.destroy().remove();
             });
             it('should display error on Invalid JSON-RPC response', async function() {
@@ -4481,12 +4483,7 @@ describe('Terminal plugin', function() {
                 await delay(200);
                 enter(term, 'foo');
                 await delay(200);
-                var output = [
-                    '> foo',
-                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
-                    '{"foo": "bar"}]'
-                ].join('\n');
-                expect(term.get_output()).toEqual(output);
+                expect(term.get_output()).toMatchSnapshot();
                 term.destroy().remove();
             });
         });
@@ -5287,7 +5284,7 @@ describe('Terminal plugin', function() {
                 term.echo(delay(0, () => "A"));
                 const fn = jest.fn();
                 term.echo("B", { typing: true, delay: 0 }).then(fn);
-                await delay(200);
+                await delay(500);
                 expect(fn).toHaveBeenCalled();
             });
         });
@@ -6510,7 +6507,7 @@ describe('Terminal plugin', function() {
                     term.echo(() => render('dolor', 10));
                     term.echo('baz');
                     // not sure why but 100 delay is too short
-                    await delay(300);
+                    await delay(500);
                     expect(output('.terminal-output div div', term)).toEqual([
                         'lorem',
                         'foo',

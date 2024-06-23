@@ -1934,12 +1934,11 @@
         this._output_buffer.push(FormatBuffer.NEW_LINE);
 
         if (arg instanceof Array) {
-            var raw_lines = raw.split('\n');
             for (var i = 0, len = arg.length; i < len; ++i) {
                 if (arg[i] === '' || arg[i] === '\r') {
                     this._output_buffer.push({line: '', raw: ''});
                 } else {
-                    var formatted = this.format(arg[i], i === len - 1, raw_lines[i]);
+                    var formatted = this.format(arg[i], i === len - 1, raw[i]);
                     this._output_buffer.push(formatted);
                 }
             }
@@ -8407,24 +8406,31 @@
                         });
                         //string = $.terminal.normalize(string);
                         var array;
+                        var raw_array;
                         var cols = line_settings.cols = self.cols();
                         if (should_wrap(string, line_settings)) {
                             array = $.terminal.split_equal(string, cols, {
                                 keepWords: line_settings.keepWords,
                                 trim: true
                             });
+                            raw_array = $.terminal.split_equal(raw_string, cols, {
+                                keepWords: line_settings.keepWords,
+                                trim: true
+                            });
                         } else if (string.match(/\n/)) {
                             array = string.split(/\n/);
+                            raw_array = string.split(/\n/);
                         }
                     }
                 } else {
                     raw_string = '';
                 }
                 var arg = array || string;
+                var raw = raw_array || raw_string;
                 if (line_cache && key && use_cache) {
-                    line_cache.set(key, {input: arg, raw: raw_string});
+                    line_cache.set(key, {input: arg, raw: raw});
                 }
-                buffer.append(arg, line.index, line_settings, raw_string);
+                buffer.append(arg, line.index, line_settings, raw);
             } catch (e) {
                 buffer.clear();
                 // don't display exception if exception throw in terminal
@@ -10677,6 +10683,8 @@
                             }
                         });
                         partial = self.find('.partial');
+                        var len = $.terminal.length(snapshot[snapshot.length - 1]);
+                        len %= self.cols();
                         finalizations.forEach(function(data) {
                             data.finalize(data.node);
                         });
@@ -10697,8 +10705,6 @@
                                 });
                             }
                         } else if (snapshot.length && snapshot[snapshot.length - 1]) {
-                            var len = $.terminal.length(snapshot[snapshot.length - 1]);
-                            len %= self.cols();
                             last_row = partial.children().last();
                             var last_row_rect = last_row[0].getBoundingClientRect();
                             // Shift command prompt up one line and to the right
@@ -10713,10 +10719,10 @@
                         }
                         limit_lines();
                         fire_event('onFlush');
-                        var cmd_cursor = self.find('.cmd-cursor');
-                        var offset = self.find('.cmd').offset();
-                        var self_offset = self.offset();
                         self.stopTime('flush').oneTime(10, 'flush', function() {
+                            var cmd_cursor = self.find('.cmd-cursor');
+                            var offset = self.find('.cmd').offset();
+                            var self_offset = self.offset();
                             var top = output.height();
                             var height = command_line.height();
                             css(self[0], {

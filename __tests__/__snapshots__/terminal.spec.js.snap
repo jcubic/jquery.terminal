@@ -22,6 +22,18 @@ Object {
 }
 `;
 
+exports[`Terminal plugin JSON-RPC No system.describe should display error on Invalid JSON-RPC response 1`] = `
+"> foo
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\\\n{\\"foo\\": \\"bar\\"}]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:]
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\\\n{\\"foo\\": \\"bar\\"}]{\\"foo\\": \\"bar\\"}]"
+`;
+
+exports[`Terminal plugin JSON-RPC No system.describe should display error on invalid JSON 1`] = `
+"> foo
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\\\nResponse]&#91;AJAX&#93; Invalid JSON - Server responded:]
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\\\nResponse]Response]"
+`;
+
 exports[`Terminal plugin cmd plugin should move cursor 1`] = `
 Array [
   5,
@@ -549,49 +561,49 @@ exports[`Terminal utils $.terminal.from_ansi should render Denis Richie ANSI art
 exports[`Terminal utils $.terminal.less should split image 1`] = `
 "xxx
 
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
-[[@;;;;data:image/jpg,<BLOB>]]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
+[[@;;;;data:image/jpg,<BLOB>] ]
 
 xxx
 ~
@@ -847,3 +859,7 @@ Array [
 exports[`extensions echo_newline should wrap lines with multiple echo 1`] = `"<div data-index=\\"0\\" class=\\"partial\\"><div style=\\"width: 100%;\\"><span data-text=\\"qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty\\">qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span></div></div>"`;
 
 exports[`extensions echo_newline should wrap lines with multiple echo 2`] = `"width: 100%;--prompt-offset: 8ch;top: 0px;"`;
+
+exports[`extensions echo_newline should wrap lines with multiple echo when partial fill full width 1`] = `"<div data-index=\\"0\\" class=\\"partial\\"><div style=\\"width: 100%;\\"><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span></div></div>"`;
+
+exports[`extensions echo_newline should wrap lines with multiple echo when partial fill full width 2`] = `"width: 100%;--prompt-offset: 0ch;top: 0px;"`;
