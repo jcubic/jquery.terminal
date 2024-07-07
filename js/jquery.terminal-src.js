@@ -10991,18 +10991,29 @@
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
+                                var continuation_run = locals.flush && self.find('.partial').length;
                                 if (locals.flush) {
+                                    self.stopTime('echo');
                                     self.flush();
                                     // HACK: when rendering multiple partials
                                     // we need to force and update them all at once
                                     // so we have line breaks #952
                                     if (self.find('.partial').length) {
-                                        var last_line = lines.last_line();
-                                        //self.update(-1, last_line[0], last_line[1]);
+                                        // setTimeout is required when you echo async function
+                                        // and immediately after echo someting else
+                                        self.oneTime(1, 'echo', function() {
+                                            var last_line = lines.last_line();
+                                            if (last_line) {
+                                                self.update(-1, last_line[0], last_line[1]);
+                                            }
+                                            cont();
+                                        });
                                     }
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                cont();
+                                if (!continuation_run) {
+                                    cont();
+                                }
                             }, error);
                         }, error);
                     } catch (e) {

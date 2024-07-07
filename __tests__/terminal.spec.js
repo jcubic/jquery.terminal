@@ -2854,11 +2854,11 @@ describe('extensions', function() {
                 () => term.echo(() => render('hello', 0), {newline: false}).echo(render(', world', 0)),
                 () => term.echo(render('hello', 0), {newline: false}).echo(() => render(', world', 0))
             ];
-            for (const fn of spec) {
+            for (const [i, fn] of Object.entries(spec)) {
                 term.clear();
                 fn();
                 await delay(100);
-                expect(output(term)).toEqual(['hello, world']);
+                expect([i, output(term)]).toEqual([i, ['hello, world']]);
             }
         });
         it('finalize with newline: false', function() {

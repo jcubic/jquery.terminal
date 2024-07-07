@@ -1,6 +1,7 @@
 ## 2.42.1
 ### Bugfix
 * fix line wrapping when calling multiple echo `newline:false` [#952](https://github.com/jcubic/jquery.terminal/issues/952)
+* fix cursor position when echo `newline:false` fill the line
 
 ## 2.42.0
 ### Features
