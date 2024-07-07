@@ -834,7 +834,7 @@ exports[`Terminal utils xml formatting should render tags 1`] = `
 [[b;;;;;{}]foo]"
 `;
 
-exports[`extensions echo_newline should create sequance of animations (#930) 1`] = `"<div data-index=\\"0\\" class=\\"\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello,&nbsp;jQuery&nbsp;\\">Hello,&nbsp;jQuery&nbsp;</span><span data-text=\\"Terminal\\">Terminal</span></div></div>"`;
+exports[`extensions echo_newline should create sequance of animations (#930) 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello,&nbsp;jQuery&nbsp;Terminal\\">Hello,&nbsp;jQuery&nbsp;Terminal</span></div></div>"`;
 
 exports[`extensions echo_newline should print mixed newline with !flush 1`] = `
 "foo, bar

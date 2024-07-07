@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 07 Jul 2024 21:51:53 +0000
+ * Date: Sun, 07 Jul 2024 22:11:58 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5311,7 +5311,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Jul 2024 21:51:53 +0000',
+        date: 'Sun, 07 Jul 2024 22:11:58 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10991,27 +10991,28 @@
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
-                                var continuation_run = locals.flush && self.find('.partial').length;
+                                var have_partial = self.find('.partial').length;
+                                var contination_run = locals.flush && have_partial;
                                 if (locals.flush) {
-                                    self.stopTime('echo');
                                     self.flush();
                                     // HACK: when rendering multiple partials
                                     // we need to force and update them all at once
                                     // so we have line breaks #952
-                                    if (self.find('.partial').length) {
-                                        // setTimeout is required when you echo async function
-                                        // and immediately after echo someting else
+                                    if (have_partial) {
+                                        // setTimeout is required when you echo async
+                                        // function and immediately after echo
+                                        // someting else
                                         self.oneTime(1, 'echo', function() {
-                                            var last_line = lines.last_line();
-                                            if (last_line) {
-                                                self.update(-1, last_line[0], last_line[1]);
+                                            var line = lines.last_line();
+                                            if (line) {
+                                                self.update(-1, line[0], line[1]);
                                             }
                                             cont();
                                         });
                                     }
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                if (!continuation_run) {
+                                if (!contination_run) {
                                     cont();
                                 }
                             }, error);
