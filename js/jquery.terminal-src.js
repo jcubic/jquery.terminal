@@ -1798,10 +1798,11 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.has_newline = function() {
-        if (this._lines.length === 0) {
+        var line = this.last_line();
+        if (!line) {
             return true;
         }
-        return this.last_line()[1].newline;
+        return line[1].newline;
     };
     // -------------------------------------------------------------------------
     // :: call when line is out of view when outputLimit is used
