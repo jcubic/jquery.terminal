@@ -1,17 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[` 1`] = `
-Object {
-  "char": Object {
+{
+  "char": {
     "height": 0,
     "width": 0,
   },
   "cols": 100,
   "density": 1,
   "rows": 25,
-  "terminal": Object {
+  "terminal": {
     "height": 0,
-    "padding": Object {
+    "padding": {
       "bottom": 0,
       "left": 0,
       "right": 0,
@@ -24,18 +24,18 @@ Object {
 
 exports[`Terminal plugin JSON-RPC No system.describe should display error on Invalid JSON-RPC response 1`] = `
 "> foo
-[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\\\n{\\"foo\\": \\"bar\\"}]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:]
-[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\\\n{\\"foo\\": \\"bar\\"}]{\\"foo\\": \\"bar\\"}]"
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\n{"foo": "bar"}]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:]
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON-RPC - Server responded:\\n{"foo": "bar"}]{"foo": "bar"}]"
 `;
 
 exports[`Terminal plugin JSON-RPC No system.describe should display error on invalid JSON 1`] = `
 "> foo
-[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\\\nResponse]&#91;AJAX&#93; Invalid JSON - Server responded:]
-[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\\\nResponse]Response]"
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\nResponse]&#91;AJAX&#93; Invalid JSON - Server responded:]
+[[;;;terminal-error;&#91;AJAX&#93; Invalid JSON - Server responded:\\nResponse]Response]"
 `;
 
 exports[`Terminal plugin cmd plugin should move cursor 1`] = `
-Array [
+[
   5,
   26,
   46,
@@ -45,7 +45,7 @@ Array [
 `;
 
 exports[`Terminal plugin cmd plugin should move cursor 2`] = `
-Array [
+[
   3,
   33,
   64,
@@ -56,7 +56,7 @@ Array [
 ]
 `;
 
-exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span>"`;
+exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=">&nbsp;foo">&gt;&nbsp;foo</span>"`;
 
 exports[`Terminal plugin jQuery Terminal methods exec should invoke array of commands when each command pause terminal 1`] = `
 "> exec_async_array
@@ -70,7 +70,7 @@ calling async 2
 calling async 3"
 `;
 
-exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello&nbsp;World!\\">Hello&nbsp;World!</span></div></div><div data-index=\\"1\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;foo\\">&gt;&nbsp;foo</span></div></div><div data-index=\\"2\\" class=\\"terminal-command\\" role=\\"presentation\\" aria-hidden=\\"true\\"><div style=\\"width: 100%;\\"><span data-text=\\">&nbsp;bar\\">&gt;&nbsp;bar</span></div></div>"`;
+exports[`Terminal plugin jQuery Terminal methods generic import/export view should import view 1`] = `"<div data-index="0"><div style="width: 100%;"><span data-text="Hello&nbsp;World!">Hello&nbsp;World!</span></div></div><div data-index="1" class="terminal-command" role="presentation" aria-hidden="true"><div style="width: 100%;"><span data-text=">&nbsp;foo">&gt;&nbsp;foo</span></div></div><div data-index="2" class="terminal-command" role="presentation" aria-hidden="true"><div style="width: 100%;"><span data-text=">&nbsp;bar">&gt;&nbsp;bar</span></div></div>"`;
 
 exports[`Terminal plugin jQuery Terminal methods output_buffer should return buffer with flush and newline 1`] = `
 "foo bar
@@ -78,8 +78,8 @@ lorem ipsum"
 `;
 
 exports[`Terminal plugin jQuery Terminal methods output_buffer should return buffer with flush and newline 2`] = `
-"<div><span data-text=\\"foo&nbsp;\\">foo&nbsp;</span><span data-text=\\"bar\\">bar</span></div>
-<div><span data-text=\\"lorem\\">lorem</span><span data-text=\\"&nbsp;ipsum\\">&nbsp;ipsum</span></div>"
+"<div><span data-text="foo&nbsp;">foo&nbsp;</span><span data-text="bar">bar</span></div>
+<div><span data-text="lorem">lorem</span><span data-text="&nbsp;ipsum">&nbsp;ipsum</span></div>"
 `;
 
 exports[`Terminal plugin jQuery Terminal methods output_buffer should return clear the buffer 1`] = `
@@ -88,49 +88,49 @@ lorem ipsum"
 `;
 
 exports[`Terminal plugin jQuery Terminal methods output_buffer should return clear the buffer 2`] = `
-"<div><span data-text=\\"foo&nbsp;\\">foo&nbsp;</span><span data-text=\\"bar\\">bar</span></div>
-<div><span data-text=\\"lorem\\">lorem</span><span data-text=\\"&nbsp;ipsum\\">&nbsp;ipsum</span></div>"
+"<div><span data-text="foo&nbsp;">foo&nbsp;</span><span data-text="bar">bar</span></div>
+<div><span data-text="lorem">lorem</span><span data-text="&nbsp;ipsum">&nbsp;ipsum</span></div>"
 `;
 
-exports[`Terminal plugin prompt should format prompt 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 1`] = `"<span style="font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff" data-text=">>>"><span style="width: 3ch;">&gt;&gt;&gt;</span></span><span data-text="&nbsp;"><span style="width: 1ch;">&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should format prompt 2`] = `"<span style=\\"font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff\\" data-text=\\">>>\\"><span style=\\"width: 3ch;\\">&gt;&gt;&gt;</span></span><span data-text=\\"&nbsp;\\"><span style=\\"width: 1ch;\\">&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should format prompt 2`] = `"<span style="font-weight:bold;text-decoration:underline;color:#fff;--color:#fff;--original-color:#fff" data-text=">>>"><span style="width: 3ch;">&gt;&gt;&gt;</span></span><span data-text="&nbsp;"><span style="width: 1ch;">&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=\\">>>&nbsp;\\"><span style=\\"width: 4ch;\\">&gt;&gt;&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should return prompt 1`] = `"<span data-text=">>>&nbsp;"><span style="width: 4ch;">&gt;&gt;&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should set prompt 1`] = `"<span data-text=\\"|||&nbsp;\\"><span style=\\"width: 4ch;\\">|||&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should set prompt 1`] = `"<span data-text="|||&nbsp;"><span style="width: 4ch;">|||&nbsp;</span></span>"`;
 
-exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=\\">>>&nbsp;\\"><span style=\\"width: 4ch;\\">&gt;&gt;&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin prompt should set prompt 2`] = `"<span data-text=">>>&nbsp;"><span style="width: 4ch;">&gt;&gt;&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=\\">&nbsp;\\"><span style=\\"width: 2ch;\\">&gt;&nbsp;</span></span>"`;
+exports[`Terminal plugin terminal create / terminal destroy should have default prompt 1`] = `"<span data-text=">&nbsp;"><span style="width: 2ch;">&gt;&nbsp;</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style=\\"font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000\\" data-text=\\"Foo\\"><span>Foo</span></span><span style=\\"font-style:italic\\" class=\\"foo\\" data-text=\\"Bar\\"><span>Bar</span></span><span style=\\"text-decoration:underline line-through overline\\" data-text=\\"Baz\\"><span>Baz</span></span><span class=\\"terminal-inverted\\" data-text=\\"Quux\\"><span>Quux</span></span>"`;
+exports[`Terminal utils $.terminal.format should create html span tags with style and classes 1`] = `"<span style="font-weight:bold;text-decoration:underline line-through;font-style:italic;color:#fff;--color:#fff;--original-color:#fff;text-shadow:0 0 5px #fff;background-color:#000;--background:#000" data-text="Foo"><span>Foo</span></span><span style="font-style:italic" class="foo" data-text="Bar"><span>Bar</span></span><span style="text-decoration:underline line-through overline" data-text="Baz"><span>Baz</span></span><span class="terminal-inverted" data-text="Quux"><span>Quux</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`] = `"<span title=\\"foo\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should filter out attribute in JSON 1`] = `"<span title="foo" data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should handle JSON 1`] = `"<span title=\\"foo\\" data-foo=\\"bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should handle JSON 1`] = `"<span title="foo" data-foo="bar" data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href=\\"mailto:jcubic@onet.pl\\" data-text>jcubic@onet.pl</a>"`;
+exports[`Terminal utils $.terminal.format should handle emails 1`] = `"<a href="mailto:jcubic@onet.pl" data-text>jcubic@onet.pl</a>"`;
 
-exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href=\\"mailto:jcubic@onet.pl\\" data-text>j</a><a href=\\"mailto:jcubic@onet.pl\\" data-text>cubic@onet.pl</a>"`;
+exports[`Terminal utils $.terminal.format should handle emails 2`] = `"<a href="mailto:jcubic@onet.pl" data-text>j</a><a href="mailto:jcubic@onet.pl" data-text>cubic@onet.pl</a>"`;
 
-exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style=\\"width:24ch\\" data-text=\\"ターミナルウィンドウは黒\\"><span style=\\"width:24ch\\"><span style=\\"width:2ch\\">タ</span><span style=\\"width:2ch\\">ー</span><span style=\\"width:2ch\\">ミ</span><span style=\\"width:2ch\\">ナ</span><span style=\\"width:2ch\\">ル</span><span style=\\"width:2ch\\">ウ</span><span style=\\"width:2ch\\">ィ</span><span style=\\"width:2ch\\">ン</span><span style=\\"width:2ch\\">ド</span><span style=\\"width:2ch\\">ウ</span><span style=\\"width:2ch\\">は</span><span style=\\"width:2ch\\">黒</span></span></span><span style=\\"width:4ch\\" data-text=\\"です\\"><span><span style=\\"width:4ch\\"><span style=\\"width:2ch\\">で</span><span style=\\"width:2ch\\">す</span></span></span></span>"`;
+exports[`Terminal utils $.terminal.format should handle wider characters without formatting 1`] = `"<span style="width:24ch" data-text="ターミナルウィンドウは黒"><span style="width:24ch"><span style="width:2ch">タ</span><span style="width:2ch">ー</span><span style="width:2ch">ミ</span><span style="width:2ch">ナ</span><span style="width:2ch">ル</span><span style="width:2ch">ウ</span><span style="width:2ch">ィ</span><span style="width:2ch">ン</span><span style="width:2ch">ド</span><span style="width:2ch">ウ</span><span style="width:2ch">は</span><span style="width:2ch">黒</span></span></span><span style="width:4ch" data-text="です"><span><span style="width:4ch"><span style="width:2ch">で</span><span style="width:2ch">す</span></span></span></span>"`;
 
-exports[`Terminal utils $.terminal.format should merge clolor with empty style 1`] = `"<span style=\\"color:green;--color:green;--original-color:green\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should merge clolor with empty style 1`] = `"<span style="color:green;--color:green;--original-color:green" data-text="Foo"><span>Foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should merge clolor with empty style 2`] = `"<span style=\\"color:green;--color:green;--original-color:green\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should merge clolor with empty style 2`] = `"<span style="color:green;--color:green;--original-color:green" data-text="Foo"><span>Foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should merge color style with style attr 1`] = `"<span style=\\"color:green;--color:green;--original-color:green;--size: 2\\" data-text=\\"Foo\\"><span>Foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should merge color style with style attr 1`] = `"<span style="color:green;--color:green;--original-color:green;--size: 2" data-text="Foo"><span>Foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should not allow attributes 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should not allow attributes 1`] = `"<span data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 1`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 1`] = `"<span data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 2`] = `"<span data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should not duplicate and don't overwrite data-text 2`] = `"<span data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should parse JSON if semicolon in value 1`] = `"<span title=\\"foo ; bar\\" data-text=\\"foo\\"><span>foo</span></span>"`;
+exports[`Terminal utils $.terminal.format should parse JSON if semicolon in value 1`] = `"<span title="foo ; bar" data-text="foo"><span>foo</span></span>"`;
 
-exports[`Terminal utils $.terminal.format should skip empty parts 1`] = `"<span data-text=\\"x\\">x</span><span style=\\"font-weight:bold\\" data-text=\\"y\\"><span>y</span></span><span style=\\"font-weight:bold\\" data-text=\\"z\\"><span>z</span></span>"`;
+exports[`Terminal utils $.terminal.format should skip empty parts 1`] = `"<span data-text="x">x</span><span style="font-weight:bold" data-text="y"><span>y</span></span><span style="font-weight:bold" data-text="z"><span>z</span></span>"`;
 
 exports[`Terminal utils $.terminal.from_ansi should convert ansi to terminal formatting 1`] = `"[[;#5555FF;]Hello][[;#640000;#0AA]Foo][[biu;#44D544;#A0A]B[[sb;;]a]r][[;#000;#AAA]Baz][[;#006400;#ffff00]Quux]"`;
 
@@ -243,7 +243,7 @@ exports[`Terminal utils $.terminal.from_ansi should format plots with moving cur
 `;
 
 exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 2`] = `
-"Skrypt uruchomiony 2022-10-27 22:14:53+02:00 [COMMAND=\\"neofetch\\" TERM=\\"xterm-256color\\" TTY=\\"/dev/pts/2\\" COLUMNS=\\"118\\" LINES=\\"26\\"]
+"Skrypt uruchomiony 2022-10-27 22:14:53+02:00 [COMMAND="neofetch" TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="118" LINES="26"]
 [[b;#5555FF;]             .',;::::;,'.]                [[b;#5555FF;]kuba]@[[b;#5555FF;]jcubic] 
 [[b;#5555FF;]         .';:cccccccccccc:;,.]            ----------- 
 [[b;#5555FF;]      .;cccccccccccccccccccccc;.]         [[b;#5555FF;]OS]: Fedora Linux 36 (Xfce) x86_64 
@@ -269,12 +269,12 @@ exports[`Terminal utils $.terminal.from_ansi should format plots with moving cur
 
 
 
-Skrypt wykonany 2022-10-27 22:14:55+02:00 [KOD_WYJŚCIA=\\"0\\"]
+Skrypt wykonany 2022-10-27 22:14:55+02:00 [KOD_WYJŚCIA="0"]
 "
 `;
 
 exports[`Terminal utils $.terminal.from_ansi should format plots with moving cursors 3`] = `
-"Skrypt uruchomiony 2022-10-27 17:29:53+02:00 [COMMAND=\\"dialog --title \\"HELLO\\" --yesno \\"Are you sure?\\" 6 30\\" TERM=\\"xterm-256color\\" TTY=\\"/dev/pts/1\\" COLUMNS=\\"115\\" LINES=\\"42\\"]
+"Skrypt uruchomiony 2022-10-27 17:29:53+02:00 [COMMAND="dialog --title "HELLO" --yesno "Are you sure?" 6 30" TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="115" LINES="42"]
 
 
 
@@ -316,7 +316,7 @@ exports[`Terminal utils $.terminal.from_ansi should format plots with moving cur
 
 
 
-Skrypt wykonany 2022-10-27 17:29:55+02:00 [KOD_WYJŚCIA=\\"1\\"]
+Skrypt wykonany 2022-10-27 17:29:55+02:00 [KOD_WYJŚCIA="1"]
 "
 `;
 
@@ -539,22 +539,22 @@ exports[`Terminal utils $.terminal.from_ansi should render Denis Richie ANSI art
 "
                      [[;#EEEEEE;],_ ,_==▄▂]
                   [[;#EEEEEE;],  ▂▃▄▄▅▅][[;#EEEEEE;#585858]▅][[;#EEEEEE;#0000D7]▂][[;#EEEEEE;#585858]▅¾].            [[;#FF00AF;]/    ][[;#0000D7;]/]
-                   [[;#EEEEEE;#0000D7]▄][[;#EEEEEE;#FF00AF]▆][[;#000000;#EEEEEE]<´  ][[;#0087D7;#EEEEEE]\\"][[;#00AF00;#EEEEEE]»][[;#EEEEEE;#EEEEEE]▓▓][[;#EEEEEE;#0087D7]▓][[;#EEEEEE;#585858]%]\\\\       [[;#FF00AF;]/ ][[;#0000D7;]/   ][[;#00D7FF;]/ ][[;#87FF00;]/]
-                 [[;#EEEEEE;],][[;#EEEEEE;#585858]▅][[;#000000;#EEEEEE]7\\"     ][[;#D70000;#EEEEEE]´][[;#00AF00;#EEEEEE]>][[;#EEEEEE;#00AFFF]▓▓][[;#FF00AF;#EEEEEE]▓][[;#EEEEEE;]%   ][[;#0000D7;]/  ][[;#87FF00;]/ ][[;#FF00AF;]> ][[;#87FF00;]/ ][[;#FF00AF;]>][[;#EEEEEE;]/][[;#00D7FF;]%]
+                   [[;#EEEEEE;#0000D7]▄][[;#EEEEEE;#FF00AF]▆][[;#000000;#EEEEEE]<´  ][[;#0087D7;#EEEEEE]"][[;#00AF00;#EEEEEE]»][[;#EEEEEE;#EEEEEE]▓▓][[;#EEEEEE;#0087D7]▓][[;#EEEEEE;#585858]%]\\       [[;#FF00AF;]/ ][[;#0000D7;]/   ][[;#00D7FF;]/ ][[;#87FF00;]/]
+                 [[;#EEEEEE;],][[;#EEEEEE;#585858]▅][[;#000000;#EEEEEE]7"     ][[;#D70000;#EEEEEE]´][[;#00AF00;#EEEEEE]>][[;#EEEEEE;#00AFFF]▓▓][[;#FF00AF;#EEEEEE]▓][[;#EEEEEE;]%   ][[;#0000D7;]/  ][[;#87FF00;]/ ][[;#FF00AF;]> ][[;#87FF00;]/ ][[;#FF00AF;]>][[;#EEEEEE;]/][[;#00D7FF;]%]
                  [[;#EEEEEE;]▐][[;#EEEEEE;#585858]¶][[;#EEEEEE;#585858]▓][[;#EEEEEE;#EEEEEE]       ][[;#FF0000;#EEEEEE],][[;#00AF00;#EEEEEE]»][[;#EEEEEE;#FF00FF]▓▓][[;#EEEEEE;]¾´]  [[;#FF00AF;]/][[;#EEEEEE;]> %][[;#FF00AF;]/][[;#87FF00;]%][[;#EEEEEE;]/][[;#FF00AF;]/ ][[;#00D7FF;]/  ][[;#FF00AF;]/]
                   [[;#EEEEEE;#585858]▓][[;#000000;#EEEEEE]▃][[;#EEEEEE;#000000]▅▅][[;#000000;#EEEEEE]▅▃,,][[;#0087D7;#EEEEEE]▄][[;#000000;#EEEEEE]▅][[;#EEEEEE;#000000]▅▅][[;#EEEEEE;#0000D7]Æ][[;#EEEEEE;]&#92;][[;#0000D7;]/][[;#87FF00;]/][[;#EEEEEE;] /][[;#87FF00;]/][[;#FF00AF;]/][[;#EEEEEE;]>][[;#00D7FF;]// ][[;#EEEEEE;]/][[;#87FF00;]>][[;#FF00AF;]/   ][[;#0000D7;]/]
                  [[;#EEEEEE;#0000D7]V][[;#000000;#EEEEEE]║][[;#EEEEEE;#0000D7]«][[;#EEEEEE;]¼.;][[;#EEEEEE;#585858]→][[;#000000;#EEEEEE] ║][[;#EEEEEE;]<«.,][[;#EEEEEE;#005FAF]\`][[;#EEEEEE;#585858]=][[;#0000D7;]/][[;#FF00AF;]/ ][[;#EEEEEE;]/>][[;#00D7FF;]/][[;#87FF00;]/][[;#EEEEEE;]%/][[;#FF00AF;]% / ][[;#0000D7;]/]
-               [[;#0000D7;]//][[;#000000;#EEEEEE]╠<´ -²,)][[;#EEEEEE;#000000](▓][[;#000000;#EEEEEE]~\\"-][[;#FF00AF;#EEEEEE]╝/][[;#EEEEEE;]¾][[;#FF00AF;]/ ][[;#87FF00;]%][[;#EEEEEE;]/][[;#87FF00;]>][[;#00D7FF;]/ ][[;#87FF00;]/][[;#FF00AF;]>]
+               [[;#0000D7;]//][[;#000000;#EEEEEE]╠<´ -²,)][[;#EEEEEE;#000000](▓][[;#000000;#EEEEEE]~"-][[;#FF00AF;#EEEEEE]╝/][[;#EEEEEE;]¾][[;#FF00AF;]/ ][[;#87FF00;]%][[;#EEEEEE;]/][[;#87FF00;]>][[;#00D7FF;]/ ][[;#87FF00;]/][[;#FF00AF;]>]
            [[;#0000D7;]/ / ][[;#87FF00;]/ ][[;#EEEEEE;#0000D7]▐][[;#000000;#585858]%][[;#000000;#EEEEEE] -./▄▃▄][[;#EEEEEE;#000000]▅][[;#000000;#EEEEEE]▐][[;#000000;#EEEEEE], ][[;#FF00AF;#EEEEEE]/][[;#EEEEEE;#FF00AF]7][[;#0000D7;]/][[;#FF00AF;]/][[;#EEEEEE;];/][[;#FF00AF;]/][[;#87FF00;]% ][[;#0000D7;]/ /]
            [[;#0000D7;]/ ][[;#FF00AF;]/][[;#EEEEEE;]/][[;#00D7FF;]/][[;#87FF00;]/][[;#EEEEEE;#585858]\`][[;#EEEEEE;#0000D7]▌][[;#EEEEEE;#0000D7]▐][[;#000000;#EEEEEE] %z][[;#EEEEEE;]Wv xX][[;#EEEEEE;#0000D7]▓][[;#EEEEEE;#00AF00]▇][[;#EEEEEE;#FF00AF]▌][[;#0000D7;]/][[;#FF00AF;]/][[;#EEEEEE;]&;][[;#0000D7;]% ][[;#FF00AF;]/ ][[;#0000D7;]/]
        [[;#0000D7;]/ / ][[;#EEEEEE;]/ ][[;#87FF00;]%][[;#FF00AF;]/][[;#EEEEEE;]/%/][[;#EEEEEE;#585858]¾][[;#000000;#EEEEEE]½´][[;#EEEEEE;#000000]▌][[;#949494;]▃▄][[;#EEEEEE;]▄▄][[;#949494;]▄▃▃][[;#EEEEEE;#000000]▐][[;#EEEEEE;#FF00AF]¶][[;#EEEEEE;#0000D7]&#92;][[;#0000D7;]/][[;#585858;#EEEEEE]&] [[;#0000D7;]/]
          [[;#FF00AF;]<][[;#87FF00;]/ ][[;#00D7FF;]/][[;#EEEEEE;]</][[;#87FF00;]%][[;#EEEEEE;]/][[;#00D7FF;]/][[;#EEEEEE;]\`][[;#EEEEEE;#000000]▓][[;#000000;#EEEEEE]!][[;#EEEEEE;#585858]%][[;#EEEEEE;#000000]▓][[;#EEEEEE;]%][[;#EEEEEE;#585858]╣][[;#EEEEEE;#585858];╣][[;#EEEEEE;]W][[;#BCBCBC;]Y<Y)][[;#000000;#EEEEEE]y&][[;#EEEEEE;]/\`][[;#EEEEEE;#585858]&#92;]
      [[;#0000D7;]/ ][[;#FF00AF;]/ ][[;#FF00AF;]%][[;#EEEEEE;]/%][[;#87FF00;]/][[;#00D7FF;]/][[;#EEEEEE;]<][[;#87FF00;]/][[;#FF00AF;]%][[;#00D7FF;]/][[;#0000D7;]/][[;#EEEEEE;#585858]&#92;][[;#000000;#EEEEEE]i7; ╠N][[;#949494;]>][[;#EEEEEE;])VY>][[;#EEEEEE;#585858]7][[;#EEEEEE;];  ][[;#EEEEEE;#585858]&#92;][[;#EEEEEE;]_]    [[;#EEEEEE;]UNIX IS VERY SIMPLE ][[;#00D7FF;]IT JUST NEEDS A]
-  [[;#0000D7;]/   ][[;#EEEEEE;]/][[;#87FF00;]<][[;#EEEEEE;]/ ][[;#00D7FF;]/][[;#EEEEEE;]/<][[;#FF00AF;]/][[;#0000D7;]/][[;#FF00AF;]/][[;#0000D7;]<][[;#EEEEEE;]_/%&#92;][[;#EEEEEE;#000000]▓][[;#000000;#EEEEEE]  V][[;#EEEEEE;]%][[;#000000;#EEEEEE]W][[;#EEEEEE;]%£)XY]  [[;#585858;]_/%][[;#EEEEEE;]‾\\\\_,]   [[;#00D7FF;]GENIUS TO UNDERSTAND ITS SIMPLICITY]
-   [[;#FF00AF;]/ ][[;#EEEEEE;]/ ][[;#FF00AF;]/][[;#EEEEEE;]/][[;#87FF00;]%][[;#FF00AF;]/][[;#EEEEEE;#585858]_,=-][[;#EEEEEE;#0000D7]-^][[;#EEEEEE;]/%/%%][[;#000000;#EEEEEE]\\\\¾%][[;#EEEEEE;]¶][[;#000000;#EEEEEE]%][[;#EEEEEE;]%}]    [[;#585858;]/%%%][[;#0000D7;]%%][[;#585858;]%;\\\\,]
-    [[;#00D7FF;]%][[;#0000D7;]/][[;#FF00AF;]< ][[;#0000D7;]/][[;#EEEEEE;#0000D7]_/][[;#EEEEEE;#585858] ][[;#EEEEEE;]%%%][[;#585858;]%%][[;#0000D7;];][[;#EEEEEE;]X][[;#585858;]%][[;#0000D7;]%][[;#EEEEEE;]\\\\%][[;#585858;]%;,     _/%%%;][[;#0000D7;],][[;#585858;]     &#92;]
+  [[;#0000D7;]/   ][[;#EEEEEE;]/][[;#87FF00;]<][[;#EEEEEE;]/ ][[;#00D7FF;]/][[;#EEEEEE;]/<][[;#FF00AF;]/][[;#0000D7;]/][[;#FF00AF;]/][[;#0000D7;]<][[;#EEEEEE;]_/%&#92;][[;#EEEEEE;#000000]▓][[;#000000;#EEEEEE]  V][[;#EEEEEE;]%][[;#000000;#EEEEEE]W][[;#EEEEEE;]%£)XY]  [[;#585858;]_/%][[;#EEEEEE;]‾\\_,]   [[;#00D7FF;]GENIUS TO UNDERSTAND ITS SIMPLICITY]
+   [[;#FF00AF;]/ ][[;#EEEEEE;]/ ][[;#FF00AF;]/][[;#EEEEEE;]/][[;#87FF00;]%][[;#FF00AF;]/][[;#EEEEEE;#585858]_,=-][[;#EEEEEE;#0000D7]-^][[;#EEEEEE;]/%/%%][[;#000000;#EEEEEE]\\¾%][[;#EEEEEE;]¶][[;#000000;#EEEEEE]%][[;#EEEEEE;]%}]    [[;#585858;]/%%%][[;#0000D7;]%%][[;#585858;]%;\\,]
+    [[;#00D7FF;]%][[;#0000D7;]/][[;#FF00AF;]< ][[;#0000D7;]/][[;#EEEEEE;#0000D7]_/][[;#EEEEEE;#585858] ][[;#EEEEEE;]%%%][[;#585858;]%%][[;#0000D7;];][[;#EEEEEE;]X][[;#585858;]%][[;#0000D7;]%][[;#EEEEEE;]\\%][[;#585858;]%;,     _/%%%;][[;#0000D7;],][[;#585858;]     &#92;]
    [[;#87FF00;]/ ][[;#0000D7;]/ ][[;#585858;]%][[;#0000D7;]%%%%][[;#585858;]%;,    ][[;#EEEEEE;]&#92;][[;#585858;]%][[;#0000D7;]%][[;#EEEEEE;]l][[;#585858;]%%;// _/][[;#0000D7;]%;,] [[;#1C1C1C;]dmr]
- [[;#0000D7;]/    ][[;#585858;]%][[;#0000D7;]%%;,]         [[;#EEEEEE;]<][[;#0000D7;];][[;#585858;]\\\\-=-/ /]
+ [[;#0000D7;]/    ][[;#585858;]%][[;#0000D7;]%%;,]         [[;#EEEEEE;]<][[;#0000D7;];][[;#585858;]\\-=-/ /]
      [[;#0000D7;];,]                [[;#585858;]l]"
 `;
 
@@ -611,7 +611,7 @@ xxx
 `;
 
 exports[`Terminal utils $.terminal.parse_arguments should create array of arguments and convert types 1`] = `
-Array [
+[
   "foo bar",
   "baz",
   /\\^asd \\[x\\]/,
@@ -625,66 +625,66 @@ Array [
 `;
 
 exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 1`] = `
-Object {
-  "args": Array [
-    "{\\"wrap\\": true}",
+{
+  "args": [
+    "{"wrap": true}",
   ],
-  "args_quotes": Array [
-    "\\"",
+  "args_quotes": [
+    """,
   ],
-  "command": "test \\"{\\\\\\"wrap\\\\\\": true}\\"",
+  "command": "test "{\\"wrap\\": true}"",
   "name": "test",
-  "rest": "\\"{\\\\\\"wrap\\\\\\": true}\\"",
+  "rest": ""{\\"wrap\\": true}"",
 }
 `;
 
 exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 2`] = `
-Object {
-  "args": Array [
-    "{\\"wrap\\": true}",
+{
+  "args": [
+    "{"wrap": true}",
   ],
-  "args_quotes": Array [
+  "args_quotes": [
     "'",
   ],
-  "command": "test '{\\"wrap\\": true}'",
+  "command": "test '{"wrap": true}'",
   "name": "test",
-  "rest": "'{\\"wrap\\": true}'",
+  "rest": "'{"wrap": true}'",
 }
 `;
 
 exports[`Terminal utils $.terminal.parse_command should handle JSON inside string 3`] = `
-Object {
-  "args": Array [
-    "xxx\\"xxx\\"xxx",
+{
+  "args": [
+    "xxx"xxx"xxx",
     "y",
   ],
-  "args_quotes": Array [
-    "\\"",
+  "args_quotes": [
+    """,
     "",
   ],
-  "command": "test \\"xxx\\\\\\"xxx\\\\\\"xxx\\" y",
+  "command": "test "xxx\\"xxx\\"xxx" y",
   "name": "test",
-  "rest": "\\"xxx\\\\\\"xxx\\\\\\"xxx\\" y",
+  "rest": ""xxx\\"xxx\\"xxx" y",
 }
 `;
 
 exports[`Terminal utils $.terminal.parse_command should handle JSON string 1`] = `
-Object {
-  "args": Array [
+{
+  "args": [
     "[error]}",
   ],
-  "args_quotes": Array [
+  "args_quotes": [
     "",
   ],
-  "command": "{\\"demo\\": [\\"error\\"]}",
-  "name": "{\\"demo\\":",
-  "rest": "[\\"error\\"]}",
+  "command": "{"demo": ["error"]}",
+  "name": "{"demo":",
+  "rest": "["error"]}",
 }
 `;
 
 exports[`Terminal utils $.terminal.parse_command should split and parse command 1`] = `
-Object {
-  "args": Array [
+{
+  "args": [
     "foo bar",
     "baz",
     /\\^asd \\[x\\]/,
@@ -695,25 +695,25 @@ Object {
     "foobar",
     "foo",
   ],
-  "args_quotes": Array [
-    "\\"",
+  "args_quotes": [
+    """,
     "",
     "",
     "",
     "",
     "",
-    "\\"",
+    """,
     "",
     "'",
   ],
-  "command": "test \\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "command": "test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" 'foo'",
   "name": "test",
-  "rest": "\\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "rest": ""foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" 'foo'",
 }
 `;
 
 exports[`Terminal utils $.terminal.split_arguments should create array of arguments 1`] = `
-Array [
+[
   "foo bar",
   "baz",
   "/^asd [x]/",
@@ -721,14 +721,14 @@ Array [
   "10",
   "1e10",
   "",
-  "foo\\"bar\\"",
+  "foo"bar"",
   "foo",
 ]
 `;
 
 exports[`Terminal utils $.terminal.split_command Should split command 1`] = `
-Object {
-  "args": Array [
+{
+  "args": [
     "foo bar",
     "baz",
     "/^asd [x]/",
@@ -736,28 +736,28 @@ Object {
     "10",
     "1e10",
     "",
-    "foo\\"bar\\"",
+    "foo"bar"",
     "foo",
   ],
-  "args_quotes": Array [
-    "\\"",
+  "args_quotes": [
+    """,
     "",
     "",
     "",
     "",
     "",
-    "\\"",
+    """,
     "",
     "'",
   ],
-  "command": "test \\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "command": "test "foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" 'foo'",
   "name": "test",
-  "rest": "\\"foo bar\\" baz /^asd [x]/ str\\\\ str 10 1e10 \\"\\" foo\\"bar\\" 'foo'",
+  "rest": ""foo bar" baz /^asd [x]/ str\\ str 10 1e10 "" foo"bar" 'foo'",
 }
 `;
 
 exports[`Terminal utils $.terminal.split_equal should remove leadnig spaces 1`] = `
-Array [
+[
   "This   is    some",
   "text   with",
   "spaces",
@@ -765,7 +765,7 @@ Array [
 `;
 
 exports[`Terminal utils $.terminal.split_equal should retain leading spaces 1`] = `
-Array [
+[
   "This",
   "                is",
   "                   a",
@@ -774,7 +774,7 @@ Array [
 `;
 
 exports[`Terminal utils $.terminal.split_equal should retain leading spaces when wrapping 1`] = `
-Array [
+[
   "This",
   "                is",
   "                   a",
@@ -783,7 +783,7 @@ Array [
 `;
 
 exports[`Terminal utils $.terminal.split_equal split emoji encoded from apply_formatters 1`] = `
-Array [
+[
   "ZZZZZZz",
   "[[;;;emoji relaxed;☺️]☺️]oo&nbsp;bar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[[;;;emoji relaxed;☺️]☺️]a[[;;;emoji eight;8️⃣]8️⃣]",
   "foo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;baz",
@@ -792,12 +792,12 @@ Array [
 `;
 
 exports[`Terminal utils xml formatting should format font 1`] = `
-"[[;white;red;;;{\\"style\\":\\"--size:1.2;letter-spacing:2\\"}]Hello World]
+"[[;white;red;;;{"style":"--size:1.2;letter-spacing:2"}]Hello World]
 [[;;red]Hello World]
-[[;;;;;{\\"style\\":\\"--size:1.2;letter-spacing:2\\"}]Hello World]"
+[[;;;;;{"style":"--size:1.2;letter-spacing:2"}]Hello World]"
 `;
 
-exports[`Terminal utils xml formatting should format font 2`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span style=\\"color:white;--color:white;--original-color:white;background-color:red;--background:red;--size:1.2;letter-spacing:2\\" data-text=\\"Hello&nbsp;World\\"><span>Hello&nbsp;World</span></span></div><div style=\\"width: 100%;\\"><span style=\\"background-color:red;--background:red\\" data-text=\\"Hello World\\"><span>Hello&nbsp;World</span></span></div><div class=\\"cmd-end-line\\" style=\\"width: 100%;\\"><span style=\\"--size:1.2;letter-spacing:2\\" data-text=\\"Hello&nbsp;World\\"><span>Hello&nbsp;World</span></span></div></div>"`;
+exports[`Terminal utils xml formatting should format font 2`] = `"<div data-index="0"><div style="width: 100%;"><span style="color:white;--color:white;--original-color:white;background-color:red;--background:red;--size:1.2;letter-spacing:2" data-text="Hello&nbsp;World"><span>Hello&nbsp;World</span></span></div><div style="width: 100%;"><span style="background-color:red;--background:red" data-text="Hello World"><span>Hello&nbsp;World</span></span></div><div class="cmd-end-line" style="width: 100%;"><span style="--size:1.2;letter-spacing:2" data-text="Hello&nbsp;World"><span>Hello&nbsp;World</span></span></div></div>"`;
 
 exports[`Terminal utils xml formatting should format for give target 1`] = `"[[;white;;;;{}]hello]"`;
 
@@ -814,18 +814,18 @@ exports[`Terminal utils xml formatting should handle invalid xml 1`] = `
 exports[`Terminal utils xml formatting should render an empty image 1`] = `"[[@;;;;;{}]]"`;
 
 exports[`Terminal utils xml formatting should render colors 1`] = `
-"[[;white;;command;;{\\"class\\":\\"command\\"}]ls]
+"[[;white;;command;;{"class":"command"}]ls]
 [[;green;;;;{}]ls]
-[[;red;;error;;{\\"class\\":\\"error\\",\\"style\\":\\"background:red\\"}]Error: invalid message]"
+[[;red;;error;;{"class":"error","style":"background:red"}]Error: invalid message]"
 `;
 
-exports[`Terminal utils xml formatting should render colors 2`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span style=\\"color:white;--color:white;--original-color:white\\" class=\\"command\\" data-text=\\"ls\\"><span>ls</span></span></div><div style=\\"width: 100%;\\"><span style=\\"color:green;--color:green;--original-color:green\\" data-text=\\"ls\\"><span>ls</span></span></div><div class=\\"cmd-end-line\\" style=\\"width: 100%;\\"><span style=\\"color:red;--color:red;--original-color:red;background:red\\" class=\\"error\\" data-text=\\"Error:&nbsp;invalid&nbsp;message\\"><span>Error:&nbsp;invalid&nbsp;message</span></span></div></div>"`;
+exports[`Terminal utils xml formatting should render colors 2`] = `"<div data-index="0"><div style="width: 100%;"><span style="color:white;--color:white;--original-color:white" class="command" data-text="ls"><span>ls</span></span></div><div style="width: 100%;"><span style="color:green;--color:green;--original-color:green" data-text="ls"><span>ls</span></span></div><div class="cmd-end-line" style="width: 100%;"><span style="color:red;--color:red;--original-color:red;background:red" class="error" data-text="Error:&nbsp;invalid&nbsp;message"><span>Error:&nbsp;invalid&nbsp;message</span></span></div></div>"`;
 
-exports[`Terminal utils xml formatting should render links 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><a href=\\"https://example.com\\" target=\\"_blank\\" class=\\"link\\" data-text=\\"\\">example.com</a></div><div style=\\"width: 100%;\\"><a href=\\"example.com\\" data-text=\\"\\">example.com</a></div><div class=\\"cmd-end-line\\" style=\\"width: 100%;\\"><a href=\\"https://example.com\\" style=\\"background:red\\" data-text=\\"\\">Error:&nbsp;invalid&nbsp;message</a></div></div>"`;
+exports[`Terminal utils xml formatting should render links 1`] = `"<div data-index="0"><div style="width: 100%;"><a href="https://example.com" target="_blank" class="link" data-text="">example.com</a></div><div style="width: 100%;"><a href="example.com" data-text="">example.com</a></div><div class="cmd-end-line" style="width: 100%;"><a href="https://example.com" style="background:red" data-text="">Error:&nbsp;invalid&nbsp;message</a></div></div>"`;
 
 exports[`Terminal utils xml formatting should render tags 1`] = `
-"[[;;;foo;;{\\"style\\":\\"color:red\\"}]text]
-[[;;;;;{\\"style\\":\\"color:red\\"}]text]
+"[[;;;foo;;{"style":"color:red"}]text]
+[[;;;;;{"style":"color:red"}]text]
 [[i;;;;;{}]lorem]
 [[g;;;;;{}]ipsum]
 [[u;;;;;{}]dolor]
@@ -834,7 +834,7 @@ exports[`Terminal utils xml formatting should render tags 1`] = `
 [[b;;;;;{}]foo]"
 `;
 
-exports[`extensions echo_newline should create sequance of animations (#930) 1`] = `"<div data-index=\\"0\\"><div style=\\"width: 100%;\\"><span data-text=\\"Hello,&nbsp;jQuery&nbsp;Terminal\\">Hello,&nbsp;jQuery&nbsp;Terminal</span></div></div>"`;
+exports[`extensions echo_newline should create sequance of animations (#930) 1`] = `"<div data-index="0"><div style="width: 100%;"><span data-text="Hello,&nbsp;jQuery&nbsp;Terminal">Hello,&nbsp;jQuery&nbsp;Terminal</span></div></div>"`;
 
 exports[`extensions echo_newline should print mixed newline with !flush 1`] = `
 "foo, bar
@@ -842,7 +842,7 @@ baz, quux"
 `;
 
 exports[`extensions echo_newline should print mixed newline with !flush 2`] = `
-Array [
+[
   "foo, bar",
   "baz, quux",
 ]
@@ -851,15 +851,15 @@ Array [
 exports[`extensions echo_newline should print multiple !flush && !newline 1`] = `"foo, bar, baz, "`;
 
 exports[`extensions echo_newline should print multiple !flush && !newline 2`] = `
-Array [
+[
   "foo, bar, baz, ",
 ]
 `;
 
-exports[`extensions echo_newline should wrap lines with multiple echo 1`] = `"<div data-index=\\"0\\" class=\\"partial\\"><div style=\\"width: 100%;\\"><span data-text=\\"qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty\\">qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span></div></div>"`;
+exports[`extensions echo_newline should wrap lines with multiple echo 1`] = `"<div data-index="0" class="partial"><div style="width: 100%;"><span data-text="qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty">qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span></div></div>"`;
 
 exports[`extensions echo_newline should wrap lines with multiple echo 2`] = `"width: 100%;--prompt-offset: 8ch;top: 0px;"`;
 
-exports[`extensions echo_newline should wrap lines with multiple echo when partial fill full width 1`] = `"<div data-index=\\"0\\" class=\\"partial\\"><div style=\\"width: 100%;\\"><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span><span data-text=\\"qwerty\\">qwerty</span></div></div>"`;
+exports[`extensions echo_newline should wrap lines with multiple echo when partial fill full width 1`] = `"<div data-index="0" class="partial"><div style="width: 100%;"><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span><span data-text="qwerty">qwerty</span></div></div>"`;
 
 exports[`extensions echo_newline should wrap lines with multiple echo when partial fill full width 2`] = `"width: 100%;--prompt-offset: 0ch;top: 0px;"`;
