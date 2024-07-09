@@ -10705,7 +10705,7 @@
                                     display: ''
                                 });
                             }
-                        } else if (snapshot.length && snapshot[snapshot.length - 1]) {
+                        } else if (snapshot.length) {
                             last_row = partial.children().last();
                             var last_row_rect = last_row[0].getBoundingClientRect();
                             // Shift command prompt up one line and to the right

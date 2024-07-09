@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 07 Jul 2024 22:26:10 +0000
+ * Date: Tue, 09 Jul 2024 17:19:34 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 07 Jul 2024 22:26:10 +0000',
+        date: 'Tue, 09 Jul 2024 17:19:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10705,7 +10705,7 @@
                                     display: ''
                                 });
                             }
-                        } else if (snapshot.length && snapshot[snapshot.length - 1]) {
+                        } else if (snapshot.length) {
                             last_row = partial.children().last();
                             var last_row_rect = last_row[0].getBoundingClientRect();
                             // Shift command prompt up one line and to the right
