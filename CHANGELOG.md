@@ -1,3 +1,11 @@
+## 2.42.1
+### Bugfix
+* fix line wrapping when calling multiple echo `newline:false` [#952](https://github.com/jcubic/jquery.terminal/issues/952)
+* fix cursor position when echo `newline:false` fill the line
+* fix running typing animation on empty terminal [#950](https://github.com/jcubic/jquery.terminal/issues/950)
+* get rid of canvas warning from images in less [#955](https://github.com/jcubic/jquery.terminal/issues/955)
+* fix update with newline after echo without it [#954](https://github.com/jcubic/jquery.terminal/issues/954)
+
 ## 2.42.0
 ### Features
 * add reverse style to formatting and XML [#943](https://github.com/jcubic/jquery.terminal/issues/943)

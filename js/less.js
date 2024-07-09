@@ -10,7 +10,7 @@
  * This is example of how to create less like command for jQuery Terminal
  * the code is based on the one from leash shell and written as jQuery plugin
  *
- * Copyright (c) 2018-2023 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2024 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -88,7 +88,7 @@
     function slice_image(img_data, width, y1, y2) {
         // render slice on canvas and get Blob Data URI
         var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d', {willReadFrequently: true});
         canvas.width = width;
         canvas.height = y2 - y1;
         ctx.putImageData(img_data, 0, 0);
@@ -120,7 +120,7 @@
                 width = img.width;
             }
             var canvas = document.createElement('canvas');
-            var ctx = canvas.getContext('2d');
+            var ctx = canvas.getContext('2d', {willReadFrequently: true});
             canvas.width = width;
             canvas.height = height;
             // scale the image to fit the terminal

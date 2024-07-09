@@ -95,7 +95,7 @@ assets/ascii_art.svg: templates/ascii_art.svg .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/ascii_art.svg > assets/ascii_art.svg
 
 test-accept-snapshots:
-	$(JEST) --coverage --env=jsdom --updateSnapshot --testMatch '**/__tests__/*.spec.js'
+	$(JEST) --coverage --updateSnapshot
 
 coveralls:
 	$(CAT) ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

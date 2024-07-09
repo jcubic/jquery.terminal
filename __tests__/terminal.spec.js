@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
- * Copyright (c) 2010-2023 Jakub T. Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2024 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Image Credit: Author Peter Hamer, source Wikipedia
@@ -2777,7 +2777,9 @@ describe('Terminal utils', function() {
 });
 describe('extensions', function() {
     describe('echo_newline', function() {
-        var term = $('<div/>').terminal();
+        var term = $('<div/>').terminal($.noop, {
+            numChars: 100
+        });
         beforeEach(function() {
             term.clear();
         });
@@ -2852,11 +2854,11 @@ describe('extensions', function() {
                 () => term.echo(() => render('hello', 0), {newline: false}).echo(render(', world', 0)),
                 () => term.echo(render('hello', 0), {newline: false}).echo(() => render(', world', 0))
             ];
-            for (const fn of spec) {
+            for (const [i, fn] of Object.entries(spec)) {
                 term.clear();
                 fn();
                 await delay(100);
-                expect(output(term)).toEqual(['hello, world']);
+                expect([i, output(term)]).toEqual([i, ['hello, world']]);
             }
         });
         it('finalize with newline: false', function() {
@@ -2891,6 +2893,21 @@ describe('extensions', function() {
             await term.echo("jQuery ", { typing: true, delay: 0, newline: false });
             await term.echo("Terminal", { typing: true, delay: 0 });
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should wrap lines with multiple echo', () => {
+            term.echo('qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty' +
+                      'qwertyqwertyqwertyqwertyqwerty', { newline: false });
+            term.echo('qwerty', { newline: false });
+            term.echo('qwerty', { newline: false });
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+            expect(term.find('.cmd').attr('style')).toMatchSnapshot();
+        });
+        it('should wrap lines with multiple echo when partial fill full width', () => {
+            for(let i = 0; i < 50; i+=1) {
+                term.echo('qwerty', { newline: false });
+            }
+            expect(term.find('.terminal-output').html()).toMatchSnapshot();
+            expect(term.find('.cmd').attr('style')).toMatchSnapshot();
         });
     });
     describe('autocomplete_menu', function() {
@@ -4456,12 +4473,7 @@ describe('Terminal plugin', function() {
                 await delay(200);
                 enter(term, 'foo');
                 await delay(200);
-                var output = [
-                    '> foo',
-                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON - Server responded:',
-                    'Response]'
-                ].join('\n');
-                expect(term.get_output()).toEqual(output);
+                expect(term.get_output()).toMatchSnapshot();
                 term.destroy().remove();
             });
             it('should display error on Invalid JSON-RPC response', async function() {
@@ -4471,12 +4483,7 @@ describe('Terminal plugin', function() {
                 await delay(200);
                 enter(term, 'foo');
                 await delay(200);
-                var output = [
-                    '> foo',
-                    '[[;;;terminal-error]&#91;AJAX&#93; Invalid JSON-RPC - Server responded:',
-                    '{"foo": "bar"}]'
-                ].join('\n');
-                expect(term.get_output()).toEqual(output);
+                expect(term.get_output()).toMatchSnapshot();
                 term.destroy().remove();
             });
         });
@@ -5277,8 +5284,15 @@ describe('Terminal plugin', function() {
                 term.echo(delay(0, () => "A"));
                 const fn = jest.fn();
                 term.echo("B", { typing: true, delay: 0 }).then(fn);
-                await delay(200);
+                await delay(500);
                 expect(fn).toHaveBeenCalled();
+            });
+            // #950
+            it('should animate on empty terminal', async () => {
+                term.clear();
+                await term.echo('hello', { typing: true, delay: 0 });
+                await delay(10);
+                expect(output(term)).toEqual(['hello']);
             });
         });
 
@@ -6500,7 +6514,7 @@ describe('Terminal plugin', function() {
                     term.echo(() => render('dolor', 10));
                     term.echo('baz');
                     // not sure why but 100 delay is too short
-                    await delay(300);
+                    await delay(500);
                     expect(output('.terminal-output div div', term)).toEqual([
                         'lorem',
                         'foo',

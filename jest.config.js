@@ -5,7 +5,8 @@ module.exports = {
         "\\/\\.#"
     ],
     testPathIgnorePatterns: [
-        "\\/\\.#"
+        "\\/\\.#",
+        "/docs/"
     ],
     testMatch: [
         "<rootDir>/__tests__/*.spec.js"

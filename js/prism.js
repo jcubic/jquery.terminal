@@ -30,7 +30,7 @@
  * by default only javascript markup and css languages are defined (also file extension
  * for them. To have more languages you need to include appropriate js files.
  *
- * Copyright (c) 2018-2023 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2024 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

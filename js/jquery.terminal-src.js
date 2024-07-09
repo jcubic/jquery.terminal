@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -1798,10 +1798,11 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.has_newline = function() {
-        if (this._lines.length === 0) {
+        var line = this.last_line();
+        if (!line) {
             return true;
         }
-        return this.last_line()[1].newline;
+        return line[1].newline;
     };
     // -------------------------------------------------------------------------
     // :: call when line is out of view when outputLimit is used
@@ -1934,12 +1935,11 @@
         this._output_buffer.push(FormatBuffer.NEW_LINE);
 
         if (arg instanceof Array) {
-            var raw_lines = raw.split('\n');
             for (var i = 0, len = arg.length; i < len; ++i) {
                 if (arg[i] === '' || arg[i] === '\r') {
                     this._output_buffer.push({line: '', raw: ''});
                 } else {
-                    var formatted = this.format(arg[i], i === len - 1, raw_lines[i]);
+                    var formatted = this.format(arg[i], i === len - 1, raw[i]);
                     this._output_buffer.push(formatted);
                 }
             }
@@ -7426,7 +7426,7 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2023 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2011-2024 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
@@ -7437,7 +7437,7 @@
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2023 jcubic'],
+        ['jQuery Terminal', '(c) 2011-2024 jcubic'],
         [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
         [name_ver, copyright.replace(/^Copyright /, '')],
         [
@@ -8407,24 +8407,31 @@
                         });
                         //string = $.terminal.normalize(string);
                         var array;
+                        var raw_array;
                         var cols = line_settings.cols = self.cols();
                         if (should_wrap(string, line_settings)) {
                             array = $.terminal.split_equal(string, cols, {
                                 keepWords: line_settings.keepWords,
                                 trim: true
                             });
+                            raw_array = $.terminal.split_equal(raw_string, cols, {
+                                keepWords: line_settings.keepWords,
+                                trim: true
+                            });
                         } else if (string.match(/\n/)) {
                             array = string.split(/\n/);
+                            raw_array = string.split(/\n/);
                         }
                     }
                 } else {
                     raw_string = '';
                 }
                 var arg = array || string;
+                var raw = raw_array || raw_string;
                 if (line_cache && key && use_cache) {
-                    line_cache.set(key, {input: arg, raw: raw_string});
+                    line_cache.set(key, {input: arg, raw: raw});
                 }
-                buffer.append(arg, line.index, line_settings, raw_string);
+                buffer.append(arg, line.index, line_settings, raw);
             } catch (e) {
                 buffer.clear();
                 // don't display exception if exception throw in terminal
@@ -10677,6 +10684,8 @@
                             }
                         });
                         partial = self.find('.partial');
+                        var len = $.terminal.length(snapshot[snapshot.length - 1]);
+                        len %= self.cols();
                         finalizations.forEach(function(data) {
                             data.finalize(data.node);
                         });
@@ -10696,9 +10705,7 @@
                                     display: ''
                                 });
                             }
-                        } else if (snapshot.length && snapshot[snapshot.length - 1]) {
-                            var len = $.terminal.length(snapshot[snapshot.length - 1]);
-                            len %= self.cols();
+                        } else if (snapshot.length) {
                             last_row = partial.children().last();
                             var last_row_rect = last_row[0].getBoundingClientRect();
                             // Shift command prompt up one line and to the right
@@ -10713,10 +10720,10 @@
                         }
                         limit_lines();
                         fire_event('onFlush');
-                        var cmd_cursor = self.find('.cmd-cursor');
-                        var offset = self.find('.cmd').offset();
-                        var self_offset = self.offset();
                         self.stopTime('flush').oneTime(10, 'flush', function() {
+                            var cmd_cursor = self.find('.cmd-cursor');
+                            var offset = self.find('.cmd').offset();
+                            var self_offset = self.offset();
                             var top = output.height();
                             var height = command_line.height();
                             css(self[0], {
@@ -10985,11 +10992,30 @@
                             unpromise(next, function() {
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
+                                var have_partial = self.find('.partial').length;
+                                var contination_run = locals.flush && have_partial;
                                 if (locals.flush) {
                                     self.flush();
+                                    // HACK: when rendering multiple partials
+                                    // we need to force and update them all at once
+                                    // so we have line breaks #952
+                                    if (have_partial) {
+                                        // setTimeout is required when you echo async
+                                        // function and immediately after echo
+                                        // someting else
+                                        self.oneTime(1, 'echo', function() {
+                                            var line = lines.last_line();
+                                            if (line) {
+                                                self.update(-1, line[0], line[1]);
+                                            }
+                                            cont();
+                                        });
+                                    }
                                     fire_event('onAfterEcho', [arg]);
                                 }
-                                cont();
+                                if (!contination_run) {
+                                    cont();
+                                }
                             }, error);
                         }, error);
                     } catch (e) {

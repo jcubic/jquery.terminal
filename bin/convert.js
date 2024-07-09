@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2023 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  */
 
@@ -71,7 +71,7 @@ function usage() {
     const bin = path.basename(process.argv[1]);
     const space = ' '.repeat(bin.length);
     console.log('jQuery Terminal utility to convert ANSI escapes');
-    console.log('Copyright (c) 2010-2023 Jakub T. Jankiewicz');
+    console.log('Copyright (c) 2010-2024 Jakub T. Jankiewicz');
     console.log(`
 usage:
   ${bin} [--help] [-h] [--input] [-i] [- | <file>]
