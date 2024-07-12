@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.42.1
+ *           \/              /____/                              version 2.42.2
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -39,8 +39,8 @@
     if (typeof jQuery === 'undefined') {
         get('http://code.jquery.com/jquery-3.5.0.min.js').then(function() {
             jQuery.noConflict();
-            get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.1/css/jquery.terminal.min.css');
-            return get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.1/js/jquery.terminal.min.js');
+            get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.2/css/jquery.terminal.min.css');
+            return get('https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.42.2/js/jquery.terminal.min.js');
         }).then(function() {
             terminals.forEach(function(spec) {
                 jQuery.fn.terminal.apply(jQuery(spec[0]), spec.slice(1));

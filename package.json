@@ -1,6 +1,6 @@
 {
   "name": "jquery.terminal",
-  "version": "2.42.1",
+  "version": "2.42.2",
   "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
   "main": "js/jquery.terminal.js",
   "typings": "js/jquery.terminal.d.ts",
