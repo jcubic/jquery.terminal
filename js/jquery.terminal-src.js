@@ -9271,21 +9271,25 @@
                                 input_chars = chars;
                                 input_len = len;
                             }
-                            var chr = input_chars[char_i];
-                            if (options.mask) {
-                                var mask = command_line.mask();
-                                if (typeof mask === 'string') {
-                                    chr = mask;
-                                } else if (mask) {
-                                    chr = settings.maskChar;
+                            if (input_len === 0) {
+                                command_line.prompt('');
+                            } else {
+                                var chr = input_chars[char_i];
+                                if (options.mask) {
+                                    var mask = command_line.mask();
+                                    if (typeof mask === 'string') {
+                                        chr = mask;
+                                    } else if (mask) {
+                                        chr = settings.maskChar;
+                                    }
                                 }
+                                new_prompt += chr;
+                                command_line.prompt(new_prompt, {formatters: false});
+                                if (bottom && (chr === '\n' || !self.is_bottom())) {
+                                    self.scroll_to_bottom();
+                                }
+                                char_i++;
                             }
-                            new_prompt += chr;
-                            command_line.prompt(new_prompt, {formatters: false});
-                            if (bottom && (chr === '\n' || !self.is_bottom())) {
-                                self.scroll_to_bottom();
-                            }
-                            char_i++;
                             if (char_i === input_len && optimized) {
                                 var index = self.last_index();
                                 if (line === anim_lines.length - 1) {

@@ -1,3 +1,7 @@
+## 2.42.2
+### Bugfix
+* actual fix for blank lines typing animation [#946](https://github.com/jcubic/jquery.terminal/issues/946)
+
 ## 2.42.1
 ### Bugfix
 * fix line wrapping when calling multiple echo `newline:false` [#952](https://github.com/jcubic/jquery.terminal/issues/952)
