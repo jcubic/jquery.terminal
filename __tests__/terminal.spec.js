@@ -5294,6 +5294,11 @@ describe('Terminal plugin', function() {
                 await delay(10);
                 expect(output(term)).toEqual(['hello']);
             });
+            // #946
+            it('should animate an empty line', async () => {
+                term.clear();
+                await term.echo('hello\n\nworld', { typing: true, delay: 0 });
+            });
         });
 
         describe('exec', function() {
