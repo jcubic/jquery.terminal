@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 12 Jul 2024 11:47:19 +0000
+ * Date: Fri, 12 Jul 2024 11:52:01 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.42.2',
-        date: 'Fri, 12 Jul 2024 11:47:19 +0000',
+        date: 'Fri, 12 Jul 2024 11:52:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

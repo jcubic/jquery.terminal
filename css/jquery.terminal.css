@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 12 Jul 2024 11:47:20 +0000
+ * Date: Fri, 26 Jul 2024 18:56:44 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -258,7 +258,6 @@ body.full-screen-terminal {
 .cmd div,
 .terminal.external div {
     line-height: 1em;
-    line-height: calc((var(--size) * (16px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
@@ -838,6 +837,16 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
+    .terminal {
+        --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
+        /* force size when user add --rows or --cols */
+        height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px)) !important;
+    }
+    .terminal .terminal-output > :not(.raw) > div,
+    .cmd div,
+    .terminal.external div {
+        line-height: var(--terminal-line, 1em);
+    }
     .terminal [data-text], .cmd [data-text] {
         /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
         /* --glow: 0; */
@@ -963,6 +972,10 @@ terminal .terminal-output > div {
   syntax: '<number>';
   inherits: true;
   initial-value: 10;
+}
+@property --rows {
+  syntax: '<number>';
+  inherits: true;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,

@@ -1,3 +1,7 @@
+## 2.43.0
+### Features
+* add support for `--rows` CSS custom property [#956](https://github.com/jcubic/jquery.terminal/issues/956)
+
 ## 2.42.2
 ### Bugfix
 * actual fix for blank lines typing animation [#946](https://github.com/jcubic/jquery.terminal/issues/946)
