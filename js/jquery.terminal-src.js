@@ -12369,12 +12369,14 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = scroller.width();
+                    var width = filler.width();
                     var height = filler.height();
                     pixel_density = get_pixel_size();
-                    css(self[0], {
-                        '--pixel-density': pixel_density
-                    });
+                    if (old_pixel_density !== pixel_density) {
+                        css(self[0], {
+                            '--pixel-density': pixel_density
+                        });
+                    }
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
                         if (!need_char_size_recalculate) {

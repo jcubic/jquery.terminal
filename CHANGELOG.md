@@ -1,6 +1,8 @@
 ## 2.43.0
 ### Features
 * add support for `--rows` CSS custom property [#956](https://github.com/jcubic/jquery.terminal/issues/956)
+### Bugfix
+* fix CMD update performace issue [#961](https://github.com/jcubic/jquery.terminal/issues/961)
 
 ## 2.42.2
 ### Bugfix

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.42.2
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 12 Jul 2024 11:52:01 +0000
+ * Date: Wed, 04 Sep 2024 18:42:23 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5311,8 +5311,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.42.2',
-        date: 'Fri, 12 Jul 2024 11:52:01 +0000',
+        version: 'DEV',
+        date: 'Wed, 04 Sep 2024 18:42:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12369,12 +12369,14 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = scroller.width();
+                    var width = filler.width();
                     var height = filler.height();
                     pixel_density = get_pixel_size();
-                    css(self[0], {
-                        '--pixel-density': pixel_density
-                    });
+                    if (old_pixel_density !== pixel_density) {
+                        css(self[0], {
+                            '--pixel-density': pixel_density
+                        });
+                    }
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
                         if (!need_char_size_recalculate) {
