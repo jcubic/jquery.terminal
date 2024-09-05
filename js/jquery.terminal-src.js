@@ -1108,7 +1108,7 @@
         if (value !== undefined) {
             if (is_promise(value)) {
                 if (is_function(value.catch) && is_function(error)) {
-                    value.catch(error);
+                    value = value.catch(error);
                 }
                 if (is_function(value.done)) {
                     return value.done(callback);
