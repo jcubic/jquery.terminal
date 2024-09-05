@@ -1,9 +1,12 @@
 ## 2.43.0
 ### Features
 * add support for `--rows` CSS custom property [#956](https://github.com/jcubic/jquery.terminal/issues/956)
+* add aborting signals [#940](https://github.com/jcubic/jquery.terminal/issues/940)
 ### Bugfix
 * fix CMD update performace issue [#961](https://github.com/jcubic/jquery.terminal/issues/961)
 * don't reflow the reflow the cursor on update [#932](https://github.com/jcubic/jquery.terminal/issues/932)
+* fix unexpected uncaught exceptions in promises
+* fix skip/skip_stop return value and add types
 
 ## 2.42.2
 ### Bugfix

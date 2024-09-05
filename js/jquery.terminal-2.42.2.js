@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 05 Sep 2024 14:55:07 +0000
+ * Date: Thu, 05 Sep 2024 22:13:03 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1107,14 +1107,15 @@
     function unpromise(value, callback, error) {
         if (value !== undefined) {
             if (is_promise(value)) {
+                if (is_function(value.done)) {
+                    value = value.done(callback);
+                } else if (is_function(value.then)) {
+                    value = value.then(callback);
+                }
                 if (is_function(value.catch) && is_function(error)) {
                     value.catch(error);
                 }
-                if (is_function(value.done)) {
-                    return value.done(callback);
-                } else if (is_function(value.then)) {
-                    return value.then(callback);
-                }
+                return value;
             } else if (value instanceof Array) {
                 var promises = value.filter(function(value) {
                     return value && (is_function(value.done) || is_function(value.then));
@@ -5312,7 +5313,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 05 Sep 2024 14:55:07 +0000',
+        date: 'Thu, 05 Sep 2024 22:13:03 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7507,6 +7508,7 @@
         completionEscape: true,
         mobileDelete: is_mobile,
         convertLinks: true,
+        errorOnAbort: true,
         extra: {},
         tabs: 4,
         historySize: 60,
@@ -7600,13 +7602,16 @@
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
             invalidMask: 'Invalid mask used only string or boolean allowed',
-            defunctTerminal: "You can't call method on terminal that was destroyed"
+            defunctTerminal: "You can't call method on terminal that was destroyed",
+            abortError: 'Abort with CTRL+D',
+            timeoutError: 'Signal timed out'
         }
     };
     // -------------------------------------------------------------------------
     // :: All terminal globals
     // -------------------------------------------------------------------------
-    var requests = []; // for canceling on CTRL+D
+    var requests = []; // jQuery AJAX and Abort controllers for canceling on CTRL+D
+    var abort_controllers = [];
     var terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
@@ -8611,8 +8616,11 @@
         }
         // ---------------------------------------------------------------------
         function make_label_error(label) {
-            return function(e) {
-                self.error('[' + label + '] ' + (e.message || e)).resume();
+            return function(err) {
+                if (['AbortError', 'TimeoutError'].includes(err.name) && !settings.errorOnAbort) {
+                    return;
+                }
+                self.error('[' + label + '] ' + (err.message || err)).resume();
             };
         }
         // ---------------------------------------------------------------------
@@ -8676,6 +8684,11 @@
                 return is_function(ret.done || ret.then) && animating;
             }
             // -----------------------------------------------------------------
+            var command_error = make_label_error('Command');
+            function invoke_error(err) {
+                command_error(err);
+                abort_controllers = [];
+            }
             function invoke() {
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
@@ -8691,14 +8704,14 @@
                         }
                     }
                     force_awake = false;
-                    var error = make_label_error('Command');
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
                         return unpromise(result, function(value) {
                             show(value, true);
-                        }, error);
+                            abort_controllers = [];
+                        }, invoke_error);
                     } else {
-                        return $.when(result).done(show).catch(error);
+                        return $.when(result).done(show).catch(invoke_error);
                     }
                 } else {
                     if (exec) {
@@ -9176,6 +9189,7 @@
                                 return result;
                             }
                         }
+                        self.abort();
                         if (requests.length) {
                             for (i = requests.length; i--;) {
                                 var r = requests[i];
@@ -9737,7 +9751,7 @@
                         // so push didn't get name/prompt from exec command
                         prev_command = null;
                         d.resolve();
-                    }, function() {
+                    }, function(e) {
                         prev_command = null;
                         d.reject();
                     });
@@ -10112,16 +10126,61 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: returns Signal that aborts on CTRL+D
+            // -------------------------------------------------------------
+            signal: function() {
+                const controller = new AbortController();
+                abort_controllers.push(controller);
+                return controller.signal;
+            },
+            // -------------------------------------------------------------
+            // :: returns Signal that aborts after timeout and CTRL+D
+            // -------------------------------------------------------------
+            timeout: function(time) {
+                // the code is based on polyfill
+                // https://github.com/southpolesteve/node-abort-controller
+                // the reason why it was implemented from scratch
+                // was because jest framework was missing AbortSignal.timeout
+                // but this give the oportinity to improve the API a bit
+                const controller = new AbortController();
+                var err = new Error(strings().timeoutError);
+                err.name = 'TimeoutError';
+                abort_controllers.push(controller);
+                var signal = controller.signal;
+                setTimeout(function() {
+                    if (!signal.aborted) {
+                        controller.abort(err);
+                    }
+                }, time);
+                return signal;
+            },
+            // -------------------------------------------------------------
+            // :: abort all signals
+            // -------------------------------------------------------------
+            abort: function(message) {
+                if (abort_controllers.length) {
+                    var err = new Error(message || strings().abortError);
+                    err.name = 'AbortError';
+                    for (i = abort_controllers.length; i--;) {
+                        abort_controllers[i].abort(err);
+                    }
+                    abort_controllers = [];
+                }
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Skip the next terminal animations
             // -------------------------------------------------------------
             skip: function() {
                 skip = true;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Stop skipping the next terminal animations
             // -------------------------------------------------------------
             skip_stop: function() {
                 skip = false;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Return if key animation is running
