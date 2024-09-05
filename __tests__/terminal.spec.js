@@ -244,7 +244,6 @@ global.URL = window.URL = {
     revokeObjectURL: function() {}
 };
 
-
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/xml_formatting')(global.$);

@@ -1107,14 +1107,15 @@
     function unpromise(value, callback, error) {
         if (value !== undefined) {
             if (is_promise(value)) {
-                if (is_function(value.catch) && is_function(error)) {
-                    value = value.catch(error);
-                }
                 if (is_function(value.done)) {
-                    return value.done(callback);
+                    value = value.done(callback);
                 } else if (is_function(value.then)) {
-                    return value.then(callback);
+                    value = value.then(callback);
                 }
+                if (is_function(value.catch) && is_function(error)) {
+                    value.catch(error);
+                }
+                return value;
             } else if (value instanceof Array) {
                 var promises = value.filter(function(value) {
                     return value && (is_function(value.done) || is_function(value.then));
