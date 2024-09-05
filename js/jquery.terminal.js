@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 04 Sep 2024 18:42:23 +0000
+ * Date: Thu, 05 Sep 2024 14:55:07 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5312,7 +5312,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 04 Sep 2024 18:42:23 +0000',
+        date: 'Thu, 05 Sep 2024 14:55:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10738,7 +10738,7 @@
                                 '--cmd-top': top,
                                 '--cmd-height': height
                             });
-                            if (enabled && !is_mobile) {
+                            if (enabled && !is_mobile && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();

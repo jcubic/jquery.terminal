@@ -10738,7 +10738,7 @@
                                 '--cmd-top': top,
                                 '--cmd-height': height
                             });
-                            if (enabled && !is_mobile) {
+                            if (enabled && !is_mobile && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
