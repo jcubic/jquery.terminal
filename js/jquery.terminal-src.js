@@ -8615,9 +8615,10 @@
             }*/
         }
         // ---------------------------------------------------------------------
+        var signals = ['AbortError', 'TimeoutError'];
         function make_label_error(label) {
             return function(err) {
-                if (['AbortError', 'TimeoutError'].includes(err.name) && !settings.errorOnAbort) {
+                if (signals.includes(err.name) && !settings.errorOnAbort) {
                     return;
                 }
                 self.error('[' + label + '] ' + (err.message || err)).resume();
@@ -9751,7 +9752,7 @@
                         // so push didn't get name/prompt from exec command
                         prev_command = null;
                         d.resolve();
-                    }, function(e) {
+                    }, function() {
                         prev_command = null;
                         d.reject();
                     });
@@ -10129,7 +10130,7 @@
             // :: returns Signal that aborts on CTRL+D
             // -------------------------------------------------------------
             signal: function() {
-                const controller = new AbortController();
+                var controller = new AbortController();
                 abort_controllers.push(controller);
                 return controller.signal;
             },
@@ -10142,7 +10143,7 @@
                 // the reason why it was implemented from scratch
                 // was because jest framework was missing AbortSignal.timeout
                 // but this give the oportinity to improve the API a bit
-                const controller = new AbortController();
+                var controller = new AbortController();
                 var err = new Error(strings().timeoutError);
                 err.name = 'TimeoutError';
                 abort_controllers.push(controller);
