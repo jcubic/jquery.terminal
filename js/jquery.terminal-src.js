@@ -10116,12 +10116,14 @@
             // -------------------------------------------------------------
             skip: function() {
                 skip = true;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Stop skipping the next terminal animations
             // -------------------------------------------------------------
             skip_stop: function() {
                 skip = false;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Return if key animation is running
