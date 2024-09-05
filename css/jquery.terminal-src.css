@@ -101,7 +101,7 @@ body.terminal, body.full-screen-terminal {
     height: 100%;
 }
 body.full-screen-terminal .terminal {
-    height: 100%;
+    height: 100% !important;
 }
 body.full-screen-terminal {
     height: 100%;
