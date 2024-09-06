@@ -1104,6 +1104,16 @@
         return defer.promise();
     }
     // -----------------------------------------------------------------------
+    function always(value, callback) {
+        if (is_function(ret.finally)) {
+            return ret.finally(callback);
+        }
+        if (is_function(ret.always)) {
+            return ret.always(callback);
+        }
+        return value;
+    }
+    // -----------------------------------------------------------------------
     function unpromise(value, callback, error) {
         if (value !== undefined) {
             if (is_promise(value)) {
@@ -7684,7 +7694,13 @@
                         if (ret === false) {
                             return false;
                         }
-                        if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
+                        var was_promise = is_promise(ret);
+                        if (was_promise) {
+                            return always(ret, function() {
+                                recursive_render = false;
+                            });
+                        }
+                        if (typeof ret === 'string' || is_node(ret)) {
                             return ret;
                         } else {
                             return value;
@@ -7695,7 +7711,9 @@
                             format_stack_trace(e.stack)
                         ].join('\n');
                     } finally {
-                        recursive_render = false;
+                        if (!was_promise) {
+                            recursive_render = false;
+                        }
                     }
                 });
             }
@@ -11018,7 +11036,7 @@
                             value = arg.bind(self);
                         } else if (typeof arg === 'undefined') {
                             if (arg_defined) {
-                                value = String(arg);
+                                return self;
                             } else {
                                 value = '';
                             }
@@ -11033,11 +11051,12 @@
                             echo_promise = true;
                         }
                         unpromise(value, function(value) {
-                            if (is_promise(ret) && value === false) {
+                            if (typeof value === 'undefined' ||
+                                (is_promise(ret) && value === false)) {
                                 return;
                             }
                             if (render(value, locals)) {
-                                return self;
+                                return;
                             }
                             var index = lines.length();
                             var last_newline = lines.has_newline();
@@ -11100,7 +11119,7 @@
                     }
                 }
                 var is_animation = options && options.typing;
-                if (echo_promise) {
+                if (echo_promise && !recursive_render) {
                     var args = [arg, options];
                     if (is_animation) {
                         args.push(d);

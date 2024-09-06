@@ -1,4 +1,6 @@
 ## 2.43.0
+### Breaking
+* echo of undefined or Promise that resolve to undefined no longer display string undefined
 ### Features
 * add support for `--rows` CSS custom property [#956](https://github.com/jcubic/jquery.terminal/issues/956)
 * add aborting signals [#940](https://github.com/jcubic/jquery.terminal/issues/940)
@@ -7,6 +9,7 @@
 * don't reflow the reflow the cursor on update [#932](https://github.com/jcubic/jquery.terminal/issues/932)
 * fix unexpected uncaught exceptions in promises
 * fix skip/skip_stop return value and add types
+* fix recursive call to echo in renderHandler [#733](https://github.com/jcubic/jquery.terminal/issues/733)
 
 ## 2.42.2
 ### Bugfix

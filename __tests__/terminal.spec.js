@@ -6421,9 +6421,9 @@ describe('Terminal plugin', function() {
                 term.clear().echo(input);
                 expect(output().join('\n')).toEqual(input);
             });
-            it('should print undefined', function() {
+            it('should not print undefined', function() {
                 term.clear().echo(undefined);
-                expect(output().join('\n')).toEqual('undefined');
+                expect(output().join('\n')).toEqual('');
             });
             it('should print value from function that return promise', function(done) {
                 var term = $('<div/>').terminal();
