@@ -3440,33 +3440,48 @@ describe('Terminal plugin', function() {
             });
         });
         describe('renderHandler', function() {
-            class Foo {
-                valueOf() {
-                    return "Hello";
+            describe('default', () => {
+                class Foo {
+                    valueOf() {
+                        return "Hello";
+                    }
                 }
-            }
-            let term;
-            beforeEach(() => {
-                term = $('<div/>').terminal(function() {
-                    return new Foo();
-                }, {
-                    renderHandler(value) {
-                        if (value instanceof Foo) {
-                            this.echo(value.valueOf());
-                            return false;
-                        }
-                    },
-                    greetings: false
+                let term;
+                beforeEach(() => {
+                    term = $('<div/>').terminal(function() {
+                        return new Foo();
+                    }, {
+                        renderHandler(value) {
+                            if (value instanceof Foo) {
+                                this.echo(value.valueOf());
+                                return false;
+                            }
+                        },
+                        greetings: false
+                    });
+                });
+                it('should render object from echo', () => {
+                    term.echo(new Foo());
+                    expect(term.get_output()).toEqual('Hello');
+                });
+                it('should render object from interpreter', () => {
+                    term.exec('foo', true);
+                    expect(term.get_output()).toEqual('Hello');
+                    expect(term.paused()).toBeFalsy(); // #857
                 });
             });
-            it('should render object from echo', () => {
-                term.echo(new Foo());
-                expect(term.get_output()).toEqual('Hello');
-            });
-            it('should render object from interpreter', () => {
-                term.exec('foo', true);
-                expect(term.get_output()).toEqual('Hello');
-                expect(term.paused()).toBeFalsy(); // #857
+            describe('resursive', () => {
+                it('should render sync echo', () => {
+                    const term = $('<div/>').terminal({}, {
+                        renderHandler(value) {
+                            this.echo(`Hello ${value}`);
+                            return false;
+                        },
+                        greetings: false
+                    });
+                    term.echo('Terminal');
+                    expect(term.get_output()).toEqual('Hello Terminal');
+                });
             });
         });
         describe('pauseEvents', function() {

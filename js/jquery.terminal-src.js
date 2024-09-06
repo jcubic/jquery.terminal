@@ -7666,6 +7666,7 @@
         // ---------------------------------------------------------------------
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
+        var recursive_render = false;
         function preprocess_value(value, options) {
             options = options || {};
             if ($.terminal.Animation && value instanceof $.terminal.Animation) {
@@ -7673,8 +7674,12 @@
                 return false;
             }
             if (is_function(settings.renderHandler)) {
+                if (recursive_render) {
+                    return value;
+                }
                 return unpromise(value, function(value) {
                     try {
+                        recursive_render = true;
                         var ret = settings.renderHandler.call(self, value, options, self);
                         if (ret === false) {
                             return false;
@@ -7689,6 +7694,8 @@
                             '[[;red;]' + e.message + ']',
                             format_stack_trace(e.stack)
                         ].join('\n');
+                    } finally {
+                        recursive_render = false;
                     }
                 });
             }
