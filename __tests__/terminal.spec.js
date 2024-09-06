@@ -3686,7 +3686,7 @@ describe('Terminal plugin', function() {
         };
     }
     describe('events', function() {
-        describe('abort ', () => {
+        describe('abort signals', () => {
             function ctrl_d() {
                 // invoke_key doesn't work here because this shortcut don't use keymap
                 shortcut(true, false, false, 'd');
@@ -3825,6 +3825,40 @@ describe('Terminal plugin', function() {
                     term.insert('fetch');
                     enter_key();
                     expect(term.get_output()).toEqual('> fetch');
+                });
+            });
+            describe('read', () => {
+                let term;
+                beforeEach(() => {
+                    term = $('<div/>').terminal({}, {
+                        greetings: false
+                    });
+                });
+                it('should aboort with CTRL+D and default signal', async () => {
+                    expect.assertions(1);
+                    try {
+                        const ret = term.read('$ ');
+                        setTimeout(() => {
+                            term.focus();
+                            ctrl_d();
+                        }, 0);
+                        await ret;
+                    } catch(err) {
+                        expect(err.name).toEqual('AbortError');
+                    }
+                });
+                it('should timeout', async () => {
+                    expect.assertions(1);
+                    try {
+                        await term.read('$ ', { signal: term.timeout(100) });
+                    } catch(err) {
+                        expect(err.name).toEqual('TimeoutError');
+                    }
+                });
+                it('should read value', async () => {
+                    const ret = term.read('$ ', { signal: term.timeout(100) });
+                    term.exec('foo bar');
+                    expect(await ret).toEqual('foo bar');
                 });
             });
         });

@@ -1105,11 +1105,11 @@
     }
     // -----------------------------------------------------------------------
     function always(value, callback) {
-        if (is_function(ret.finally)) {
-            return ret.finally(callback);
+        if (is_function(value.finally)) {
+            return value.finally(callback);
         }
-        if (is_function(ret.always)) {
-            return ret.always(callback);
+        if (is_function(value.always)) {
+            return value.always(callback);
         }
         return value;
     }
@@ -1151,7 +1151,7 @@
     // :: helper to allow to execute unpromise with undefined
     // :: this is workaround on the problem above
     // -----------------------------------------------------------------------
-    function always(value) {
+    function defined(value) {
         return value === undefined ? true : value;
     }
     // -----------------------------------------------------------------------
@@ -9478,7 +9478,7 @@
         // ---------------------------------------------------------------------
         function validate_login(user, token_or_password, callback) {
             var ret = fire_event('onBeforeLogin', [user, token_or_password]);
-            return unpromise(always(ret), callback, 'validate_login');
+            return unpromise(defined(ret), callback, 'validate_login');
         }
         // ---------------------------------------------------------------------
         // :: Function changes the prompt of the command line to login
@@ -10187,8 +10187,11 @@
                 if (abort_controllers.length) {
                     var err = new Error(message || strings().abortError);
                     err.name = 'AbortError';
-                    for (i = abort_controllers.length; i--;) {
-                        abort_controllers[i].abort(err);
+                    for (var i = abort_controllers.length; i--;) {
+                        var controller = abort_controllers[i];
+                        if (!controller.signal.aborted) {
+                            controller.abort(err);
+                        }
                     }
                     abort_controllers = [];
                 }
@@ -11378,6 +11381,9 @@
                         cancel: cancel || $.noop
                     };
                 }
+                if (!options.signal) {
+                    options.signal = self.signal();
+                }
                 if (options.typing) {
                     var prompt = self.get_prompt();
                     options.typing = false;
@@ -11388,30 +11394,46 @@
                 // return from read() should not pause terminal
                 force_awake = true;
                 var defer = jQuery.Deferred();
-                var read = false;
+                if (options.signal.aborted) {
+                    defer.reject();
+                    return defer.promise();
+                }
                 self.push(function(string) {
-                    read = true;
                     defer.resolve(string);
                     if (is_function(options.success)) {
                         options.success(string);
                     }
-                    self.pop();
-                    if (settings.history) {
-                        command_line.history().enable();
-                    }
+                    exit();
                 }, {
                     name: 'read',
                     history: false,
                     prompt: message || '',
-                    onExit: function() {
-                        if (!read) {
-                            defer.reject();
-                            if (is_function(options.cancel)) {
-                                options.cancel();
-                            }
+                    onStart: function() {
+                        options.signal.addEventListener('abort', abort_handler);
+                    },
+                    keymap: {
+                        'CTRL+D': function() {
+                            self.abort();
+                            return false;
                         }
                     }
                 });
+                function reject(value) {
+                    defer.reject(value);
+                    if (is_function(options.cancel)) {
+                        options.cancel();
+                    }
+                }
+                function exit() {
+                    self.pop();
+                    if (settings.history) {
+                        command_line.history().enable();
+                    }
+                }
+                function abort_handler() {
+                    exit();
+                    reject(options.signal.reason);
+                }
                 if (settings.history) {
                     command_line.history().disable();
                 }
