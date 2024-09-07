@@ -1104,17 +1104,28 @@
         return defer.promise();
     }
     // -----------------------------------------------------------------------
+    function always(value, callback) {
+        if (is_function(value.finally)) {
+            return value.finally(callback);
+        }
+        if (is_function(value.always)) {
+            return value.always(callback);
+        }
+        return value;
+    }
+    // -----------------------------------------------------------------------
     function unpromise(value, callback, error) {
         if (value !== undefined) {
             if (is_promise(value)) {
+                if (is_function(value.done)) {
+                    value = value.done(callback);
+                } else if (is_function(value.then)) {
+                    value = value.then(callback);
+                }
                 if (is_function(value.catch) && is_function(error)) {
                     value.catch(error);
                 }
-                if (is_function(value.done)) {
-                    return value.done(callback);
-                } else if (is_function(value.then)) {
-                    return value.then(callback);
-                }
+                return value;
             } else if (value instanceof Array) {
                 var promises = value.filter(function(value) {
                     return value && (is_function(value.done) || is_function(value.then));
@@ -1140,7 +1151,7 @@
     // :: helper to allow to execute unpromise with undefined
     // :: this is workaround on the problem above
     // -----------------------------------------------------------------------
-    function always(value) {
+    function defined(value) {
         return value === undefined ? true : value;
     }
     // -----------------------------------------------------------------------
@@ -7507,6 +7518,7 @@
         completionEscape: true,
         mobileDelete: is_mobile,
         convertLinks: true,
+        errorOnAbort: true,
         extra: {},
         tabs: 4,
         historySize: 60,
@@ -7600,13 +7612,16 @@
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
             invalidMask: 'Invalid mask used only string or boolean allowed',
-            defunctTerminal: "You can't call method on terminal that was destroyed"
+            defunctTerminal: "You can't call method on terminal that was destroyed",
+            abortError: 'Abort with CTRL+D',
+            timeoutError: 'Signal timed out'
         }
     };
     // -------------------------------------------------------------------------
     // :: All terminal globals
     // -------------------------------------------------------------------------
-    var requests = []; // for canceling on CTRL+D
+    var requests = []; // jQuery AJAX and Abort controllers for canceling on CTRL+D
+    var abort_controllers = [];
     var terminals = new Cycle(); // list of terminals global in this scope
     // state for all terminals, terminals can't have own array fo state because
     // there is only one popstate event
@@ -7661,6 +7676,7 @@
         // ---------------------------------------------------------------------
         // :: helper function that use option to render objects
         // ---------------------------------------------------------------------
+        var recursive_render = false;
         function preprocess_value(value, options) {
             options = options || {};
             if ($.terminal.Animation && value instanceof $.terminal.Animation) {
@@ -7668,13 +7684,23 @@
                 return false;
             }
             if (is_function(settings.renderHandler)) {
+                if (recursive_render) {
+                    return value;
+                }
                 return unpromise(value, function(value) {
                     try {
+                        recursive_render = true;
                         var ret = settings.renderHandler.call(self, value, options, self);
                         if (ret === false) {
                             return false;
                         }
-                        if (typeof ret === 'string' || is_node(ret) || is_promise(ret)) {
+                        var was_promise = is_promise(ret);
+                        if (was_promise) {
+                            return always(ret, function() {
+                                recursive_render = false;
+                            });
+                        }
+                        if (typeof ret === 'string' || is_node(ret)) {
                             return ret;
                         } else {
                             return value;
@@ -7684,6 +7710,10 @@
                             '[[;red;]' + e.message + ']',
                             format_stack_trace(e.stack)
                         ].join('\n');
+                    } finally {
+                        if (!was_promise) {
+                            recursive_render = false;
+                        }
                     }
                 });
             }
@@ -8610,9 +8640,13 @@
             }*/
         }
         // ---------------------------------------------------------------------
+        var signals = ['AbortError', 'TimeoutError'];
         function make_label_error(label) {
-            return function(e) {
-                self.error('[' + label + '] ' + (e.message || e)).resume();
+            return function(err) {
+                if (signals.includes(err.name) && !settings.errorOnAbort) {
+                    return;
+                }
+                self.error('[' + label + '] ' + (err.message || err)).resume();
             };
         }
         // ---------------------------------------------------------------------
@@ -8676,6 +8710,11 @@
                 return is_function(ret.done || ret.then) && animating;
             }
             // -----------------------------------------------------------------
+            var command_error = make_label_error('Command');
+            function invoke_error(err) {
+                command_error(err);
+                abort_controllers = [];
+            }
             function invoke() {
                 // Call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
@@ -8691,14 +8730,14 @@
                         }
                     }
                     force_awake = false;
-                    var error = make_label_error('Command');
                     // when for native Promise object work only in jQuery 3.x
                     if (is_function(result.done || result.then)) {
                         return unpromise(result, function(value) {
                             show(value, true);
-                        }, error);
+                            abort_controllers = [];
+                        }, invoke_error);
                     } else {
-                        return $.when(result).done(show).catch(error);
+                        return $.when(result).done(show).catch(invoke_error);
                     }
                 } else {
                     if (exec) {
@@ -9176,6 +9215,7 @@
                                 return result;
                             }
                         }
+                        self.abort();
                         if (requests.length) {
                             for (i = requests.length; i--;) {
                                 var r = requests[i];
@@ -9438,7 +9478,7 @@
         // ---------------------------------------------------------------------
         function validate_login(user, token_or_password, callback) {
             var ret = fire_event('onBeforeLogin', [user, token_or_password]);
-            return unpromise(always(ret), callback, 'validate_login');
+            return unpromise(defined(ret), callback, 'validate_login');
         }
         // ---------------------------------------------------------------------
         // :: Function changes the prompt of the command line to login
@@ -10112,16 +10152,64 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: returns Signal that aborts on CTRL+D
+            // -------------------------------------------------------------
+            signal: function() {
+                var controller = new AbortController();
+                abort_controllers.push(controller);
+                return controller.signal;
+            },
+            // -------------------------------------------------------------
+            // :: returns Signal that aborts after timeout and CTRL+D
+            // -------------------------------------------------------------
+            timeout: function(time) {
+                // the code is based on polyfill
+                // https://github.com/southpolesteve/node-abort-controller
+                // the reason why it was implemented from scratch
+                // was because jest framework was missing AbortSignal.timeout
+                // but this give the oportinity to improve the API a bit
+                var controller = new AbortController();
+                var err = new Error(strings().timeoutError);
+                err.name = 'TimeoutError';
+                abort_controllers.push(controller);
+                var signal = controller.signal;
+                setTimeout(function() {
+                    if (!signal.aborted) {
+                        controller.abort(err);
+                    }
+                }, time);
+                return signal;
+            },
+            // -------------------------------------------------------------
+            // :: abort all signals
+            // -------------------------------------------------------------
+            abort: function(message) {
+                if (abort_controllers.length) {
+                    var err = new Error(message || strings().abortError);
+                    err.name = 'AbortError';
+                    for (var i = abort_controllers.length; i--;) {
+                        var controller = abort_controllers[i];
+                        if (!controller.signal.aborted) {
+                            controller.abort(err);
+                        }
+                    }
+                    abort_controllers = [];
+                }
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Skip the next terminal animations
             // -------------------------------------------------------------
             skip: function() {
                 skip = true;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Stop skipping the next terminal animations
             // -------------------------------------------------------------
             skip_stop: function() {
                 skip = false;
+                return self;
             },
             // -------------------------------------------------------------
             // :: Return if key animation is running
@@ -10738,7 +10826,7 @@
                                 '--cmd-top': top,
                                 '--cmd-height': height
                             });
-                            if (enabled && !is_mobile) {
+                            if (enabled && !is_mobile && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
@@ -10951,7 +11039,7 @@
                             value = arg.bind(self);
                         } else if (typeof arg === 'undefined') {
                             if (arg_defined) {
-                                value = String(arg);
+                                return self;
                             } else {
                                 value = '';
                             }
@@ -10966,11 +11054,12 @@
                             echo_promise = true;
                         }
                         unpromise(value, function(value) {
-                            if (is_promise(ret) && value === false) {
+                            if (typeof value === 'undefined' ||
+                                (is_promise(ret) && value === false)) {
                                 return;
                             }
                             if (render(value, locals)) {
-                                return self;
+                                return;
                             }
                             var index = lines.length();
                             var last_newline = lines.has_newline();
@@ -11033,7 +11122,7 @@
                     }
                 }
                 var is_animation = options && options.typing;
-                if (echo_promise) {
+                if (echo_promise && !recursive_render) {
                     var args = [arg, options];
                     if (is_animation) {
                         args.push(d);
@@ -11292,6 +11381,9 @@
                         cancel: cancel || $.noop
                     };
                 }
+                if (!options.signal) {
+                    options.signal = self.signal();
+                }
                 if (options.typing) {
                     var prompt = self.get_prompt();
                     options.typing = false;
@@ -11302,30 +11394,46 @@
                 // return from read() should not pause terminal
                 force_awake = true;
                 var defer = jQuery.Deferred();
-                var read = false;
+                if (options.signal.aborted) {
+                    defer.reject();
+                    return defer.promise();
+                }
                 self.push(function(string) {
-                    read = true;
                     defer.resolve(string);
                     if (is_function(options.success)) {
                         options.success(string);
                     }
-                    self.pop();
-                    if (settings.history) {
-                        command_line.history().enable();
-                    }
+                    exit();
                 }, {
                     name: 'read',
                     history: false,
                     prompt: message || '',
-                    onExit: function() {
-                        if (!read) {
-                            defer.reject();
-                            if (is_function(options.cancel)) {
-                                options.cancel();
-                            }
+                    onStart: function() {
+                        options.signal.addEventListener('abort', abort_handler);
+                    },
+                    keymap: {
+                        'CTRL+D': function() {
+                            self.abort();
+                            return false;
                         }
                     }
                 });
+                function reject(value) {
+                    defer.reject(value);
+                    if (is_function(options.cancel)) {
+                        options.cancel();
+                    }
+                }
+                function exit() {
+                    self.pop();
+                    if (settings.history) {
+                        command_line.history().enable();
+                    }
+                }
+                function abort_handler() {
+                    exit();
+                    reject(options.signal.reason);
+                }
                 if (settings.history) {
                     command_line.history().disable();
                 }
@@ -12369,12 +12477,14 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = scroller.width();
+                    var width = filler.width();
                     var height = filler.height();
                     pixel_density = get_pixel_size();
-                    css(self[0], {
-                        '--pixel-density': pixel_density
-                    });
+                    if (old_pixel_density !== pixel_density) {
+                        css(self[0], {
+                            '--pixel-density': pixel_density
+                        });
+                    }
                     if (need_char_size_recalculate) {
                         need_char_size_recalculate = !terminal_ready(self);
                         if (!need_char_size_recalculate) {

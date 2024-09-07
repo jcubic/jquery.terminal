@@ -238,6 +238,7 @@ declare namespace JQueryTerminal {
         processRPCResponse?: null | processRPCResponseFunction;
         completionEscape?: boolean;
         convertLinks?: boolean;
+        errorOnAbort?: boolean;
         unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
         extra?: any;
         tabs?: number;
@@ -754,6 +755,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     paused(): boolean;
     pause(): JQueryTerminal;
     resume(): JQueryTerminal;
+    signal(): AbortSignal;
+    aboort(message?: string): JQueryTerminal;
     cols(): number;
     rows(): number;
     geometry(): JQueryTerminal.geometry;
@@ -810,6 +813,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     name(): string;
     prefix_name(local?: boolean): string;
     typing(type: JQueryTerminal.TypingAnimations, delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
+    skip(): JQueryTerminal;
+    skip_stop(): JQueryTerminal;
     read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;

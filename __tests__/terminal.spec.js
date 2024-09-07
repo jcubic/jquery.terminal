@@ -244,7 +244,6 @@ global.URL = window.URL = {
     revokeObjectURL: function() {}
 };
 
-
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/xml_formatting')(global.$);
@@ -3441,33 +3440,48 @@ describe('Terminal plugin', function() {
             });
         });
         describe('renderHandler', function() {
-            class Foo {
-                valueOf() {
-                    return "Hello";
+            describe('default', () => {
+                class Foo {
+                    valueOf() {
+                        return "Hello";
+                    }
                 }
-            }
-            let term;
-            beforeEach(() => {
-                term = $('<div/>').terminal(function() {
-                    return new Foo();
-                }, {
-                    renderHandler(value) {
-                        if (value instanceof Foo) {
-                            this.echo(value.valueOf());
-                            return false;
-                        }
-                    },
-                    greetings: false
+                let term;
+                beforeEach(() => {
+                    term = $('<div/>').terminal(function() {
+                        return new Foo();
+                    }, {
+                        renderHandler(value) {
+                            if (value instanceof Foo) {
+                                this.echo(value.valueOf());
+                                return false;
+                            }
+                        },
+                        greetings: false
+                    });
+                });
+                it('should render object from echo', () => {
+                    term.echo(new Foo());
+                    expect(term.get_output()).toEqual('Hello');
+                });
+                it('should render object from interpreter', () => {
+                    term.exec('foo', true);
+                    expect(term.get_output()).toEqual('Hello');
+                    expect(term.paused()).toBeFalsy(); // #857
                 });
             });
-            it('should render object from echo', () => {
-                term.echo(new Foo());
-                expect(term.get_output()).toEqual('Hello');
-            });
-            it('should render object from interpreter', () => {
-                term.exec('foo', true);
-                expect(term.get_output()).toEqual('Hello');
-                expect(term.paused()).toBeFalsy(); // #857
+            describe('resursive', () => {
+                it('should render sync echo', () => {
+                    const term = $('<div/>').terminal({}, {
+                        renderHandler(value) {
+                            this.echo(`Hello ${value}`);
+                            return false;
+                        },
+                        greetings: false
+                    });
+                    term.echo('Terminal');
+                    expect(term.get_output()).toEqual('Hello Terminal');
+                });
             });
         });
         describe('pauseEvents', function() {
@@ -3672,6 +3686,182 @@ describe('Terminal plugin', function() {
         };
     }
     describe('events', function() {
+        describe('abort signals', () => {
+            function ctrl_d() {
+                // invoke_key doesn't work here because this shortcut don't use keymap
+                shortcut(true, false, false, 'd');
+            }
+            const response = 'jQuery Terminal';
+            const fetch = function(url, { signal }) {
+                return new Promise((resolve, reject) => {
+                    if (signal.aborted) {
+                        reject(signal.reason);
+                    }
+                    setTimeout(() => {
+                        resolve({
+                            text: function() {
+                                return Promise.resolve(response);
+                            }
+                        });
+                    }, 100);
+                    signal.addEventListener("abort", () => {
+                        reject(signal.reason);
+                    });
+                });
+            }
+            function terminal(fetch, options = {}) {
+                return $('<div/>').terminal(async function() {
+                    const res = await fetch.call(this);
+                    const text = await res.text();
+                    this.echo(text);
+                }, { greetings: false, ...options });
+            }
+            describe('fetch with abort', () => {
+                let term;
+                beforeEach(() => {
+                    term = terminal(function() {
+                        const signal = this.signal();
+                        return fetch('https://terminal.jcubic.pl', { signal });
+                    });
+                });
+                it('should abort fetch on CTRL+D', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    ctrl_d();
+                    await delay(200);
+                    expect(term.get_output()).toMatch(/> fetch\n.*Abort with CTRL\+D/);
+                });
+                it('should fetch the data', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    await delay(200);
+                    expect(term.get_output()).toEqual('> fetch\njQuery Terminal');
+                });
+                it('should change abort message', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    term.abort('Nasty Abort');
+                    await delay(200);
+                    expect(term.get_output()).toMatch(/> fetch\n.*Nasty Abort/);
+                });
+            });
+            describe('fetch with timeout', () => {
+                let term;
+                beforeEach(() => {
+                    term = terminal(function() {
+                        const signal = this.timeout(100);
+                        return fetch('https://terminal.jcubic.pl', { signal });
+                    });
+                });
+                it('should abort fetch with error message', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    await delay(200);
+                    expect(term.get_output()).toMatch(/> fetch\n.*Signal timed out/);
+                });
+                it('should abort the timer with CTRL+D', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    ctrl_d();
+                    await delay(200);
+                    expect(term.get_output()).toMatch(/> fetch\n.*Abort with CTRL\+D/);
+                });
+            });
+            describe('catch exceptions', () => {
+                let term;
+                beforeEach(() => {
+                    term = $('<div/>').terminal(async function() {
+                        try {
+                            const signal = this.timeout(100);
+                            const res = await fetch('https://terminal.jcubic.pl', { signal });
+                            const text = await res.text();
+                            this.echo(text);
+                        } catch(err) {
+                            if (!['AbortError', 'TimeoutError'].includes(err.name)) {
+                                throw err;
+                            }
+                        }
+                    }, { greetings: false });
+                });
+                it('should catch timeout', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    await delay(200);
+                    expect(term.get_output()).toEqual('> fetch');
+                });
+                it('should catch abort timeout', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    ctrl_d();
+                    await delay(200);
+                    expect(term.get_output()).toEqual('> fetch');
+                });
+            });
+            describe('ignore errors', () => {
+                let term;
+                beforeEach(() => {
+                    term = terminal(function() {
+                        const signal = this.timeout(100);
+                        return fetch('https://terminal.jcubic.pl', { signal });
+                    }, { errorOnAbort: false });
+                });
+                it('should ingore timeout', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    await delay(200);
+                    expect(term.get_output()).toEqual('> fetch');
+                });
+                it('should ingore abort', async () => {
+                    term.insert('fetch');
+                    enter_key();
+                    ctrl_d();
+                    await delay(200);
+                    expect(term.get_output()).toEqual('> fetch');
+                });
+                it('should show error', async () => {
+                    const term = terminal(async function() {
+                        throw new Error('Nasty Error');
+                    }, { errorOnAbort: false });
+                    term.insert('fetch');
+                    enter_key();
+                    expect(term.get_output()).toEqual('> fetch');
+                });
+            });
+            describe('read', () => {
+                let term;
+                beforeEach(() => {
+                    term = $('<div/>').terminal({}, {
+                        greetings: false
+                    });
+                });
+                it('should aboort with CTRL+D and default signal', async () => {
+                    expect.assertions(1);
+                    try {
+                        const ret = term.read('$ ');
+                        setTimeout(() => {
+                            term.focus();
+                            ctrl_d();
+                        }, 0);
+                        await ret;
+                    } catch(err) {
+                        expect(err.name).toEqual('AbortError');
+                    }
+                });
+                it('should timeout', async () => {
+                    expect.assertions(1);
+                    try {
+                        await term.read('$ ', { signal: term.timeout(100) });
+                    } catch(err) {
+                        expect(err.name).toEqual('TimeoutError');
+                    }
+                });
+                it('should read value', async () => {
+                    const ret = term.read('$ ', { signal: term.timeout(100) });
+                    term.exec('foo bar');
+                    expect(await ret).toEqual('foo bar');
+                });
+            });
+        });
         describe('click', function() {
             var term = $('<div/>').terminal($.noop, {greetings: false, clickTimeout: 0});
             var cmd = term.cmd();
@@ -6265,9 +6455,9 @@ describe('Terminal plugin', function() {
                 term.clear().echo(input);
                 expect(output().join('\n')).toEqual(input);
             });
-            it('should print undefined', function() {
+            it('should not print undefined', function() {
                 term.clear().echo(undefined);
-                expect(output().join('\n')).toEqual('undefined');
+                expect(output().join('\n')).toEqual('');
             });
             it('should print value from function that return promise', function(done) {
                 var term = $('<div/>').terminal();

@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.42.2
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 12 Jul 2024 11:47:20 +0000
+ * Date: Thu, 05 Sep 2024 15:06:43 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -101,7 +101,7 @@ body.terminal, body.full-screen-terminal {
     height: 100%;
 }
 body.full-screen-terminal .terminal {
-    height: 100%;
+    height: 100% !important;
 }
 body.full-screen-terminal {
     height: 100%;
@@ -258,7 +258,6 @@ body.full-screen-terminal {
 .cmd div,
 .terminal.external div {
     line-height: 1em;
-    line-height: calc((var(--size) * (16px / var(--pixel-density, 1))) + (1px / var(--pixel-density, 1)));
 }
 .cmd .cmd-prompt span.fa::before,
 .cmd .cmd-prompt span.fab::before,
@@ -838,6 +837,16 @@ terminal .terminal-output > div {
         color: var(--color, #aaa);
         background-color: var(--background, #000);
     }
+    .terminal {
+        --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
+        /* force size when user add --rows or --cols */
+        height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px)) !important;
+    }
+    .terminal .terminal-output > :not(.raw) > div,
+    .cmd div,
+    .terminal.external div {
+        line-height: var(--terminal-line, 1em);
+    }
     .terminal [data-text], .cmd [data-text] {
         /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
         /* --glow: 0; */
@@ -963,6 +972,10 @@ terminal .terminal-output > div {
   syntax: '<number>';
   inherits: true;
   initial-value: 10;
+}
+@property --rows {
+  syntax: '<number>';
+  inherits: true;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
