@@ -1,5 +1,21 @@
 name: Build and test
-on: [pull_request, push]
+on:
+  push:
+    paths:
+      - "template/Makefile"
+      - "Makefile"
+      - "css/*"
+      - "package.json"
+      - "package-lock.json"
+      - "js/*"
+      - ".github/workflows/build.yaml"
+    branches:
+      - master
+      - devel
+  pull_request:
+    branches:
+      - master
+      - devel
 jobs:
   build:
     runs-on: ubuntu-latest

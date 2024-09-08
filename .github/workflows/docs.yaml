@@ -1,0 +1,51 @@
+name: build docs
+run-name: ${{ github.actor }} building documentation 🚀
+on:
+  push:
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yaml"
+    branches:
+      - docusaurus
+      - master
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: docs
+
+jobs:
+  deploy:
+    name: Build Docusaurus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: create version file
+        run: npm run version
+
+      - name: Build website
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.repository == 'jcubic/jquery.terminal-docs' || (github.repository == 'jcubic/jquery.terminal' && github.ref_name == 'master')}}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com
