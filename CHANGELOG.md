@@ -1,3 +1,7 @@
+## 2.43.1
+### Bugfix
+* fix height when not using `--rows` [#962](https://github.com/jcubic/jquery.terminal/issues/962)
+
 ## 2.43.0
 ### Breaking
 * echo of undefined or Promise that resolve to undefined no longer display string undefined
