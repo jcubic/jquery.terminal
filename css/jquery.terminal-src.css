@@ -839,8 +839,9 @@ terminal .terminal-output > div {
     }
     .terminal {
         --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
-        /* force size when user add --rows or --cols */
-        height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px)) !important;
+        height: auto;
+        /* force size when user add --rows */
+        height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px));
     }
     .terminal .terminal-output > :not(.raw) > div,
     .cmd div,
