@@ -13,3 +13,4 @@ js/*map binary
 __tests__/__snapshots__/*.snap binary
 __tests__/__fixtures__/*.ans binary
 *.png binary
+*.jpeg binary
