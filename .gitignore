@@ -1,6 +1,6 @@
 *~
 .[0-9/]*
-components
+#components
 \#*\#
 .\#*
 www
