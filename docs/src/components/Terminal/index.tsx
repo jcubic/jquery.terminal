@@ -1,4 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
+import clsx from 'clsx';
+
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import Head from '@docusaurus/Head';
 
@@ -14,7 +16,11 @@ const replReady = () => {
 
 import { initTerminal, destroyTerminal } from './terminal';
 
-export default function Interpreter(): JSX.Element {
+type InterpreterProps = {
+  className?: string;
+};
+
+export default function Interpreter({ className }: InterpreterProps): JSX.Element {
   const ref = useRef<HTMLDivElement>();
 
   const isProd = process.env.NODE_ENV === 'production';
@@ -51,7 +57,7 @@ export default function Interpreter(): JSX.Element {
         {isStatic && <script src="https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js" />}
       </Head>
       <div className="terminal marker" ref={ref}></div>
-      <div className="term"/>
+      <div className={clsx('term', className)}/>
     </>
   );
 };
