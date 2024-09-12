@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, CSSProperties } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import Head from '@docusaurus/Head';
 
@@ -13,10 +13,6 @@ const replReady = () => {
 }
 
 import { initTerminal, destroyTerminal } from './terminal';
-
-export interface TerminalProps extends CSSProperties {
-  '--rows': number;
-}
 
 export default function Interpreter(): JSX.Element {
   const ref = useRef<HTMLDivElement>();
@@ -46,10 +42,6 @@ export default function Interpreter(): JSX.Element {
     return !!getComputedStyle(ref.current).getPropertyValue('--base-background');
   }
 
-  const terminalStyle = {
-    '--rows': 15
-  } as TerminalProps;
-
   return (
     <>
       <Head>
@@ -59,7 +51,7 @@ export default function Interpreter(): JSX.Element {
         {isStatic && <script src="https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js" />}
       </Head>
       <div className="terminal marker" ref={ref}></div>
-      <div className="term" style={terminalStyle} />
+      <div className="term"/>
     </>
   );
 };
