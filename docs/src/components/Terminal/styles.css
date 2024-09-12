@@ -11,7 +11,8 @@
     left: -9999999999px;
 }
 .term {
-    --rows: 11;
+    --rows: 20;
+    border-radius: 5px;
     text-align: left;
     resize: vertical;
     overflow: hidden;
