@@ -1,0 +1,18 @@
+.term {
+    --background: white;
+    --color:#14232d;
+}
+[data-theme='dark'] .term {
+    --background: #14232d;
+    --color: white;
+}
+.terminal.marker {
+    position: absolute;
+    left: -9999999999px;
+}
+.term {
+    --rows: 11;
+    text-align: left;
+    resize: vertical;
+    overflow: hidden;
+}
