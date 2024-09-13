@@ -1,9 +1,11 @@
 import clsx from 'clsx';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
 
+import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Terminal from '@site/src/components/Terminal';
+import Contributors from '@site/src/components/Contributors';
+
 
 import styles from './index.module.css';
 
@@ -34,6 +36,7 @@ export default function Home(): JSX.Element {
       <HomepageHeader />
       <main>
         <HomepageFeatures />
+        <Contributors />
       </main>
     </Layout>
   );

@@ -1,0 +1,24 @@
+.contributors {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 2em auto;
+    width: calc(32px * 15);
+}
+
+.contributors li {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.contributors img {
+    width: 32px;
+    height: 32px;
+}
+
+.contributors a, .contributors img {
+    display: block;
+}
