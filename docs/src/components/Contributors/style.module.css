@@ -1,3 +1,8 @@
+.header {
+    font-family: "bambi-bold", sans-serif;
+    letter-spacing: 3px;
+}
+
 .contributors {
     list-style: none;
     margin: 0;

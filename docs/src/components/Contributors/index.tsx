@@ -13,7 +13,7 @@ type User = {
 export default function Contributors() {
   return (
     <div className="container narrow">
-      <Heading as="h2" id="contributors">Contributors</Heading>
+      <Heading as="h2" id="contributors" className={styles.header}>Contributors</Heading>
       <ul className={styles.contributors}>
         {users.map((user: User) => {
           return (
