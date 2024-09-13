@@ -4,6 +4,7 @@
 }
 
 .contributors {
+    --avatar-size: 52px;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -11,7 +12,7 @@
     flex-wrap: wrap;
     gap: 5px;
     margin: 2em auto;
-    width: calc(32px * 15);
+    width: calc(var(--avatar-size) * 15);
 }
 
 .contributors li {
@@ -20,8 +21,8 @@
 }
 
 .contributors img {
-    width: 32px;
-    height: 32px;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
 }
 
 .contributors a, .contributors img {
