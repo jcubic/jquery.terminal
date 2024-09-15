@@ -9716,6 +9716,7 @@
                 }
                 fire_event('onImport', [view]);
                 when_ready(function ready() {
+                    var bottom = self.is_bottom();
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
@@ -9733,6 +9734,9 @@
                         command_line.history().set(view.history);
                     }
                     redraw();
+                    if (bottom) {
+                        self.scroll_to_bottom();
+                    }
                 });
                 return self;
             },
