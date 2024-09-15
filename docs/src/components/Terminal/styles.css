@@ -17,3 +17,14 @@
     resize: vertical;
     overflow: hidden;
 }
+
+.term.shake {
+    animation: shake 0.2s;
+}
+
+@keyframes shake {
+    0% { transform: translateY(0) }
+    25% { transform: translateY(2px) }
+    50% { transform: translateY(0) }
+    100% { transform: translateY(-2px) }
+}
