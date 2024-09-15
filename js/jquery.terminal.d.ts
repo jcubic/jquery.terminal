@@ -5,12 +5,12 @@ type anyFunction = (...args: any[]) => any;
 type StringOrNumber = string | number | null;
 
 type JSONObject = {
-    [key: string]: TypeOrArray<StringOrNumber | boolean | JSONObject>
+  [key: string]: TypeOrArray<StringOrNumber | boolean | JSONObject>
 }
 
 type renderHandlerOptions = {
-    update?: boolean;
-    line?: number;
+  update?: boolean;
+  line?: number;
 }
 
 type mapFunction = (key: string, value: anyFunction) => any;
@@ -20,98 +20,100 @@ type TypeOrArray<T> = T | T[];
 type TypeOrString<T> = T | string;
 type TypeOrPromise<T> = T | PromiseLike<T>;
 
-declare namespace JQueryTerminal {
+declare module 'jquery.terminal' {
+
+  export namespace JQueryTerminal {
     type interpreterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
     type terminalObjectFunction = (this: JQueryTerminal, ...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
     type Interpreter = string | interpreterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
-        [key: string]: ObjectInterpreter | terminalObjectFunction;
+      [key: string]: ObjectInterpreter | terminalObjectFunction;
     }
 
     type RegExpReplacementFunction = (...args: string[]) => string;
     type IterateFormattingArgument = {
-        count: number,
-        index: number,
-        formatting: string,
-        length: number,
-        text: boolean,
-        space: number
+      count: number,
+      index: number,
+      formatting: string,
+      length: number,
+      text: boolean,
+      space: number
     };
     type IterateFormattingFunction = (data: IterateFormattingArgument) => void;
 
     type strings = {
-        comletionParameters: string;
-        wrongPasswordTryAgain: string;
-        wrongPassword: string;
-        ajaxAbortError: string;
-        wrongArity: string;
-        commandNotFound: string;
-        oneRPCWithIgnore: string;
-        oneInterpreterFunction: string;
-        loginFunctionMissing: string;
-        noTokenError: string;
-        serverResponse: string;
-        wrongGreetings: string;
-        notWhileLogin: string;
-        loginIsNotAFunction: string;
-        canExitError: string;
-        invalidCompletion: string;
-        invalidSelector: string;
-        invalidTerminalId: string;
-        login: string;
-        password: string;
-        recursiveCall: string;
-        notAString: string;
-        redrawError: string;
-        invalidStrings: string;
-        defunctTerminal: string;
+      comletionParameters: string;
+      wrongPasswordTryAgain: string;
+      wrongPassword: string;
+      ajaxAbortError: string;
+      wrongArity: string;
+      commandNotFound: string;
+      oneRPCWithIgnore: string;
+      oneInterpreterFunction: string;
+      loginFunctionMissing: string;
+      noTokenError: string;
+      serverResponse: string;
+      wrongGreetings: string;
+      notWhileLogin: string;
+      loginIsNotAFunction: string;
+      canExitError: string;
+      invalidCompletion: string;
+      invalidSelector: string;
+      invalidTerminalId: string;
+      login: string;
+      password: string;
+      recursiveCall: string;
+      notAString: string;
+      redrawError: string;
+      invalidStrings: string;
+      defunctTerminal: string;
     };
 
     type ParsedCommand<T> = {
-        command: string;
-        name: string;
-        args: T[];
-        args_quotes: string[];
-        rest: string;
+      command: string;
+      name: string;
+      args: T[];
+      args_quotes: string[];
+      rest: string;
     };
 
     type size = {
-        width: number,
-        height: number
+      width: number,
+      height: number
     };
     interface geometry {
-        padding: {
-            left: number,
-            right: number,
-            top: number,
-            bottom: number
-        };
-        terminal: size;
-        char: size;
-        cols: number;
-        rows: number;
+      padding: {
+        left: number,
+        right: number,
+        top: number,
+        bottom: number
+      };
+      terminal: size;
+      char: size;
+      cols: number;
+      rows: number;
     }
 
     type insertOptions = {
-        stay?: boolean;
+      stay?: boolean;
     }
 
     type readOptions = {
-        typing?: boolean;
-        delay?: number;
-        success?: (result: string) => void;
-        cancel?: voidFunction;
+      typing?: boolean;
+      delay?: number;
+      success?: (result: string) => void;
+      cancel?: voidFunction;
     }
 
     type AnsiColorType = {
-        black: string;
-        red: string;
-        green: string;
-        yellow: string;
-        blue: string;
-        magenta: string;
-        cyan: string;
-        white: string;
+      black: string;
+      red: string;
+      green: string;
+      yellow: string;
+      blue: string;
+      magenta: string;
+      cyan: string;
+      white: string;
     }
 
     type TypingAnimations = 'echo' | 'prompt' | 'enter' | 'command';
@@ -119,32 +121,32 @@ declare namespace JQueryTerminal {
     type LessArgument = string | ((cols: number, cb: (text: string) => void) => void) | string[];
 
     type ParsedOptions = {
-        _: string[];
-        [key: string]: boolean | string | string[];
+      _: string[];
+      [key: string]: boolean | string | string[];
     };
 
     type FormatterFunctionOptions = {
-        echo: boolean;
-        animation: boolean;
-        prompt: boolean;
-        command: boolean;
-        position: number;
+      echo: boolean;
+      animation: boolean;
+      prompt: boolean;
+      command: boolean;
+      position: number;
     }
 
     type FormatterRegExpFunction = (...args: string[]) => string;
     type FormaterRegExpReplacement = string | FormatterRegExpFunction;
     type FormatterFunctionPropsInterface = {
-        __inherit__?: boolean;
-        __warn__?: boolean;
-        __meta__?: boolean;
+      __inherit__?: boolean;
+      __warn__?: boolean;
+      __meta__?: boolean;
     };
     type FormatterFunction = ((str: string, options?: FormatterFunctionOptions) => (string | [string, number])) & FormatterFunctionPropsInterface;
     type FormatterArrayOptions = {
-        loop?: boolean;
-        echo?: boolean;
-        animation?: boolean;
-        command?: boolean;
-        prompt?: boolean;
+      loop?: boolean;
+      echo?: boolean;
+      animation?: boolean;
+      command?: boolean;
+      prompt?: boolean;
     };
 
     type Formatter = [RegExp, FormaterRegExpReplacement] | [RegExp, FormaterRegExpReplacement, FormatterArrayOptions] | FormatterFunction;
@@ -170,114 +172,115 @@ declare namespace JQueryTerminal {
     type TouchScrollCallback = MouseWheelCallback;
 
     type execOptions = JQueryTerminal.animationOptions & {
-        silent?: boolean;
-        deferred?: JQuery.Deferred<void>
+      silent?: boolean;
+      deferred?: JQuery.Deferred<void>
     };
 
     type CommonOptions = {
-        completion?: Completion;
-        keypress?: KeyEventHandler;
-        keydown?: KeyEventHandler;
-        mousewheel?: MouseWheelCallback;
-        touchscroll?: TouchScrollCallback;
-        keymap?: keymapObject;
-        history?: boolean;
-        name?: string;
-        prompt?: ExtendedPrompt;
-        login?: LoginArgument;
+      completion?: Completion;
+      keypress?: KeyEventHandler;
+      keydown?: KeyEventHandler;
+      mousewheel?: MouseWheelCallback;
+      touchscroll?: TouchScrollCallback;
+      keymap?: keymapObject;
+      history?: boolean;
+      name?: string;
+      prompt?: ExtendedPrompt;
+      login?: LoginArgument;
 
-        onFocus?: EventCallback;
-        onClear?: EventCallback;
-        onBlur?: EventCallback;
-        onExit?: EventCallback;
-        onPop?: PushPopCallback;
-        onTerminalChange?: EventCallback;
-        onPush?: PushPopCallback;
-        onAfterRedraw?: EventCallback;
-        onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
-        onFlush?: EventCallback;
-        onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
-        onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
-        onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
-        onBeforeCommand?: (this: JQueryTerminal, command: string) => (boolean | void);
-        onAfterCommand?: (this: JQueryTerminal, command: string) => void;
-        onBeforeEcho?: (this: JQueryTerminal, value: echoValue) => (boolean | void);
-        onAfterEcho?: (this: JQueryTerminal, value: echoValue) => void;
+      onFocus?: EventCallback;
+      onClear?: EventCallback;
+      onBlur?: EventCallback;
+      onExit?: EventCallback;
+      onPop?: PushPopCallback;
+      onTerminalChange?: EventCallback;
+      onPush?: PushPopCallback;
+      onAfterRedraw?: EventCallback;
+      onEchoCommand?: (this: JQueryTerminal, div: JQuery, command: string, term: JQueryTerminal) => void;
+      onFlush?: EventCallback;
+      onPaste?: (this: JQueryTerminal, value: string) => TypeOrPromise<string | Blob> | void;
+      onCommandChange?: (this: JQueryTerminal, command: string, term: JQueryTerminal) => void;
+      onPositionChange?: (this: JQueryTerminal, position: number, display_position: number, term: JQueryTerminal) => void;
+      onBeforeCommand?: (this: JQueryTerminal, command: string) => (boolean | void);
+      onAfterCommand?: (this: JQueryTerminal, command: string) => void;
+      onBeforeEcho?: (this: JQueryTerminal, value: echoValue) => (boolean | void);
+      onAfterEcho?: (this: JQueryTerminal, value: echoValue) => void;
     };
 
     type TerminalOptions = CommonOptions & {
-        // login events need fixing to work with push
-        onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
-        onAfterLogout?: (this: JQueryTerminal) => void;
-        onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
-        onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
+      // login events need fixing to work with push
+      onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
+      onAfterLogout?: (this: JQueryTerminal) => void;
+      onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
+      onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
 
-        exit?: boolean;
-        clear?: boolean;
-        enabled?: boolean;
-        maskCHar?: string;
-        pipe?: boolean;
-        redirects?: {[key:string]: terminalObjectFunction};
-        wrap?: boolean;
-        checkArity?: boolean;
-        invokeMethods?: boolean;
-        useCache?: boolean;
-        anyLinks?: boolean;
-        raw?: boolean;
-        allowedAttributes?: Array<RegExp | string>;
-        tabindex?: number;
-        exceptionHandler?: null | ExceptionHandler;
-        pauseEvents?: boolean;
-        softPause?: boolean;
-        memory?: boolean;
-        cancelableAjax?: boolean;
-        processArguments?: boolean;
-        execAnimation?: boolean;
-        linksNoReferrer?: boolean;
-        javascriptLinks?: boolean;
-        processRPCResponse?: null | processRPCResponseFunction;
-        completionEscape?: boolean;
-        convertLinks?: boolean;
-        unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
-        extra?: any;
-        tabs?: number;
-        historySize?: number;
-        greetings?: greetingsArg;
-        scrollObject?: null | JQuery.Selector | HTMLElement | JQuery;
-        historyState?: boolean;
-        importHistory?: boolean;
-        historyFilter?: historyFilter;
-        echoCommand?: boolean;
-        scrollOnEcho?: boolean;
-        outputLimit?: number;
-        pasteImage?: boolean;
-        scrollBottomOffset?: boolean;
-        wordAutocomplete?: boolean;
-        caseSensitiveAutocomplete?: boolean;
-        caseSensitiveSearch?: boolean;
-        clickTimeout?: number;
-        holdTimeout?: number;
-        holdRepeatTimeout?: number;
-        repeatTimeoutKeys?: string[];
-        mobileIngoreAutoSpace?: string[];
-        request?: RequestResponseCallback;
-        response?: RequestResponseCallback;
-        describe?: string | false;
-        onRPCError?: RPCErrorCallback;
-        doubleTab?: DoubleTabFunction;
-        doubleTabEchoCommand?: boolean;
-        renderHandler?: (this: JQueryTerminal, obj: any, opts: renderHandlerOptions, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
-        onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
-        onInit?: EventCallback;
-        autocompleteMenu?: boolean;
-        mobileDelete?: boolean;
-        strings?: strings;
-        height?: number;
+      exit?: boolean;
+      clear?: boolean;
+      enabled?: boolean;
+      maskCHar?: string;
+      pipe?: boolean;
+      redirects?: {[key:string]: terminalObjectFunction};
+      wrap?: boolean;
+      checkArity?: boolean;
+      invokeMethods?: boolean;
+      useCache?: boolean;
+      anyLinks?: boolean;
+      raw?: boolean;
+      allowedAttributes?: Array<RegExp | string>;
+      tabindex?: number;
+      exceptionHandler?: null | ExceptionHandler;
+      pauseEvents?: boolean;
+      softPause?: boolean;
+      memory?: boolean;
+      cancelableAjax?: boolean;
+      processArguments?: boolean;
+      execAnimation?: boolean;
+      linksNoReferrer?: boolean;
+      javascriptLinks?: boolean;
+      processRPCResponse?: null | processRPCResponseFunction;
+      completionEscape?: boolean;
+      convertLinks?: boolean;
+      errorOnAbort?: boolean;
+      unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
+      extra?: any;
+      tabs?: number;
+      historySize?: number;
+      greetings?: greetingsArg;
+      scrollObject?: null | JQuery.Selector | HTMLElement | JQuery;
+      historyState?: boolean;
+      importHistory?: boolean;
+      historyFilter?: historyFilter;
+      echoCommand?: boolean;
+      scrollOnEcho?: boolean;
+      outputLimit?: number;
+      pasteImage?: boolean;
+      scrollBottomOffset?: boolean;
+      wordAutocomplete?: boolean;
+      caseSensitiveAutocomplete?: boolean;
+      caseSensitiveSearch?: boolean;
+      clickTimeout?: number;
+      holdTimeout?: number;
+      holdRepeatTimeout?: number;
+      repeatTimeoutKeys?: string[];
+      mobileIngoreAutoSpace?: string[];
+      request?: RequestResponseCallback;
+      response?: RequestResponseCallback;
+      describe?: string | false;
+      onRPCError?: RPCErrorCallback;
+      doubleTab?: DoubleTabFunction;
+      doubleTabEchoCommand?: boolean;
+      renderHandler?: (this: JQueryTerminal, obj: any, opts: renderHandlerOptions, term: JQueryTerminal) => (void | string | Element | JQuery<Element> | false);
+      onAjaxError?: (this: JQueryTerminal, xhr: JQuery.jqXHR, status: string, error: string) => void;
+      onInit?: EventCallback;
+      autocompleteMenu?: boolean;
+      mobileDelete?: boolean;
+      strings?: strings;
+      height?: number;
     };
 
     type pushOptions = CommonOptions & {
-        infiniteLogin?: boolean;
-        onStart?: () => void;
+      infiniteLogin?: boolean;
+      onStart?: () => void;
     };
 
     type historyFilterFunction = (command: string) => boolean;
@@ -288,7 +291,7 @@ declare namespace JQueryTerminal {
     type ExceptionHandler = (this: JQueryTerminal, e: Error | TerminalException, label: string) => void;
     type processRPCResponseFunction = (this: JQueryTerminal, result: JSONObject, term: JQueryTerminal) => void;
     type ObjectWithThenMethod = {
-        then: () => any;
+      then: () => any;
     }
     type SetLoginCallback = (token: string) => (void | ObjectWithThenMethod);
     type LoginFunction = (username: string, password: string, cb: SetLoginCallback) => (void | ObjectWithThenMethod);
@@ -314,29 +317,29 @@ declare namespace JQueryTerminal {
     type EventCallback = (this: JQueryTerminal, term: JQueryTerminal) => (void | boolean);
 
     type formatOptions = {
-        linksNoReferrer?: boolean;
-        anyLinks?: boolean;
-        charWidth?: number;
-        linksNoFollow?: boolean;
-        allowedAttributes: string[];
-        escape: boolean;
+      linksNoReferrer?: boolean;
+      anyLinks?: boolean;
+      charWidth?: number;
+      linksNoFollow?: boolean;
+      allowedAttributes: string[];
+      escape: boolean;
     };
 
     type animationOptions = {
-        delay?: number;
-        typing: boolean;
+      delay?: number;
+      typing: boolean;
     };
 
     type InterpreterItem = {
-        completion: "settings" | JQueryTerminal.Completion;
-        history?: boolean;
-        // all other interpreters are converted to function
-        interpreter: JQueryTerminal.interpreterFunction;
-        keydown?: KeyEventHandler<JQueryTerminal>;
-        keypress?: KeyEventHandler<JQueryTerminal>;
-        mask?: boolean | string;
-        infiniteLogin?: boolean;
-        prompt: ExtendedPrompt;
+      completion: "settings" | JQueryTerminal.Completion;
+      history?: boolean;
+      // all other interpreters are converted to function
+      interpreter: JQueryTerminal.interpreterFunction;
+      keydown?: KeyEventHandler<JQueryTerminal>;
+      keypress?: KeyEventHandler<JQueryTerminal>;
+      mask?: boolean | string;
+      infiniteLogin?: boolean;
+      prompt: ExtendedPrompt;
     }
 
     type PushPopCallback = (this: JQueryTerminal, before: JQueryTerminal.InterpreterItem, after: JQueryTerminal.InterpreterItem, term: JQueryTerminal) => void;
@@ -344,107 +347,107 @@ declare namespace JQueryTerminal {
     type Lines = Array<{ string: any, options: LineEchoOptions, index: number }>;
 
     type View = {
-        focus: boolean;
-        mask: string | boolean;
-        prompt?: ExtendedPrompt;
-        command: string;
-        position: number;
-        lines: Lines;
-        interpreters?: Stack<InterpreterItem>;
-        history: string[];
+      focus: boolean;
+      mask: string | boolean;
+      prompt?: ExtendedPrompt;
+      command: string;
+      position: number;
+      lines: Lines;
+      interpreters?: Stack<InterpreterItem>;
+      history: string[];
     }
 
     type CompleteOptions = {
-        word?: boolean;
-        echo?: boolean;
-        escape?: boolean;
-        caseSensitive?: boolean;
-        echoCommand?: boolean;
-        doubleTab?: DoubleTabFunction;
+      word?: boolean;
+      echo?: boolean;
+      escape?: boolean;
+      caseSensitive?: boolean;
+      echoCommand?: boolean;
+      doubleTab?: DoubleTabFunction;
     }
 
     type LineEchoOptions = {
-        exec: boolean;
-        unmount: JQueryTerminal.EchoEventFunction;
-        onClear: JQueryTerminal.EchoEventFunction;
-        finalize: JQueryTerminal.EchoEventFunction;
-        invokeMethods: boolean;
-        allowedAttributes: Array<RegExp | string>;
-        delay: number;
-        ansi: boolean;
-        typing: boolean;
-        flush: boolean;
-        formatters: boolean;
-        keepWords: boolean;
-        raw: boolean;
-        newline: boolean;
+      exec: boolean;
+      unmount: JQueryTerminal.EchoEventFunction;
+      onClear: JQueryTerminal.EchoEventFunction;
+      finalize: JQueryTerminal.EchoEventFunction;
+      invokeMethods: boolean;
+      allowedAttributes: Array<RegExp | string>;
+      delay: number;
+      ansi: boolean;
+      typing: boolean;
+      flush: boolean;
+      formatters: boolean;
+      keepWords: boolean;
+      raw: boolean;
+      newline: boolean;
     }
 
     type EchoOptions = {
-        flush?: boolean;
-        raw?: boolean;
-        exec?: boolean;
-        invokeMethods?: boolean;
-        ansi?: boolean;
-        allowedAttributes?: Array<RegExp | string>;
-        unmount?: JQueryTerminal.EchoEventFunction;
-        onClear?: JQueryTerminal.EchoEventFunction;
-        finalize?: JQueryTerminal.EchoEventFunction;
-        keepWords?: boolean;
-        formatters?: boolean;
-        newline?: boolean;
+      flush?: boolean;
+      raw?: boolean;
+      exec?: boolean;
+      invokeMethods?: boolean;
+      ansi?: boolean;
+      allowedAttributes?: Array<RegExp | string>;
+      unmount?: JQueryTerminal.EchoEventFunction;
+      onClear?: JQueryTerminal.EchoEventFunction;
+      finalize?: JQueryTerminal.EchoEventFunction;
+      keepWords?: boolean;
+      formatters?: boolean;
+      newline?: boolean;
     }
 
 
     interface History<T = string> {
-        new(name?: string, size?: number, memory?: boolean): History<T>;
-        append(item: T): void;
-        set(items: T[]): void;
-        data(): T[];
-        reset(): void;
-        last(): any;
-        end(): boolean;
-        position(): number;
-        current(): T;
-        next(): T | void;
-        previous(): T | void;
-        clear(): void;
-        enabled(): boolean;
-        enable(): void;
-        purge(): void;
-        disable(): void;
-        toggle(value?: boolean): void;
+      new(name?: string, size?: number, memory?: boolean): History<T>;
+      append(item: T): void;
+      set(items: T[]): void;
+      data(): T[];
+      reset(): void;
+      last(): any;
+      end(): boolean;
+      position(): number;
+      current(): T;
+      next(): T | void;
+      previous(): T | void;
+      clear(): void;
+      enabled(): boolean;
+      enable(): void;
+      purge(): void;
+      disable(): void;
+      toggle(value?: boolean): void;
     }
 
     interface Stack<T> {
-        new(init?: T[]): Stack<T>;
-        data(): T[];
-        map(fn: (item: T, index?: number) => any): any[];
-        size(): number;
-        pop(): null | T;
-        push(): T;
-        top(): T;
-        clone(): Stack<T>;
+      new(init?: T[]): Stack<T>;
+      data(): T[];
+      map(fn: (item: T, index?: number) => any): any[];
+      size(): number;
+      pop(): null | T;
+      push(): T;
+      top(): T;
+      clone(): Stack<T>;
     }
 
     interface Cycle<T> {
-        new(...args: T[]): Cycle<T>;
-        get(): T[];
-        index(): number;
-        rotate(): T | void;
-        length(): number;
-        remove(i: number): void;
-        set(item: T): void;
-        front(): void | T;
-        map(fn: (item: T, index: number) => any): any[];
-        forEach(fn: (item: T, index: number) => any): void;
-        append(item: T): void;
+      new(...args: T[]): Cycle<T>;
+      get(): T[];
+      index(): number;
+      rotate(): T | void;
+      length(): number;
+      remove(i: number): void;
+      set(item: T): void;
+      front(): void | T;
+      map(fn: (item: T, index: number) => any): any[];
+      forEach(fn: (item: T, index: number) => any): void;
+      append(item: T): void;
     }
 
     type rendererOptions = {
-        color?: string;
-        background?: string;
-        char?: { width: number, height: number };
+      color?: string;
+      background?: string;
+      char?: { width: number, height: number };
     }
 
     type option = string | { width: number, height: number };
@@ -452,81 +455,81 @@ declare namespace JQueryTerminal {
     type rendererFunction = () => string[];
 
     type clearArgs = {
-        width?: number;
-        height?: number;
-        size?: number;
+      width?: number;
+      height?: number;
+      size?: number;
     }
 
     interface Renderer {
-        new(fn: rendererFunction, options: rendererOptions): Renderer;
-        option(arg: string | rendererOptions, value?: option): option;
-        render(): void;
-        line(text: string, x: number, y: number): void;
-        clear(options: clearArgs): void;
+      new(fn: rendererFunction, options: rendererOptions): Renderer;
+      option(arg: string | rendererOptions, value?: option): option;
+      render(): void;
+      line(text: string, x: number, y: number): void;
+      clear(options: clearArgs): void;
     }
 
     interface Animation {
-        new(fps?: null | number, renderer?: Renderer): Animation;
-        start(term: JQueryTerminal): void;
-        stop(): void;
-        render(term: JQueryTerminal): string[];
-        mount(): void;
-        unmount(): void;
+      new(fps?: null | number, renderer?: Renderer): Animation;
+      start(term: JQueryTerminal): void;
+      stop(): void;
+      render(term: JQueryTerminal): string[];
+      mount(): void;
+      unmount(): void;
     }
 
     interface FramesAnimation extends Animation {
-        new(frames: string[][], fps?: null | number, renderer?: Renderer): FramesAnimation;
+      new(frames: string[][], fps?: null | number, renderer?: Renderer): FramesAnimation;
     }
 
     type formStaticTypes = {
-        input: 'input',
-        password: 'password';
-        boolean: 'boolean';
-        checkboxes: 'checkboxes';
-        radio: 'radio';
+      input: 'input',
+      password: 'password';
+      boolean: 'boolean';
+      checkboxes: 'checkboxes';
+      radio: 'radio';
     }
     type formTypes = 'input' | 'password' | 'boolean' | 'checkboxes' | 'radio';
 
     type simpleInput = {
-        type?: 'input';
-        message?: string;
-        prompt?: string;
-        name?: string;
+      type?: 'input';
+      message?: string;
+      prompt?: string;
+      name?: string;
     }
 
     type passwordInput = {
-        type?: 'password';
-        message?: string;
-        prompt?: string;
-        name?: string;
+      type?: 'password';
+      message?: string;
+      prompt?: string;
+      name?: string;
     }
 
     type booleanInput = {
-        type?: 'boolean';
-        message?: string;
-        prompt?: string;
-        items?: [RegExp, RegExp];
-        name?: string;
+      type?: 'boolean';
+      message?: string;
+      prompt?: string;
+      items?: [RegExp, RegExp];
+      name?: string;
     }
 
     type checkboxesInput = {
-        type?: 'checkboxes';
-        message?: string;
-        items: {[key: string]: any};
-        name?: string;
+      type?: 'checkboxes';
+      message?: string;
+      items: {[key: string]: any};
+      name?: string;
     }
 
     type radioInput = {
-        type?: 'radio';
-        message?: string;
-        items: {[key: string]: any};
-        name?: string;
+      type?: 'radio';
+      message?: string;
+      items: {[key: string]: any};
+      name?: string;
     }
 
     type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
-}
+  }
 
-interface JQuery<TElement = HTMLElement> {
+  interface JQuery<TElement = HTMLElement> {
     terminal(interpreter?: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.TerminalOptions): JQueryTerminal;
     resizer(arg: TypeOrString<anyFunction>): JQuery;
     cmd(options?: CmdOptions): Cmd;
@@ -536,26 +539,26 @@ interface JQuery<TElement = HTMLElement> {
     hidden(): JQuery;
     // plugins
     less(text: JQueryTerminal.LessArgument, options?: {
-        formatters?: boolean,
-        wrap?: boolean,
-        keepWords?: boolean
+      formatters?: boolean,
+      wrap?: boolean,
+      keepWords?: boolean
     }): JQueryTerminal;
-}
+  }
 
-interface JQueryStatic {
+  interface JQueryStatic {
     omap(object: { [key: string]: anyFunction }, fn: mapFunction): { [key: string]: anyFunction };
     jrpc(url: string, method: string, params: any[], success?: (json: JSONObject, status: string, jqxhr: JQuery.jqXHR) => void, error?: (jqxhr: JQuery.jqXHR, status: string) => void): void;
     terminal: JQueryTerminalStatic;
-}
+  }
 
-interface JQueryTerminalStatic {
+  export interface JQueryTerminalStatic {
     version: string,
     data: string;
     color_names: string[];
     defaults: {
-        formatters: JQueryTerminal.Formatter[],
-        strings: JQueryTerminal.strings;
-        [key: string]: any;
+      formatters: JQueryTerminal.Formatter[],
+      strings: JQueryTerminal.strings;
+      [key: string]: any;
     };
     History(name?: string, size?: number, memory?: boolean): JQueryTerminal.History<any>;
     Stack(init?: any[]): JQueryTerminal.Stack<any>;
@@ -605,10 +608,10 @@ interface JQueryTerminalStatic {
      */
     prism(lang: string, text: string): string;
     prism_formatters: {
-        command: boolean,
-        animation: boolean,
-        echo: boolean,
-        prompt: boolean
+      command: boolean,
+      animation: boolean,
+      echo: boolean,
+      prompt: boolean
     },
     syntax(lang: string): void;
     pipe(obj: JQueryTerminal.ObjectInterpreter): JQueryTerminal.interpreterFunction;
@@ -617,10 +620,10 @@ interface JQueryTerminalStatic {
     overtyping: JQueryTerminal.FormatterFunction;
     from_ansi: JQueryTerminal.FormatterFunction;
     ansi_colors: {
-        normal: JQueryTerminal.AnsiColorType;
-        faited: JQueryTerminal.AnsiColorType;
-        bold: JQueryTerminal.AnsiColorType;
-        palette: string[];
+      normal: JQueryTerminal.AnsiColorType;
+      faited: JQueryTerminal.AnsiColorType;
+      bold: JQueryTerminal.AnsiColorType;
+      palette: string[];
     };
     // xml
     xml_formatter: JQueryTerminal.FormatterFunction;
@@ -630,24 +633,24 @@ interface JQueryTerminalStatic {
     FramesAnimation: JQueryTerminal.FramesAnimation;
 
     forms: {
-        types: JQueryTerminal.formStaticTypes,
-        form: (term: JQueryTerminal, data: Array<JQueryTerminal.formData>) => Promise<JQueryTerminal.formData>;
-        checkboxes: (term: JQueryTerminal, data: JQueryTerminal.checkboxesInput) => Promise<any[]>;
-        radio: (term: JQueryTerminal, data: JQueryTerminal.radioInput) => Promise<any>;
-        input: (term: JQueryTerminal, data: JQueryTerminal.simpleInput) => Promise<string>;
-        password: (term: JQueryTerminal, data: JQueryTerminal.passwordInput) => Promise<string>;
-        boolean: (term: JQueryTerminal, data: JQueryTerminal.booleanInput) => Promise<boolean>;
+      types: JQueryTerminal.formStaticTypes,
+      form: (term: JQueryTerminal, data: Array<JQueryTerminal.formData>) => Promise<JQueryTerminal.formData>;
+      checkboxes: (term: JQueryTerminal, data: JQueryTerminal.checkboxesInput) => Promise<any[]>;
+      radio: (term: JQueryTerminal, data: JQueryTerminal.radioInput) => Promise<any>;
+      input: (term: JQueryTerminal, data: JQueryTerminal.simpleInput) => Promise<string>;
+      password: (term: JQueryTerminal, data: JQueryTerminal.passwordInput) => Promise<string>;
+      boolean: (term: JQueryTerminal, data: JQueryTerminal.booleanInput) => Promise<boolean>;
     };
-}
+  }
 
-type TerminalException = {
+  export type TerminalException = {
     new(typeOrMessage: string, message?: string, stack?: string): TerminalException;
     message: string;
     type: string;
     stack?: string;
-};
+  };
 
-type CmdOptions = {
+  export type CmdOptions = {
     mask?: string | boolean;
     caseSensitiveSearch?: boolean;
     historySize?: number;
@@ -672,16 +675,16 @@ type CmdOptions = {
     keydown?: JQueryTerminal.KeyEventHandler<Cmd>;
     tabindex?: number;
     mobileDelete?: boolean;
-}
+  }
 
-type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" | "prompt" | "enabled" |
+  type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" | "prompt" | "enabled" |
     "history" | "tabs" | "onPositionChange" | "clickTimeout" | "holdTimeout" | "onPaste" |
     "holdRepeatTimeout" | "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
     "charWidth" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
 
-// we copy methods from jQuery to overwrite it
-// see: https://github.com/Microsoft/TypeScript/issues/978
-interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
+  // we copy methods from jQuery to overwrite it
+  // see: https://github.com/Microsoft/TypeScript/issues/978
+  export interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     option(name: CmdOption, value: any): Cmd;
     option(name: CmdOption): any;
     name(name: string): Cmd;
@@ -722,7 +725,7 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     show(): Cmd;
     // jQuery methods
     resize(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> |
-        false): this;
+           false): this;
     // jQuery Terminal method
     resize(num_chars?: number): Cmd;
     clear_cache(): Cmd;
@@ -731,9 +734,9 @@ interface Cmd<TElement = HTMLElement> extends JQuery<TElement> {
     disable(focus?: boolean): Cmd;
     mask(mask: boolean | string): Cmd;
     mask<T extends boolean | string>(): T;
-}
+  }
 
-interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
+  export interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(command: string): JQueryTerminal;
     id(): number;
     clear(): JQueryTerminal;
@@ -754,6 +757,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     paused(): boolean;
     pause(): JQueryTerminal;
     resume(): JQueryTerminal;
+    signal(): AbortSignal;
+    aboort(message?: string): JQueryTerminal;
     cols(): number;
     rows(): number;
     geometry(): JQueryTerminal.geometry;
@@ -810,6 +815,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     name(): string;
     prefix_name(local?: boolean): string;
     typing(type: JQueryTerminal.TypingAnimations, delay: number, message: string, finish: voidFunction): JQuery.Promise<void>;
+    skip(): JQueryTerminal;
+    skip_stop(): JQueryTerminal;
     read(message: string, success_or_options?: ((result: string) => void) | JQueryTerminal.readOptions, cancel?: voidFunction): JQuery.Promise<string>;
     push(interpreter: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.pushOptions): JQueryTerminal;
     pop(echoCommand?: string, silent?: boolean): JQueryTerminal;
@@ -827,9 +834,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     destroy(): JQueryTerminal;
     scroll_to_bottom(): JQueryTerminal;
     is_bottom(): boolean;
-}
+  }
 
-declare module 'jquery.terminal' {
-    const JQTerminal: (window: Window, JQuery: JQueryStatic) => void;
-    export default JQTerminal;
+  const JQTerminal: (window: Window, JQuery: JQueryStatic) => void;
+  export default JQTerminal;
 }
