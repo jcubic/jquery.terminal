@@ -1,5 +1,4 @@
-import 'jquery.terminal';
-
+import type { JQueryTerminal } from 'jquery.terminal';
 
 function scroll() {
   const { length } = this.get_output().split('\n');
