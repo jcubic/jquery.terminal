@@ -13,6 +13,7 @@
     gap: 5px;
     margin: 2em auto;
     width: calc(var(--avatar-size) * 15);
+    max-width: 100%;
 }
 
 .contributors li {

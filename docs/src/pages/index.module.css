@@ -16,7 +16,6 @@
 }
 
 .heroText, .terminal {
-    flex: 1;
     width: 50%;
 }
 
@@ -28,4 +27,13 @@
 .heroText p {
     font-size: 1.2em;
     line-height: 2em;
+}
+
+@media (max-width: 1050px) {
+    .container {
+        flex-direction: column;
+    }
+    .heroText, .terminal {
+        width: 100%;
+    }
 }

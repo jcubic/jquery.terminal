@@ -31,3 +31,7 @@
 .narrow.container {
     --ifm-container-width: 700px;
 }
+
+.container.container {
+    max-width: var(--ifm-container-width);
+}
