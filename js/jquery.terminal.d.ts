@@ -529,7 +529,7 @@ declare module 'jquery.terminal' {
     type formData = Array<simpleInput | passwordInput | checkboxesInput | radioInput>;
   }
 
-  interface JQuery<TElement = HTMLElement> {
+  export interface JQuery<TElement = HTMLElement> {
     terminal(interpreter?: TypeOrArray<JQueryTerminal.Interpreter>, options?: JQueryTerminal.TerminalOptions): JQueryTerminal;
     resizer(arg: TypeOrString<anyFunction>): JQuery;
     cmd(options?: CmdOptions): Cmd;
@@ -545,7 +545,7 @@ declare module 'jquery.terminal' {
     }): JQueryTerminal;
   }
 
-  interface JQueryStatic {
+  export interface JQueryStatic {
     omap(object: { [key: string]: anyFunction }, fn: mapFunction): { [key: string]: anyFunction };
     jrpc(url: string, method: string, params: any[], success?: (json: JSONObject, status: string, jqxhr: JQuery.jqXHR) => void, error?: (jqxhr: JQuery.jqXHR, status: string) => void): void;
     terminal: JQueryTerminalStatic;
