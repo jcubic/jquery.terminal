@@ -29,7 +29,7 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
 
   useScripts(!globalThis.jQuery && [
     'https://cdn.jsdelivr.net/npm/jquery',
-    'https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js'
+    'https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
   ]);
 
   useLayoutEffect(() => {

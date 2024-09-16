@@ -1,5 +1,7 @@
 import type { JQueryTerminal } from 'jquery.terminal';
 
+import github from './github';
+
 function scroll() {
   const { length } = this.get_output().split('\n');
   const rows = this.rows();
@@ -22,7 +24,12 @@ export function initTerminal() {
     return scroll.apply(term, args);
   };
 
-  const term = $term.terminal({}, {
+  const term = $term.terminal({
+    github
+  }, {
+    processArguments: false,
+    checkArity: false,
+    completion: true,
     mousewheel: scroll_event,
     touchscroll: scroll_event
   });

@@ -28,6 +28,7 @@
     "@docusaurus/module-type-aliases": "3.5.2",
     "@docusaurus/tsconfig": "3.5.2",
     "@docusaurus/types": "3.5.2",
+    "@types/jquery": "^3.5.30",
     "jquery.terminal": "github:jcubic/jquery.terminal#docusaurus",
     "typescript": "~5.5.2"
   },
