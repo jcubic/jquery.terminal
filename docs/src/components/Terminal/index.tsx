@@ -54,7 +54,7 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
         {isStatic && <script src="https://cdn.jsdelivr.net/npm/jquery" />}
-        {isStatic && <script src="https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js" />}
+        {isStatic && <script src="https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js" />}
       </Head>
       <div className="terminal marker" ref={ref}></div>
       <div className={clsx('term', className)}/>
