@@ -1,17 +1,17 @@
 import { useLayoutEffect, useRef } from 'react';
+import type { JQueryStatic } from 'jquery.terminal';
 import clsx from 'clsx';
 
 import useIsBrowser from '@docusaurus/useIsBrowser';
 import Head from '@docusaurus/Head';
 
 import useScripts from '@site/src/hooks/useScripts';
+import '@site/src/types';
 import './styles.css';
 
 const replReady = () => {
-  return (
-    globalThis.jQuery &&
-    globalThis.jQuery.terminal
-  );
+  const jQuery = (globalThis as any).jQuery as JQueryStatic;
+  return jQuery && jQuery.terminal;
 }
 
 import { initTerminal, destroyTerminal } from './terminal';
@@ -28,11 +28,13 @@ const terminal_scripts = [
 export default function Interpreter({ className }: InterpreterProps): JSX.Element {
   const ref = useRef<HTMLDivElement>();
 
+  const jQuery = (globalThis as any).jQuery as JQueryStatic;
+
   const isProd = process.env.NODE_ENV === 'production';
   const isBrowser = useIsBrowser();
-  const isStatic = isProd && !isBrowser && !globalThis.jQuery;
+  const isStatic = isProd && !isBrowser && !jQuery;
 
-  useScripts(!globalThis.jQuery && terminal_scripts);
+  useScripts(!jQuery && terminal_scripts);
 
   useLayoutEffect(() => {
     (function loop() {
