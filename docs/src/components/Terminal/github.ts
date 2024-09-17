@@ -1,4 +1,4 @@
-import type { JQueryTerminal, JQueryStatic, JQuery } from 'jquery.terminal';
+import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import type { Deferred } from 'jquery';
 
 import colors from './colors';

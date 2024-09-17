@@ -20,6 +20,11 @@ type InterpreterProps = {
   className?: string;
 };
 
+const terminal_scripts = [
+  'https://cdn.jsdelivr.net/npm/jquery',
+  'https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
+]
+
 export default function Interpreter({ className }: InterpreterProps): JSX.Element {
   const ref = useRef<HTMLDivElement>();
 
@@ -27,10 +32,7 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
   const isBrowser = useIsBrowser();
   const isStatic = isProd && !isBrowser && !globalThis.jQuery;
 
-  useScripts(!globalThis.jQuery && [
-    'https://cdn.jsdelivr.net/npm/jquery',
-    'https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
-  ]);
+  useScripts(!globalThis.jQuery && terminal_scripts);
 
   useLayoutEffect(() => {
     (function loop() {
@@ -53,8 +55,9 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
       <Head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
-        {isStatic && <script src="https://cdn.jsdelivr.net/npm/jquery" />}
-        {isStatic && <script src="https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js" />}
+        {isStatic && terminal_scripts.map(script => {
+          return <script key={script} src={script} />
+        })}
       </Head>
       <div className="terminal marker" ref={ref}></div>
       <div className={clsx('term', className)}/>
