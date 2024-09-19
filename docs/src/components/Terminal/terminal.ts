@@ -1,19 +1,7 @@
 import type { JQueryTerminal } from 'jquery.terminal';
 
 import github from './github';
-
-function scroll() {
-  const { length } = this.get_output().split('\n');
-  const rows = this.rows();
-  if (rows >= length) {
-    this.removeClass('shake');
-    this.addClass('shake');
-    this.stopTime('shake');
-    this.oneTime(200, 'shake', () => {
-      this.removeClass('shake');
-    });
-  }
-}
+import echo from './echo';
 
 export function initTerminal() {
   const $ = (globalThis as any).$;
@@ -25,7 +13,8 @@ export function initTerminal() {
   };
 
   const term = $term.terminal({
-    github
+    github,
+    echo
   }, {
     processArguments: false,
     checkArity: false,
@@ -41,4 +30,17 @@ export function destroyTerminal() {
   const $ = (globalThis as any).$;
   const $term = $('.term');
   $term.terminal().destroy();
+}
+
+function scroll() {
+  const { length } = this.get_output().split('\n');
+  const rows = this.rows();
+  if (rows >= length) {
+    this.removeClass('shake');
+    this.addClass('shake');
+    this.stopTime('shake');
+    this.oneTime(200, 'shake', () => {
+      this.removeClass('shake');
+    });
+  }
 }
