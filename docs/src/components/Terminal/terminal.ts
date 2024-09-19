@@ -16,7 +16,7 @@ function scroll() {
 }
 
 export function initTerminal() {
-  const $ = globalThis.$;
+  const $ = (globalThis as any).$;
   const $term = $('.term');
   $term.empty();
 
@@ -38,7 +38,7 @@ export function initTerminal() {
 };
 
 export function destroyTerminal() {
-  const $ = globalThis.$;
+  const $ = (globalThis as any).$;
   const $term = $('.term');
   $term.terminal().destroy();
 }
