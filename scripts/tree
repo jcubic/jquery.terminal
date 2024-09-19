@@ -1,0 +1,15 @@
+#!/bin/bash
+
+TEMP_FILE=$(mktemp)
+cd `git rev-parse --show-toplevel`
+git ls-files > "$TEMP_FILE"
+
+if [ ! -f .tree ]; then
+  mv "$TEMP_FILE" .tree
+else
+  if ! git diff --no-index .tree "$TEMP_FILE" > /dev/null; then
+    mv "$TEMP_FILE" .tree
+  else
+    rm "$TEMP_FILE"
+  fi
+fi

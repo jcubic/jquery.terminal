@@ -16,16 +16,18 @@ JEST=./node_modules/.bin/jest
 CSSNANO=./scripts/cssnano.js
 ESLINT=./node_modules/.bin/eslint
 TSC=./node_modules/.bin/tsc
+TS_NODE=./docs/node_modules/.bin/ts-node
 SPEC_CHECKSUM=`md5sum __tests__/terminal.spec.js | cut -d' ' -f 1`
 COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
+ROOT=`git rev-parse --show-toplevel`
 UPDATE_CONTRIBUTORS=0
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors docs/dir.json
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -160,3 +162,9 @@ update-contributors:
 			false;\
 		fi;\
 	fi
+
+.tree:
+	./scripts/tree
+
+docs/dir.json: .tree
+	$(TS_NODE) ./docs/dir.ts $(ROOT) > ./docs/dir.json

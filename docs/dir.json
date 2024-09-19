@@ -1,0 +1,678 @@
+{
+  "path": "/",
+  "name": null,
+  "children": {
+    "name": "docusaurus",
+    "path": "",
+    "children": [
+      {
+        "name": ".gitattributes"
+      },
+      {
+        "name": ".github",
+        "path": "/.github",
+        "children": [
+          {
+            "name": "FUNDING.yml"
+          },
+          {
+            "name": "ISSUE_TEMPLATE",
+            "path": "/.github/ISSUE_TEMPLATE",
+            "children": [
+              {
+                "name": "bug.md"
+              },
+              {
+                "name": "config.yml"
+              },
+              {
+                "name": "feature.md"
+              }
+            ]
+          },
+          {
+            "name": "PULL_REQUEST_TEMPLATE"
+          },
+          {
+            "name": "support.svg"
+          },
+          {
+            "name": "workflows",
+            "path": "/.github/workflows",
+            "children": [
+              {
+                "name": "build.yaml"
+              },
+              {
+                "name": "docs.yaml"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": ".gitignore"
+      },
+      {
+        "name": ".gitmodules"
+      },
+      {
+        "name": ".npmignore"
+      },
+      {
+        "name": ".tree"
+      },
+      {
+        "name": "CHANGELOG.md"
+      },
+      {
+        "name": "CODE_OF_CONDUCT.md"
+      },
+      {
+        "name": "CONTRIBUTING.md"
+      },
+      {
+        "name": "LICENSE"
+      },
+      {
+        "name": "Makefile"
+      },
+      {
+        "name": "README.md"
+      },
+      {
+        "name": "__tests__",
+        "path": "/__tests__",
+        "children": [
+          {
+            "name": "__fixtures__",
+            "path": "/__tests__/__fixtures__",
+            "children": [
+              {
+                "name": "Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg"
+              },
+              {
+                "name": "bs-pacis.ans"
+              },
+              {
+                "name": "denis.ans"
+              },
+              {
+                "name": "dialog.ans"
+              },
+              {
+                "name": "ervy-plot.ans"
+              },
+              {
+                "name": "neofetch.ans"
+              },
+              {
+                "name": "nf-marble.ans"
+              }
+            ]
+          },
+          {
+            "name": "__snapshots__",
+            "path": "/__tests__/__snapshots__",
+            "children": [
+              {
+                "name": "terminal.spec.js.snap"
+              }
+            ]
+          },
+          {
+            "name": "terminal.spec.js"
+          }
+        ]
+      },
+      {
+        "name": "assets",
+        "path": "/assets",
+        "children": [
+          {
+            "name": "ascii_art.svg"
+          }
+        ]
+      },
+      {
+        "name": "bin",
+        "path": "/bin",
+        "children": [
+          {
+            "name": "convert.js"
+          }
+        ]
+      },
+      {
+        "name": "bower.json"
+      },
+      {
+        "name": "css",
+        "path": "/css",
+        "children": [
+          {
+            "name": "emoji.css"
+          },
+          {
+            "name": "jquery.terminal-2.41.1.css"
+          },
+          {
+            "name": "jquery.terminal-2.41.1.min.css"
+          },
+          {
+            "name": "jquery.terminal-src.css"
+          },
+          {
+            "name": "jquery.terminal.css"
+          },
+          {
+            "name": "jquery.terminal.min.css"
+          },
+          {
+            "name": "jquery.terminal.min.css.map"
+          }
+        ]
+      },
+      {
+        "name": "docs",
+        "path": "/docs",
+        "children": [
+          {
+            "name": ".gitignore"
+          },
+          {
+            "name": "README.md"
+          },
+          {
+            "name": "babel.config.js"
+          },
+          {
+            "name": "blog",
+            "path": "/docs/blog",
+            "children": [
+              {
+                "name": "2019-05-28-first-blog-post.md"
+              },
+              {
+                "name": "2019-05-29-long-blog-post.md"
+              },
+              {
+                "name": "2021-08-01-mdx-blog-post.mdx"
+              },
+              {
+                "name": "2021-08-26-welcome",
+                "path": "/docs/blog/2021-08-26-welcome",
+                "children": [
+                  {
+                    "name": "docusaurus-plushie-banner.jpeg"
+                  },
+                  {
+                    "name": "index.md"
+                  }
+                ]
+              },
+              {
+                "name": "authors.yml"
+              },
+              {
+                "name": "tags.yml"
+              }
+            ]
+          },
+          {
+            "name": "contributors.json"
+          },
+          {
+            "name": "dir.json"
+          },
+          {
+            "name": "dir.ts"
+          },
+          {
+            "name": "docs",
+            "path": "/docs/docs",
+            "children": [
+              {
+                "name": "intro.md"
+              },
+              {
+                "name": "tutorial-basics",
+                "path": "/docs/docs/tutorial-basics",
+                "children": [
+                  {
+                    "name": "_category_.json"
+                  },
+                  {
+                    "name": "congratulations.md"
+                  },
+                  {
+                    "name": "create-a-blog-post.md"
+                  },
+                  {
+                    "name": "create-a-document.md"
+                  },
+                  {
+                    "name": "create-a-page.md"
+                  },
+                  {
+                    "name": "deploy-your-site.md"
+                  },
+                  {
+                    "name": "markdown-features.mdx"
+                  }
+                ]
+              },
+              {
+                "name": "tutorial-extras",
+                "path": "/docs/docs/tutorial-extras",
+                "children": [
+                  {
+                    "name": "_category_.json"
+                  },
+                  {
+                    "name": "img",
+                    "path": "/docs/docs/tutorial-extras/img",
+                    "children": [
+                      {
+                        "name": "docsVersionDropdown.png"
+                      },
+                      {
+                        "name": "localeDropdown.png"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "manage-docs-versions.md"
+                  },
+                  {
+                    "name": "translate-your-site.md"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "docusaurus.config.ts"
+          },
+          {
+            "name": "package-lock.json"
+          },
+          {
+            "name": "package.json"
+          },
+          {
+            "name": "sidebars.ts"
+          },
+          {
+            "name": "src",
+            "path": "/docs/src",
+            "children": [
+              {
+                "name": "components",
+                "path": "/docs/src/components",
+                "children": [
+                  {
+                    "name": "Contributors",
+                    "path": "/docs/src/components/Contributors",
+                    "children": [
+                      {
+                        "name": "index.tsx"
+                      },
+                      {
+                        "name": "style.module.css"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "HomepageFeatures",
+                    "path": "/docs/src/components/HomepageFeatures",
+                    "children": [
+                      {
+                        "name": "index.tsx"
+                      },
+                      {
+                        "name": "styles.module.css"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "Terminal",
+                    "path": "/docs/src/components/Terminal",
+                    "children": [
+                      {
+                        "name": "colors.ts"
+                      },
+                      {
+                        "name": "echo.ts"
+                      },
+                      {
+                        "name": "github.ts"
+                      },
+                      {
+                        "name": "index.tsx"
+                      },
+                      {
+                        "name": "source.ts"
+                      },
+                      {
+                        "name": "styles.css"
+                      },
+                      {
+                        "name": "terminal.ts"
+                      },
+                      {
+                        "name": "wikipedia",
+                        "path": "/docs/src/components/Terminal/wikipedia",
+                        "children": [
+                          {
+                            "name": "parser.ts"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "wikipedia.ts"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "css",
+                "path": "/docs/src/css",
+                "children": [
+                  {
+                    "name": "custom.css"
+                  }
+                ]
+              },
+              {
+                "name": "hooks",
+                "path": "/docs/src/hooks",
+                "children": [
+                  {
+                    "name": "useScripts.ts"
+                  }
+                ]
+              },
+              {
+                "name": "pages",
+                "path": "/docs/src/pages",
+                "children": [
+                  {
+                    "name": "index.module.css"
+                  },
+                  {
+                    "name": "index.tsx"
+                  },
+                  {
+                    "name": "markdown-page.md"
+                  }
+                ]
+              },
+              {
+                "name": "types.ts"
+              },
+              {
+                "name": "utils.ts"
+              }
+            ]
+          },
+          {
+            "name": "static",
+            "path": "/docs/static",
+            "children": [
+              {
+                "name": ".nojekyll"
+              },
+              {
+                "name": "fonts",
+                "path": "/docs/static/fonts",
+                "children": [
+                  {
+                    "name": "x_bambi-webfont.woff"
+                  },
+                  {
+                    "name": "x_bambi-webfont.woff2"
+                  }
+                ]
+              },
+              {
+                "name": "img",
+                "path": "/docs/static/img",
+                "children": [
+                  {
+                    "name": "docusaurus-social-card.png"
+                  },
+                  {
+                    "name": "docusaurus.png"
+                  },
+                  {
+                    "name": "favicon.ico"
+                  },
+                  {
+                    "name": "logo.svg"
+                  },
+                  {
+                    "name": "undraw_terminal_electricity.svg"
+                  },
+                  {
+                    "name": "undraw_terminal_pilates.svg"
+                  },
+                  {
+                    "name": "undraw_terminal_selectoption.svg"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "tsconfig.json"
+          },
+          {
+            "name": "version.mjs"
+          }
+        ]
+      },
+      {
+        "name": "examples",
+        "path": "/examples",
+        "children": [
+          {
+            "name": "README.md"
+          },
+          {
+            "name": "dialog.css"
+          },
+          {
+            "name": "dialog.html"
+          },
+          {
+            "name": "dialog.js"
+          },
+          {
+            "name": "json-rpc",
+            "path": "/examples/json-rpc",
+            "children": []
+          },
+          {
+            "name": "json-rpc-service-demo.php"
+          },
+          {
+            "name": "multiple-interpreters-demo.html"
+          },
+          {
+            "name": "mysql-rpc-demo.php"
+          },
+          {
+            "name": "rpc-demo.html"
+          },
+          {
+            "name": "tilda-demo.html"
+          }
+        ]
+      },
+      {
+        "name": "files"
+      },
+      {
+        "name": "import.html"
+      },
+      {
+        "name": "jest.config.js"
+      },
+      {
+        "name": "js",
+        "path": "/js",
+        "children": [
+          {
+            "name": "animation.js"
+          },
+          {
+            "name": "ascii_table.js"
+          },
+          {
+            "name": "autocomplete_menu.js"
+          },
+          {
+            "name": "dterm.js"
+          },
+          {
+            "name": "echo_newline.js"
+          },
+          {
+            "name": "emoji.js"
+          },
+          {
+            "name": "forms.js"
+          },
+          {
+            "name": "jquery-1.7.1.min.js"
+          },
+          {
+            "name": "jquery.mousewheel-min.js"
+          },
+          {
+            "name": "jquery.terminal-2.41.1.js"
+          },
+          {
+            "name": "jquery.terminal-2.41.1.min.js"
+          },
+          {
+            "name": "jquery.terminal-src.js"
+          },
+          {
+            "name": "jquery.terminal.d.ts"
+          },
+          {
+            "name": "jquery.terminal.js"
+          },
+          {
+            "name": "jquery.terminal.min.js"
+          },
+          {
+            "name": "jquery.terminal.min.js.map"
+          },
+          {
+            "name": "less.js"
+          },
+          {
+            "name": "pipe.js"
+          },
+          {
+            "name": "prism.js"
+          },
+          {
+            "name": "terminal.widget.in"
+          },
+          {
+            "name": "terminal.widget.js"
+          },
+          {
+            "name": "unix_formatting.js"
+          },
+          {
+            "name": "xml_formatting.js"
+          }
+        ]
+      },
+      {
+        "name": "manifest"
+      },
+      {
+        "name": "package-lock.json"
+      },
+      {
+        "name": "package.json"
+      },
+      {
+        "name": "scripts",
+        "path": "/scripts",
+        "children": [
+          {
+            "name": "contributors.js"
+          },
+          {
+            "name": "cssnano.js"
+          },
+          {
+            "name": "methods.js"
+          },
+          {
+            "name": "mkemoji"
+          },
+          {
+            "name": "options"
+          },
+          {
+            "name": "tree"
+          },
+          {
+            "name": "update-contributors-package.js"
+          },
+          {
+            "name": "update-contributors-readme"
+          },
+          {
+            "name": "version"
+          }
+        ]
+      },
+      {
+        "name": "templates",
+        "path": "/templates",
+        "children": [
+          {
+            "name": "Makefile.in"
+          },
+          {
+            "name": "README.in"
+          },
+          {
+            "name": "ascii_art.svg"
+          },
+          {
+            "name": "bower.in"
+          },
+          {
+            "name": "import.in"
+          },
+          {
+            "name": "npmrc.tmpl"
+          },
+          {
+            "name": "package.git"
+          }
+        ]
+      },
+      {
+        "name": "terminal.jquery.json"
+      },
+      {
+        "name": "test.ts"
+      },
+      {
+        "name": "tsconfig.json"
+      }
+    ]
+  }
+}
