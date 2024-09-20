@@ -15,8 +15,11 @@
     gap: 1em;
 }
 
-.heroText, .terminal {
-    width: 50%;
+.heroText {
+    width: 40%;
+}
+.terminal {
+    width: 60%;
 }
 
 .heroText h1 {
