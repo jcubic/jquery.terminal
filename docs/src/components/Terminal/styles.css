@@ -1,6 +1,7 @@
 .term {
     --background: white;
     --color:#14232d;
+    --size: 1.2;
 }
 [data-theme='dark'] .term {
     --background: #14232d;

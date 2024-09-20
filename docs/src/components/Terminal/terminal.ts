@@ -2,6 +2,7 @@ import type { JQueryTerminal } from 'jquery.terminal';
 
 import github from './github';
 import echo from './echo';
+import source from './source';
 
 export function initTerminal() {
   const $ = (globalThis as any).$;
@@ -14,6 +15,7 @@ export function initTerminal() {
 
   const term = $term.terminal({
     github,
+    source,
     echo
   }, {
     processArguments: false,
