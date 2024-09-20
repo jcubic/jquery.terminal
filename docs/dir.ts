@@ -14,13 +14,15 @@ function is_git_ignored(path_name: string) {
   }
 }
 
-function dir(root: RegExp, dir_name: string) {
+function dir(dir_name: string) {
   function children(dir_name: string) {
+    const short_path = dir_name.replace(root, '') || '/';
     const result = {
       name: path.basename(dir_name),
-      path: dir_name.replace(root, ''),
+      path: short_path,
       children: []
     };
+
     const items = fs.readdirSync(dir_name, { withFileTypes: true });
 
     items.forEach(item => {
@@ -33,18 +35,19 @@ function dir(root: RegExp, dir_name: string) {
       if (item.isDirectory()) {
         result.children.push(children(full_path));
       } else {
-        result.children.push({ name: item.name });
+        result.children.push({
+          name: item.name,
+          path: path.join(short_path, item.name)
+        });
       }
     });
 
     return result;
   }
 
-  return {
-    path: '/',
-    name: null,
-    children: children(dir_name)
-  };
+  const root = new RegExp('^' + dir_name);
+
+  return children(dir_name);
 }
 
 const root = process.argv[2];
@@ -54,4 +57,8 @@ if (!root) {
   process.exit(1);
 }
 
-console.log(JSON.stringify(dir(new RegExp('^' + root), root), null, 2));
+const tree = dir(root);
+tree.name = '';
+tree.path = '/';
+
+console.log(JSON.stringify(tree, null, 2));
