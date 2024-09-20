@@ -15,4 +15,5 @@ tmp
 npm
 contributors-www.json
 _*
+!__tests__
 .tree
