@@ -25,9 +25,9 @@ skip_re="[xfi]it\\(|[fdx]describe\\("
 ROOT=`git rev-parse --show-toplevel`
 UPDATE_CONTRIBUTORS=0
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji update-tree
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors docs/dir.json
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors update-tree docs/dir.json
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -163,7 +163,7 @@ update-contributors:
 		fi;\
 	fi
 
-.tree:
+update-tree:
 	./scripts/tree
 
 docs/dir.json: .tree ./docs/dir.ts

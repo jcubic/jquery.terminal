@@ -822,6 +822,32 @@
     {
       "name": "tsconfig.json",
       "path": "/tsconfig.json"
+    },
+    {
+      "name": "x",
+      "path": "/x",
+      "children": [
+        {
+          "name": "bar",
+          "path": "/x/bar"
+        },
+        {
+          "name": "baz",
+          "path": "/x/baz"
+        },
+        {
+          "name": "foo",
+          "path": "/x/foo"
+        },
+        {
+          "name": "quux",
+          "path": "/x/quux"
+        },
+        {
+          "name": "zzz",
+          "path": "/x/zzz"
+        }
+      ]
     }
   ]
 }
