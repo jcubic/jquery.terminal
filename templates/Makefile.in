@@ -25,7 +25,7 @@ UPDATE_CONTRIBUTORS=0
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal-$(VERSION).js js/jquery.terminal.js js/jquery.terminal-$(VERSION).min.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map css/jquery.terminal-$(VERSION).css css/jquery.terminal-$(VERSION).min.css css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
+ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map  css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
 bower.json: templates/bower.in .$(VERSION)
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
@@ -33,29 +33,17 @@ bower.json: templates/bower.in .$(VERSION)
 package.json: .$(VERSION)
 	$(SED) -i 's/"version": "[^"]\+"/"version": "$(VERSION)"/' package.json
 
-js/jquery.terminal-$(VERSION).js: js/jquery.terminal-src.js .$(VERSION)
-	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal-$(VERSION).js
-
-js/jquery.terminal.js: js/jquery.terminal-$(VERSION).js
-	$(CP) js/jquery.terminal-$(VERSION).js js/jquery.terminal.js
-
-js/jquery.terminal-$(VERSION).min.js: js/jquery.terminal.min.js
-	$(CP) js/jquery.terminal.min.js js/jquery.terminal-$(VERSION).min.js
+js/jquery.terminal.js: js/jquery.terminal-src.js .$(VERSION)
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal.js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal.js
 
 js/jquery.terminal.min.js js/jquery.terminal.min.js.map: js/jquery.terminal-$(VERSION).js
 	$(CD) js && $(UGLIFY) -o jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- jquery.terminal.js && $(ECHO) >> jquery.terminal.min.js
 
-css/jquery.terminal-$(VERSION).css: css/jquery.terminal-src.css .$(VERSION)
-	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal-$(VERSION).css
-
-css/jquery.terminal.css: css/jquery.terminal-$(VERSION).css .$(VERSION)
-	$(CP) css/jquery.terminal-$(VERSION).css css/jquery.terminal.css
+css/jquery.terminal.css: css/jquery.terminal-src.css .$(VERSION)
+	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal.css || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" css/jquery.terminal-src.css > css/jquery.terminal.css
 
 css/jquery.terminal.min.css css/jquery.terminal.min.css.map: css/jquery.terminal.css
 	$(CSSNANO) css/jquery.terminal.css css/jquery.terminal.min.css
-
-css/jquery.terminal-$(VERSION).min.css: css/jquery.terminal.min.css
-	$(CP) css/jquery.terminal.min.css css/jquery.terminal-$(VERSION).min.css
 
 README.md: templates/README.in .$(VERSION) __tests__/terminal.spec.js
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e \
