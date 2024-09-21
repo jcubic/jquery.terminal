@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Sep 2024 23:29:58 +0000
+ * Date: Sat, 21 Sep 2024 22:03:59 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5323,7 +5323,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 15 Sep 2024 23:29:58 +0000',
+        date: 'Sat, 21 Sep 2024 22:03:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7328,6 +7328,15 @@
         return result;
     }
     // -----------------------------------------------------------------------
+    // :: fix rounding issue #969
+    // -----------------------------------------------------------------------
+    function aproximation(number) {
+        if (number - Math.floor(number) > 0.99) {
+            return Math.ceil(number);
+        }
+        return Math.floor(number);
+    }
+    // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal, char_size) {
@@ -7343,7 +7352,7 @@
     function get_num_rows(terminal, char_size) {
         var filler = terminal.find('.terminal-fill');
         var height = filler.height();
-        return Math.floor(height / char_size.height);
+        return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
     function all(array, fn) {

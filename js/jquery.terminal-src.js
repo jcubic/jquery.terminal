@@ -7328,6 +7328,15 @@
         return result;
     }
     // -----------------------------------------------------------------------
+    // :: fix rounding issue #969
+    // -----------------------------------------------------------------------
+    function aproximation(number) {
+        if (number - Math.floor(number) > 0.99) {
+            return Math.ceil(number);
+        }
+        return Math.floor(number);
+    }
+    // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal, char_size) {
@@ -7343,7 +7352,7 @@
     function get_num_rows(terminal, char_size) {
         var filler = terminal.find('.terminal-fill');
         var height = filler.height();
-        return Math.floor(height / char_size.height);
+        return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
     function all(array, fn) {

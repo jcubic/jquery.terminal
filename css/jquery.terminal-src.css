@@ -845,6 +845,7 @@ terminal .terminal-output > div {
     }
     .terminal .terminal-output > :not(.raw) > div,
     .cmd div,
+    .terminal,
     .terminal.external div {
         line-height: var(--terminal-line, 1em);
     }

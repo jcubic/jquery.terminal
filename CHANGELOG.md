@@ -1,3 +1,7 @@
+## 2.43.3
+### Bugfix
+* fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
+
 ## 2.43.2
 ### Bugfix
 * fix scroll to bottom when using `terminal::import_view`
