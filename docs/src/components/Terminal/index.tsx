@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef } from 'react';
-import type { JQueryStatic } from 'jquery.terminal';
+import { useLayoutEffect, useRef, useState, RefObject } from 'react';
+import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import clsx from 'clsx';
 
 import useIsBrowser from '@docusaurus/useIsBrowser';
@@ -16,17 +16,20 @@ const replReady = () => {
 
 import { initTerminal, destroyTerminal } from './terminal';
 
-type InterpreterProps = {
-  className?: string;
-};
-
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
   'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
-]
+];
 
-export default function Interpreter({ className }: InterpreterProps): JSX.Element {
+function command(term: RefObject<JQueryTerminal>) {
+  const options = { typing: true, delay: 100 };
+  return (command: string) => () => term.current.exec(command, options);
+}
+
+export default function Interpreter(): JSX.Element {
+  const [show_commands, set_show_commands] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>();
+  const term = useRef<JQueryTerminal>(null);
 
   const jQuery = (globalThis as any).jQuery as JQueryStatic;
 
@@ -36,10 +39,13 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
 
   useScripts(!jQuery && terminal_scripts);
 
+  const exec = command(term);
+
   useLayoutEffect(() => {
     (function loop() {
       if (replReady() && styleReady()) {
-        initTerminal();
+        term.current = initTerminal();
+        set_show_commands(true);
       } else {
         setTimeout(loop, 100);
       }
@@ -62,7 +68,22 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
         })}
       </Head>
       <div className={clsx('terminal', styles.marker)} ref={ref}></div>
-      <div className={clsx(styles.term, className)}/>
+      <div className={styles.term}/>
+      {show_commands && (
+        <div className={styles.commands}>
+          <p>Commands:</p>
+          <ul>
+            <li>
+              <button onClick={exec('source')}>source</button>
+            </li>
+            <li>
+              <button onClick={exec('github -u jcubic -r jquery.terminal')}>
+                github
+              </button>
+            </li>
+           </ul>
+        </div>
+      )}
     </>
   );
 };

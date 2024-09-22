@@ -21,7 +21,9 @@ function HomepageHeader() {
           a debugging tool, or creating interactive portfolio websites that resemble a terminal from
           GNU/Linux, macOS, or Windows WSL.</p>
         </aside>
-        <Terminal className={styles.terminal}/>
+        <div className={styles.terminal_container}>
+          <Terminal />
+        </div>
       </div>
     </header>
   );

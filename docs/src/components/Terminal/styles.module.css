@@ -1,6 +1,6 @@
 .term {
     --background: white;
-    --color:#14232d;
+    --color: #14232d;
     --size: 1.2;
     --rows: 18;
     border-radius: 5px;
@@ -12,6 +12,18 @@
 [data-theme='dark'] .term {
     --background: #14232d;
     --color: white;
+}
+
+.commands p {
+    margin: 0;
+}
+
+.commands ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 5px;
 }
 
 .marker {

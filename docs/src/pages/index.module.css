@@ -18,7 +18,7 @@
 .heroText {
     width: 40%;
 }
-.terminal {
+.terminal_container {
     width: 60%;
 }
 
@@ -36,7 +36,7 @@
     .container {
         flex-direction: column;
     }
-    .heroText, .terminal {
+    .heroText, .terminal_container {
         width: 100%;
     }
 }
