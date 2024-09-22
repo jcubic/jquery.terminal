@@ -10843,7 +10843,7 @@
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
-                                self.oneTime(1, 'flush', function() {
+                                setTimeout(function() {
                                     cmd_cursor.show();
                                 });
                             }

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 21 Sep 2024 22:03:59 +0000
+ * Date: Sun, 22 Sep 2024 10:44:34 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5323,7 +5323,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 21 Sep 2024 22:03:59 +0000',
+        date: 'Sun, 22 Sep 2024 10:44:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10843,7 +10843,7 @@
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
-                                self.oneTime(1, 'flush', function() {
+                                setTimeout(function() {
                                     cmd_cursor.show();
                                 });
                             }
