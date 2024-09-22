@@ -19,7 +19,7 @@ function dir(dir_name: string) {
     const short_path = dir_name.replace(root, '') || '/';
     const result = {
       name: path.basename(dir_name),
-      path: short_path,
+      path: `${short_path}/`,
       children: []
     };
 

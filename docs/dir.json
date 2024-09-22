@@ -8,7 +8,7 @@
     },
     {
       "name": ".github",
-      "path": "/.github",
+      "path": "/.github/",
       "children": [
         {
           "name": "FUNDING.yml",
@@ -16,7 +16,7 @@
         },
         {
           "name": "ISSUE_TEMPLATE",
-          "path": "/.github/ISSUE_TEMPLATE",
+          "path": "/.github/ISSUE_TEMPLATE/",
           "children": [
             {
               "name": "bug.md",
@@ -42,7 +42,7 @@
         },
         {
           "name": "workflows",
-          "path": "/.github/workflows",
+          "path": "/.github/workflows/",
           "children": [
             {
               "name": "build.yaml",
@@ -94,11 +94,11 @@
     },
     {
       "name": "__tests__",
-      "path": "/__tests__",
+      "path": "/__tests__/",
       "children": [
         {
           "name": "__fixtures__",
-          "path": "/__tests__/__fixtures__",
+          "path": "/__tests__/__fixtures__/",
           "children": [
             {
               "name": "Ken_Thompson__and_Dennis_Ritchie_at_PDP-11.jpg",
@@ -132,7 +132,7 @@
         },
         {
           "name": "__snapshots__",
-          "path": "/__tests__/__snapshots__",
+          "path": "/__tests__/__snapshots__/",
           "children": [
             {
               "name": "terminal.spec.js.snap",
@@ -148,7 +148,7 @@
     },
     {
       "name": "assets",
-      "path": "/assets",
+      "path": "/assets/",
       "children": [
         {
           "name": "ascii_art.svg",
@@ -158,7 +158,7 @@
     },
     {
       "name": "bin",
-      "path": "/bin",
+      "path": "/bin/",
       "children": [
         {
           "name": "convert.js",
@@ -172,7 +172,7 @@
     },
     {
       "name": "css",
-      "path": "/css",
+      "path": "/css/",
       "children": [
         {
           "name": "emoji.css",
@@ -206,7 +206,7 @@
     },
     {
       "name": "docs",
-      "path": "/docs",
+      "path": "/docs/",
       "children": [
         {
           "name": ".gitignore",
@@ -222,7 +222,7 @@
         },
         {
           "name": "blog",
-          "path": "/docs/blog",
+          "path": "/docs/blog/",
           "children": [
             {
               "name": "2019-05-28-first-blog-post.md",
@@ -238,7 +238,7 @@
             },
             {
               "name": "2021-08-26-welcome",
-              "path": "/docs/blog/2021-08-26-welcome",
+              "path": "/docs/blog/2021-08-26-welcome/",
               "children": [
                 {
                   "name": "docusaurus-plushie-banner.jpeg",
@@ -274,7 +274,7 @@
         },
         {
           "name": "docs",
-          "path": "/docs/docs",
+          "path": "/docs/docs/",
           "children": [
             {
               "name": "intro.md",
@@ -282,7 +282,7 @@
             },
             {
               "name": "tutorial-basics",
-              "path": "/docs/docs/tutorial-basics",
+              "path": "/docs/docs/tutorial-basics/",
               "children": [
                 {
                   "name": "_category_.json",
@@ -316,7 +316,7 @@
             },
             {
               "name": "tutorial-extras",
-              "path": "/docs/docs/tutorial-extras",
+              "path": "/docs/docs/tutorial-extras/",
               "children": [
                 {
                   "name": "_category_.json",
@@ -324,7 +324,7 @@
                 },
                 {
                   "name": "img",
-                  "path": "/docs/docs/tutorial-extras/img",
+                  "path": "/docs/docs/tutorial-extras/img/",
                   "children": [
                     {
                       "name": "docsVersionDropdown.png",
@@ -366,15 +366,15 @@
         },
         {
           "name": "src",
-          "path": "/docs/src",
+          "path": "/docs/src/",
           "children": [
             {
               "name": "components",
-              "path": "/docs/src/components",
+              "path": "/docs/src/components/",
               "children": [
                 {
                   "name": "Contributors",
-                  "path": "/docs/src/components/Contributors",
+                  "path": "/docs/src/components/Contributors/",
                   "children": [
                     {
                       "name": "index.tsx",
@@ -388,7 +388,7 @@
                 },
                 {
                   "name": "HomepageFeatures",
-                  "path": "/docs/src/components/HomepageFeatures",
+                  "path": "/docs/src/components/HomepageFeatures/",
                   "children": [
                     {
                       "name": "index.tsx",
@@ -402,7 +402,7 @@
                 },
                 {
                   "name": "Terminal",
-                  "path": "/docs/src/components/Terminal",
+                  "path": "/docs/src/components/Terminal/",
                   "children": [
                     {
                       "name": "colors.ts",
@@ -434,7 +434,7 @@
                     },
                     {
                       "name": "wikipedia",
-                      "path": "/docs/src/components/Terminal/wikipedia",
+                      "path": "/docs/src/components/Terminal/wikipedia/",
                       "children": [
                         {
                           "name": "parser.ts",
@@ -452,7 +452,7 @@
             },
             {
               "name": "css",
-              "path": "/docs/src/css",
+              "path": "/docs/src/css/",
               "children": [
                 {
                   "name": "custom.css",
@@ -462,7 +462,7 @@
             },
             {
               "name": "hooks",
-              "path": "/docs/src/hooks",
+              "path": "/docs/src/hooks/",
               "children": [
                 {
                   "name": "useScripts.ts",
@@ -472,7 +472,7 @@
             },
             {
               "name": "pages",
-              "path": "/docs/src/pages",
+              "path": "/docs/src/pages/",
               "children": [
                 {
                   "name": "index.module.css",
@@ -500,7 +500,7 @@
         },
         {
           "name": "static",
-          "path": "/docs/static",
+          "path": "/docs/static/",
           "children": [
             {
               "name": ".nojekyll",
@@ -508,7 +508,7 @@
             },
             {
               "name": "fonts",
-              "path": "/docs/static/fonts",
+              "path": "/docs/static/fonts/",
               "children": [
                 {
                   "name": "x_bambi-webfont.woff",
@@ -522,7 +522,7 @@
             },
             {
               "name": "img",
-              "path": "/docs/static/img",
+              "path": "/docs/static/img/",
               "children": [
                 {
                   "name": "docusaurus-social-card.png",
@@ -568,7 +568,7 @@
     },
     {
       "name": "examples",
-      "path": "/examples",
+      "path": "/examples/",
       "children": [
         {
           "name": "README.md",
@@ -588,7 +588,7 @@
         },
         {
           "name": "json-rpc",
-          "path": "/examples/json-rpc",
+          "path": "/examples/json-rpc/",
           "children": []
         },
         {
@@ -627,7 +627,7 @@
     },
     {
       "name": "js",
-      "path": "/js",
+      "path": "/js/",
       "children": [
         {
           "name": "animation.js",
@@ -737,7 +737,7 @@
     },
     {
       "name": "scripts",
-      "path": "/scripts",
+      "path": "/scripts/",
       "children": [
         {
           "name": "contributors.js",
@@ -779,7 +779,7 @@
     },
     {
       "name": "templates",
-      "path": "/templates",
+      "path": "/templates/",
       "children": [
         {
           "name": "Makefile.in",
@@ -825,29 +825,7 @@
     },
     {
       "name": "x",
-      "path": "/x",
-      "children": [
-        {
-          "name": "bar",
-          "path": "/x/bar"
-        },
-        {
-          "name": "baz",
-          "path": "/x/baz"
-        },
-        {
-          "name": "foo",
-          "path": "/x/foo"
-        },
-        {
-          "name": "quux",
-          "path": "/x/quux"
-        },
-        {
-          "name": "zzz",
-          "path": "/x/zzz"
-        }
-      ]
+      "path": "/x"
     }
   ]
 }
