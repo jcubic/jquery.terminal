@@ -3,14 +3,17 @@
     --color:#14232d;
     --size: 1.2;
 }
+
 [data-theme='dark'] .term {
     --background: #14232d;
     --color: white;
 }
+
 .terminal.marker {
     position: absolute;
     left: -9999999999px;
 }
+
 .term {
     --rows: 20;
     border-radius: 5px;
