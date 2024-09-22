@@ -7332,7 +7332,7 @@
     // :: fix rounding issue #969
     // -----------------------------------------------------------------------
     function aproximation(number) {
-        if (number - Math.floor(number) > 0.99) {
+        if (number - Math.floor(number) > 0.9) {
             return Math.ceil(number);
         }
         return Math.floor(number);

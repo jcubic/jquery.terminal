@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 22 Sep 2024 11:01:40 +0000
+ * Date: Sun, 22 Sep 2024 14:35:14 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5324,7 +5324,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 22 Sep 2024 11:01:40 +0000',
+        date: 'Sun, 22 Sep 2024 14:35:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7332,7 +7332,7 @@
     // :: fix rounding issue #969
     // -----------------------------------------------------------------------
     function aproximation(number) {
-        if (number - Math.floor(number) > 0.99) {
+        if (number - Math.floor(number) > 0.9) {
             return Math.ceil(number);
         }
         return Math.floor(number);
