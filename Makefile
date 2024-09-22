@@ -36,7 +36,7 @@ package.json: .$(VERSION)
 js/jquery.terminal.js: js/jquery.terminal-src.js .$(VERSION)
 	$(GIT) branch | grep '* devel' > /dev/null && $(SED) -e "s/{{VER}}/DEV/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal.js || $(SED) -e "s/{{VER}}/$(VERSION)/g" -e "s/{{DATE}}/$(DATE)/g" js/jquery.terminal-src.js > js/jquery.terminal.js
 
-js/jquery.terminal.min.js js/jquery.terminal.min.js.map: js/jquery.terminal-$(VERSION).js
+js/jquery.terminal.min.js js/jquery.terminal.min.js.map: js/jquery.terminal.js
 	$(CD) js && $(UGLIFY) -o jquery.terminal.min.js --comments --mangle --source-map "includeSources,url='jquery.terminal.min.js.map'" -- jquery.terminal.js && $(ECHO) >> jquery.terminal.min.js
 
 css/jquery.terminal.css: css/jquery.terminal-src.css .$(VERSION)
