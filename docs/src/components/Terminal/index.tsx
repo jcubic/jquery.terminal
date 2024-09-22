@@ -7,7 +7,7 @@ import Head from '@docusaurus/Head';
 
 import useScripts from '@site/src/hooks/useScripts';
 import '@site/src/types';
-import './styles.css';
+import styles from './styles.module.css';
 
 const replReady = () => {
   const jQuery = (globalThis as any).jQuery as JQueryStatic;
@@ -61,8 +61,8 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
           return <script key={script} src={script} />
         })}
       </Head>
-      <div className="terminal marker" ref={ref}></div>
-      <div className={clsx('term', className)}/>
+      <div className={clsx('terminal', styles.marker)} ref={ref}></div>
+      <div className={clsx(styles.term, className)}/>
     </>
   );
 };

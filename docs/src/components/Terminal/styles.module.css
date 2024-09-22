@@ -2,6 +2,11 @@
     --background: white;
     --color:#14232d;
     --size: 1.2;
+    --rows: 18;
+    border-radius: 5px;
+    text-align: left;
+    resize: vertical;
+    overflow: hidden;
 }
 
 [data-theme='dark'] .term {
@@ -9,20 +14,12 @@
     --color: white;
 }
 
-.terminal.marker {
+.marker {
     position: absolute;
     left: -9999999999px;
 }
 
-.term {
-    --rows: 20;
-    border-radius: 5px;
-    text-align: left;
-    resize: vertical;
-    overflow: hidden;
-}
-
-.term.shake {
+.shake {
     animation: shake 0.2s;
 }
 
