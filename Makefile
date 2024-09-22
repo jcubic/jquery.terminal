@@ -164,7 +164,7 @@ update-contributors:
 	fi
 
 update-tree:
-	./scripts/tree
+	@scripts/tree
 
 docs/dir.json: .tree ./docs/dir.ts
 	$(TS_NODE) ./docs/dir.ts $(ROOT) > ./docs/dir.json

@@ -8,6 +8,7 @@ if [ ! -f .tree ]; then
   mv "$TEMP_FILE" .tree
 else
   if ! cmp -s .tree "$TEMP_FILE"; then
+    echo "update .tree"
     mv "$TEMP_FILE" .tree
   else
     rm "$TEMP_FILE"
