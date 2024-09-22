@@ -2,6 +2,7 @@
 ### Bugfix
 * fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
 * fix hidden cursor when using command that change `--size` [#968](https://github.com/jcubic/jquery.terminal/issues/968)
+* fix command prop in `export_view()` when in command [#967](https://github.com/jcubic/jquery.terminal/issues/967)
 
 ## 2.43.2
 ### Bugfix

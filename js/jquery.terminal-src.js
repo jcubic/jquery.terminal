@@ -2384,6 +2384,9 @@
                 }
                 history.reset();
 
+                self.set('');
+                clip.val('');
+
                 // for next input event on firefox/android with google keyboard
                 prev_command = '';
                 no_keydown = true;
@@ -2401,8 +2404,6 @@
                         draw_prompt();
                     }
                 }
-                self.set('');
-                clip.val('');
                 if (!is_mobile) {
                     clip.$node.focus();
                 }
