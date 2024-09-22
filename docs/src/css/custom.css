@@ -38,6 +38,7 @@
 
 .terminal [data-path]:not([data-path$="/"]) {
     --color: var(--ifm-link-color);
+    cursor: pointer;
 }
 
 .terminal [data-path]:not([data-path$="/"]):hover {
