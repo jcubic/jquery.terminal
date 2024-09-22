@@ -9,8 +9,28 @@ function alow_data() {
   }
 }
 
+const root = 'https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@docusaurus';
+
 export default function source(this: JQueryTerminal) {
   alow_data();
+  let pending = false;
+  const display = async (node: JQuery<HTMLSpanElement>) => {
+    if (!pending) {
+      const path = node.data('path');
+      node.addClass('pending');
+      pending = true;
+      const url = [root, path].join('');
+      const res = await fetch(url);
+      const text = await res.text();
+      pending = false;
+      node.removeClass('pending');
+      this.less(text);
+    }
+  };
+  this.off('.source');
+  this.on('click.source', '[data-path]:not([data-path$="/"])', function() {
+    display($(this));
+  });
   setTimeout(() => {
     this.less(tree(data));
   }, 0);
@@ -24,7 +44,7 @@ type TreeNode = {
 
 
 function tree({ children, name, path }: TreeNode, prefix = '') {
-  let result = prefix ? `${prefix}[[;white;;;;{"data-path":"${path}"}]${name}]\n` : '/\n';
+  let result = prefix ? `${prefix}[[;;;;;{"data-path":"${path}"}]${name}]\n` : '/\n';
   if (children) {
     for (let i = 0; i < children.length; i++) {
       const isLast = i === children.length - 1;

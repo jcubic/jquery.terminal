@@ -22,7 +22,7 @@ type InterpreterProps = {
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
-  'https://cdn.jsdelivr.net/combine/npm/jquery.terminal/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
 ]
 
 export default function Interpreter({ className }: InterpreterProps): JSX.Element {
@@ -56,7 +56,7 @@ export default function Interpreter({ className }: InterpreterProps): JSX.Elemen
     <>
       <Head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" rel="stylesheet"/>
+        <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
         {isStatic && terminal_scripts.map(script => {
           return <script key={script} src={script} />
         })}

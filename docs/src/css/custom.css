@@ -35,3 +35,39 @@
 .container.container {
     max-width: var(--ifm-container-width);
 }
+
+.terminal [data-path]:not([data-path$="/"]) {
+    --color: var(--ifm-link-color);
+}
+
+.terminal [data-path]:not([data-path$="/"]):hover {
+    text-decoration: underline;
+}
+
+/* ajax loader */
+.terminal [data-path]:not([data-path$="/"]).pending::after {
+    content: '';
+    width: calc(var(--size, 1) * (10px / var(--pixel-density, 1)));
+    height: calc(var(--size, 1) * (10px / var(--pixel-density, 1)));
+    border: 2px solid var(--ifm-link-color);
+    display: inline-block;
+    border-radius: 50%;
+    border-top: none;
+    border-left: none;
+    animation: rotate 2s linear infinite;
+}
+
+.terminal [data-path]:not([data-path$="/"]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

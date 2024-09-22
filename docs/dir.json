@@ -822,10 +822,6 @@
     {
       "name": "tsconfig.json",
       "path": "/tsconfig.json"
-    },
-    {
-      "name": "x",
-      "path": "/x"
     }
   ]
 }
