@@ -27,7 +27,11 @@ const terminal_scripts = [
 
 function command(term: RefObject<JQueryTerminal>) {
   const options = { typing: true, delay: 100 };
-  return (command: string) => () => term.current.exec(command, options);
+  return (command: string) => () => {
+      setTimeout(() => {
+          term.current.focus().exec(command, options);
+      }, 0);
+  };
 }
 
 export default function Interpreter(): JSX.Element {
