@@ -81,6 +81,9 @@ export default function Interpreter(): JSX.Element {
                 github
               </button>
             </li>
+            <li>
+              <button onClick={exec('size 1')}>size</button>
+            </li>
            </ul>
         </div>
       )}
