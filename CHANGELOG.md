@@ -1,4 +1,6 @@
-## 2.43.3
+## 2.44.0
+### Features
+* new API `terminal::animation()` and `terminal::delay()` [#683](https://github.com/jcubic/jquery.terminal/issues/683)
 ### Bugfix
 * fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
 * fix hidden cursor when using command that change `--size` [#968](https://github.com/jcubic/jquery.terminal/issues/968)

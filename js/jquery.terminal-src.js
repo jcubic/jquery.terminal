@@ -9282,6 +9282,7 @@
                         keepWords: keepWords
                     });
                 }
+                var was_animating = animating;
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -9395,7 +9396,9 @@
                                     }
                                     finish_typing_fn(message, prompt, options);
                                 }
-                                animating = false;
+                                if (!was_animating) {
+                                    animating = false;
+                                }
                             }, options.delay);
                         }
                     }, options.delay);
@@ -11150,6 +11153,33 @@
                 }
                 return self;
             },
+            // -------------------------------------------------------------
+            // :: Animation helper to hide leaky abstraction
+            // -------------------------------------------------------------
+            animation: function(callback) {
+                if (is_function(callback)) {
+                    animating = true;
+                    var prompt = self.get_prompt();
+                    self.set_prompt('');
+                    return unpromise(callback(), function() {
+                        self.set_prompt(prompt);
+                        animating = false;
+                    });
+                }
+                return $.when();
+            },
+            // -------------------------------------------------------------
+            // :: Common async delay function helper
+            // -------------------------------------------------------------
+            delay: function(time) {
+                var d = new $.Deferred();
+                setTimeout(function() {
+                    d.resolve();
+                }, time);
+                return d.promise();
+            },
+            // -------------------------------------------------------------
+            // :: low level typing animation interface
             // -------------------------------------------------------------
             typing: function(type, delay, string, options) {
                 var d = new $.Deferred();

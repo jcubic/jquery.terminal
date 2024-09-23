@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 22 Sep 2024 14:35:14 +0000
+ * Date: Mon, 23 Sep 2024 19:55:52 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5324,7 +5324,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 22 Sep 2024 14:35:14 +0000',
+        date: 'Mon, 23 Sep 2024 19:55:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9282,6 +9282,7 @@
                         keepWords: keepWords
                     });
                 }
+                var was_animating = animating;
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -9395,7 +9396,9 @@
                                     }
                                     finish_typing_fn(message, prompt, options);
                                 }
-                                animating = false;
+                                if (!was_animating) {
+                                    animating = false;
+                                }
                             }, options.delay);
                         }
                     }, options.delay);
@@ -11150,6 +11153,33 @@
                 }
                 return self;
             },
+            // -------------------------------------------------------------
+            // :: Animation helper to hide leaky abstraction
+            // -------------------------------------------------------------
+            animation: function(callback) {
+                if (is_function(callback)) {
+                    animating = true;
+                    var prompt = self.get_prompt();
+                    self.set_prompt('');
+                    return unpromise(callback(), function() {
+                        self.set_prompt(prompt);
+                        animating = false;
+                    });
+                }
+                return $.when();
+            },
+            // -------------------------------------------------------------
+            // :: Common async delay function helper
+            // -------------------------------------------------------------
+            delay: function(time) {
+                var d = new $.Deferred();
+                setTimeout(function() {
+                    d.resolve();
+                }, time);
+                return d.promise();
+            },
+            // -------------------------------------------------------------
+            // :: low level typing animation interface
             // -------------------------------------------------------------
             typing: function(type, delay, string, options) {
                 var d = new $.Deferred();
