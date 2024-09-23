@@ -61,7 +61,7 @@
     }
 })(function($) {
     var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\s*\])/;
-    var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;[^;]*;([^;]*)(?:;[^;]+)?\][^\]]*\]/;
+    var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;([^;]*);([^;]*)(?:;[^;]+)?\]([^\]]*)\]/;
     // -------------------------------------------------------------------------
     function find(arr, fn) {
         for (var i in arr) {
@@ -322,7 +322,7 @@
                 function concat_slices(slices) {
                     cache[width][img] = slices;
                     result = result.concat(slices.map(function(uri) {
-                        return '[[@;;;;' + uri + ']]';
+                        return '[[@;;;' + cls + ';' + uri + ']' + alt + ']';
                     }));
                     recur();
                 }
@@ -332,7 +332,9 @@
                 var part = parts.shift();
                 var m = part.match(img_re);
                 if (m) {
-                    var img = m[1];
+                    var img = m[2];
+                    var cls = m[1];
+                    var alt = m[3];
                     var rect = cursor_size();
                     var width = term.width();
                     var opts = {
