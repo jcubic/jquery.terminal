@@ -19,6 +19,7 @@ import { initTerminal, destroyTerminal } from './terminal';
 import github from './github';
 import echo from './echo';
 import source from './source';
+import record from './record';
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
@@ -56,6 +57,7 @@ export default function Interpreter(): JSX.Element {
           github,
           source,
           echo,
+          record,
           size(num: string) {
             this.css('--size', num);
           },
