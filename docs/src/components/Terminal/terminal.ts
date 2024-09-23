@@ -1,12 +1,8 @@
 import type { JQueryTerminal } from 'jquery.terminal';
 
-import github from './github';
-import echo from './echo';
-import source from './source';
-
 import styles from './styles.module.css';
 
-export function initTerminal() {
+export function initTerminal(interpreter: JQueryTerminal.Interpreter) {
   const $ = (globalThis as any).$;
   const $term = $(`.${styles.term}`);
   $term.empty();
@@ -15,11 +11,7 @@ export function initTerminal() {
     return scroll.apply(term, args);
   };
 
-  const term = $term.terminal({
-    github,
-    source,
-    echo
-  }, {
+  const term = $term.terminal(interpreter, {
     processArguments: false,
     checkArity: false,
     completion: true,

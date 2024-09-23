@@ -1,4 +1,5 @@
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
+import path from 'path-browserify';
 
 import data from '@site/dir.json';
 
@@ -11,20 +12,31 @@ function alow_data() {
 
 const root = 'https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@docusaurus';
 
+function is_image(path_name: string) {
+  const ext = path.extname(path_name);
+  return ['.jpeg', '.jpg', '.svg', '.png'].includes(ext);
+}
+
 export default function source(this: JQueryTerminal) {
   alow_data();
   let pending = false;
   const display = async (node: JQuery<HTMLSpanElement>) => {
     if (!pending) {
-      const path = node.data('path');
+      const full_path = node.data('path');
       node.addClass('pending');
       pending = true;
-      const url = [root, path].join('');
-      const res = await fetch(url);
-      const text = await res.text();
+      const url = [root, full_path].join('');
+      let text: string;
+      if (is_image(full_path)) {
+        const name = path.basename(full_path);
+        text = `<img class="less" src="${url}" alt="file ${name}"/>`;
+      } else {
+        const res = await fetch(url);
+        text = await res.text();
+      }
       pending = false;
       node.removeClass('pending');
-      this.less(text);
+      this.less(text, { formatters: true });
     }
   };
   this.off('.source');

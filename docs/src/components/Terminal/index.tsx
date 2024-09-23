@@ -16,9 +16,13 @@ const replReady = () => {
 
 import { initTerminal, destroyTerminal } from './terminal';
 
+import github from './github';
+import echo from './echo';
+import source from './source';
+
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
-  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,npm/jquery.terminal/js/less.js'
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@99526e255/js/less.js,npm/jquery.terminal/js/xml_formatting.js'
 ];
 
 function command(term: RefObject<JQueryTerminal>) {
@@ -44,7 +48,17 @@ export default function Interpreter(): JSX.Element {
   useLayoutEffect(() => {
     (function loop() {
       if (replReady() && styleReady()) {
-        term.current = initTerminal();
+        term.current = initTerminal({
+          github,
+          source,
+          echo,
+          size(num: string) {
+            this.css('--size', num);
+          },
+          rows(num: string) {
+            this.css('--rows', num);
+          }
+        });
         set_show_commands(true);
       } else {
         setTimeout(loop, 100);
