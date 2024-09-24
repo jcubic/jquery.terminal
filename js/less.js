@@ -97,7 +97,6 @@
                 return URL.createObjectURL(blob);
             }
         });
-        return defer.promise();
     }
     function slice(src, options) {
         var settings = $.extend({
@@ -116,10 +115,8 @@
                 height = img.height;
                 width = img.width;
             }
-            var canvas = document.createElement('canvas');
+            var canvas = new OffscreenCanvas(width, height);
             var ctx = canvas.getContext('2d', {willReadFrequently: true});
-            canvas.width = width;
-            canvas.height = height;
             // scale the image to fit the terminal
             ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
             (function recur(start) {
@@ -314,7 +311,7 @@
                 return text.split('\n');
             }
             var parts = text.split(img_split_re).filter(Boolean);
-            var width = term.find('.terminal-fill').width();
+            var width = term.find('.terminal-output').width();
             var result = [];
             (function recur() {
                 function concat_slices(slices) {

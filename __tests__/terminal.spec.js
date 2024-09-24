@@ -223,20 +223,28 @@ window.Image = class Image {
         }
     }
 };
-window.HTMLCanvasElement.prototype.getContext = function () {
+
+const context = {
+    putImageData: function(data, x, y) {
+    },
+    getImageData: function(x, y, w, h) {
+        return [1,1,1];
+    },
+    drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
+    }
+};
+
+global.OffscreenCanvas = function(width, height) {
     return {
-        putImageData: function(data, x, y) {
-        },
-        getImageData: function(x, y, w, h) {
-            return [1,1,1];
-        },
-        drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
-        }
+        height,
+        width,
+        getContext: () => context,
+        convertToBlob: () => Promise.resolve('<BLOB>')
     };
 };
-window.HTMLCanvasElement.prototype.toBlob = function(fn) {
-    fn('<BLOB>');
-};
+
+window.HTMLCanvasElement.prototype.getContext = () => context;
+window.HTMLCanvasElement.prototype.toBlob = (fn) => fn('<BLOB>');
 global.URL = window.URL = {
     createObjectURL: function(blob) {
         return 'data:image/jpg,' + blob;
@@ -2209,6 +2217,7 @@ describe('Terminal utils', function() {
                 numRows: rows
             });
             term.css('width', 800);
+            term.find('.terminal-output').css('width', 800);
             term.focus();
         });
         function key(ord, key) {
