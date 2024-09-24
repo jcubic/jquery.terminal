@@ -17,3 +17,15 @@ export function shuffle<T>(arr: T[]) {
     }
     return arr;
 }
+
+export type TColor = {
+  red: number;
+  green: number;
+  blue: number;
+};
+
+export function hex(color: TColor) {
+    return '#' + [color.red, color.green, color.blue].map(n => {
+        return n.toString(16).padStart(2, '0');
+    }).join('');
+}

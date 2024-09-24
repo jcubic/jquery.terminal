@@ -15,6 +15,7 @@ export function initTerminal(interpreter: JQueryTerminal.Interpreter) {
     processArguments: false,
     checkArity: false,
     completion: true,
+    pipe: true,
     execHash: true,
     mousewheel: scroll_event,
     touchscroll: scroll_event

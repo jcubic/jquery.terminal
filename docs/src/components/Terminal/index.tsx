@@ -21,10 +21,13 @@ import echo from './echo';
 import source from './source';
 import record from './record';
 import theme from './theme';
+import joke from './joke';
+import lolcat from './lolcat';
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
-  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@99526e255/js/less.js,npm/jquery.terminal/js/xml_formatting.js'
+  'https://cdn.jsdelivr.net/npm/prismjs/prism.js',
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,npm/jquery.terminal/js/pipe.js'
 ];
 
 function command(term: RefObject<JQueryTerminal>) {
@@ -58,6 +61,8 @@ export default function Interpreter(): JSX.Element {
           github,
           source,
           echo,
+          joke,
+          lolcat,
           theme,
           record,
           size(num: string) {
@@ -105,6 +110,9 @@ export default function Interpreter(): JSX.Element {
             </li>
             <li>
               <button onClick={exec('theme', true)}>theme</button>
+            </li>
+            <li>
+              <button onClick={exec('joke | lolcat')}>joke</button>
             </li>
            </ul>
         </div>
