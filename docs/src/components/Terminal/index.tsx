@@ -113,7 +113,7 @@ export default function Interpreter(): JSX.Element {
               <button onClick={exec('theme', true)}>theme</button>
             </li>
             <li>
-              <button onClick={exec('joke | lolcat')}>joke</button>
+              <button onClick={exec('joke | lolcat -a')}>joke</button>
             </li>
            </ul>
         </div>
