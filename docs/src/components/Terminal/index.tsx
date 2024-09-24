@@ -20,6 +20,7 @@ import github from './github';
 import echo from './echo';
 import source from './source';
 import record from './record';
+import theme from './theme';
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
@@ -27,10 +28,10 @@ const terminal_scripts = [
 ];
 
 function command(term: RefObject<JQueryTerminal>) {
-  const options = { typing: true, delay: 100 };
-  return (command: string) => () => {
+  const options = { typing: true, delay: 50 };
+  return (command: string, silent: boolean = false) => () => {
       setTimeout(() => {
-          term.current.focus().exec(command, options);
+          term.current.focus().exec(command, { ...options, silent });
       }, 0);
   };
 }
@@ -57,6 +58,7 @@ export default function Interpreter(): JSX.Element {
           github,
           source,
           echo,
+          theme,
           record,
           size(num: string) {
             this.css('--size', num);
@@ -102,7 +104,7 @@ export default function Interpreter(): JSX.Element {
               </button>
             </li>
             <li>
-              <button onClick={exec('size 1')}>size</button>
+              <button onClick={exec('theme', true)}>theme</button>
             </li>
            </ul>
         </div>
