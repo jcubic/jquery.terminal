@@ -87,17 +87,14 @@
     // slice images into terminal lines - each line is unique blob url
     function slice_image(img_data, width, y1, y2) {
         // render slice on canvas and get Blob Data URI
-        var canvas = document.createElement('canvas');
+        var canvas = new OffscreenCanvas(width, y2 - y1);
         var ctx = canvas.getContext('2d', {willReadFrequently: true});
-        canvas.width = width;
-        canvas.height = y2 - y1;
         ctx.putImageData(img_data, 0, 0);
-        var defer = $.Deferred();
-        canvas.toBlob(function(blob) {
+        return canvas.convertToBlob().then(function(blob) {
             if (blob === null) {
-                defer.resolve(null);
+                return null;
             } else {
-                defer.resolve(URL.createObjectURL(blob));
+                return URL.createObjectURL(blob);
             }
         });
         return defer.promise();
