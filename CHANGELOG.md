@@ -7,6 +7,7 @@
 * fix command prop in `export_view()` when in command [#967](https://github.com/jcubic/jquery.terminal/issues/967)
 * fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
 * fix passing alt and class for image in less
+* fix width of images in less
 
 ## 2.43.2
 ### Bugfix

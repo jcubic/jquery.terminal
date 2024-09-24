@@ -317,6 +317,7 @@
                 return text.split('\n');
             }
             var parts = text.split(img_split_re).filter(Boolean);
+            var width = term.find('.terminal-fill').width();
             var result = [];
             (function recur() {
                 function concat_slices(slices) {
@@ -336,7 +337,6 @@
                     var cls = m[1];
                     var alt = m[3];
                     var rect = cursor_size();
-                    var width = term.width();
                     var opts = {
                         width: width,
                         line_height: Math.floor(rect.height)
