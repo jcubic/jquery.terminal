@@ -18,6 +18,13 @@ export function shuffle<T>(arr: T[]) {
     return arr;
 }
 
+export function randomize<T>(array: T[]) {
+  let index = 0;
+  const random = [...array];
+  shuffle(random);
+  return () => random[index++ % random.length];
+}
+
 export type TColor = {
   red: number;
   green: number;
