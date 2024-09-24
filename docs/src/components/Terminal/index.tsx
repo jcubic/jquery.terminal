@@ -24,6 +24,8 @@ import record from './record';
 import theme from './theme';
 import joke from './joke';
 import lolcat from './lolcat';
+import cowsay from './cowsay';
+import fortune from './fortune';
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
@@ -63,7 +65,9 @@ export default function Interpreter(): JSX.Element {
           source,
           echo,
           joke,
+          cowsay,
           lolcat,
+          fortune,
           theme,
           record,
           size(num: string) {
@@ -114,6 +118,9 @@ export default function Interpreter(): JSX.Element {
             </li>
             <li>
               <button onClick={exec('joke | lolcat -a')}>joke</button>
+            </li>
+            <li>
+              <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
             </li>
            </ul>
         </div>

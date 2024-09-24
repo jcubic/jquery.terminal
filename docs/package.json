@@ -20,6 +20,8 @@
     "@docusaurus/preset-classic": "3.5.2",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
+    "cowsay": "^1.6.0",
+    "fortune-cookie": "^0.0.1",
     "isomorphic-lolcat": "^0.3.1",
     "path-browserify": "^1.0.1",
     "prism-react-renderer": "^2.3.0",
