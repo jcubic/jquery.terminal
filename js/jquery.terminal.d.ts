@@ -1,7 +1,7 @@
 /*
  * helper types
  */
-type anyFunction = (...args: any[]) => any;
+type anyFunction = (...args: unknown[]) => unknown;
 type StringOrNumber = string | number | null;
 
 type JSONObject = {
@@ -801,6 +801,8 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     last_index(): number;
     echo(arg: string, options: JQueryTerminal.animationOptions & JQueryTerminal.EchoOptions): JQuery.Promise<void>;
     echo<TValue = JQueryTerminal.echoValueOrPromise>(arg: TValue, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
+    animation(callback: anyFunction): PromiseLike<void>;
+    delay(time: number): PromiseLike<void>;
     error(arg: JQueryTerminal.errorArgument, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     exception<T extends Error>(e: T, label?: string): JQueryTerminal;
     scroll(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'scroll'> | false): this;
