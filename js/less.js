@@ -331,7 +331,12 @@
                 var m = part.match(img_re);
                 if (m) {
                     var img = m[2];
-                    var cls = m[1];
+                    var cls = m[1].trim();
+                    if (cls) {
+                        cls += ' terminal-less';
+                    } else {
+                        cls = 'terminal-less';
+                    }
                     var alt = m[3];
                     var rect = cursor_size();
                     var opts = {
