@@ -21,10 +21,9 @@ type TypeOrString<T> = T | string;
 type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare module 'jquery.terminal' {
-
   export namespace JQueryTerminal {
     type interpreterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
-    type terminalObjectFunction = (this: JQueryTerminal, ...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
+    type terminalObjectFunction = (this: JQueryTerminal, ...args: (string | number | RegExp)[]) => TypeOrPromise<simpleEchoValue | void>;
     type Interpreter = string | interpreterFunction | ObjectInterpreter;
     type ObjectInterpreter = {
       [key: string]: ObjectInterpreter | terminalObjectFunction;
