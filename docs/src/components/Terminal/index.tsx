@@ -16,6 +16,7 @@ const replReady = () => {
 
 import { initTerminal, destroyTerminal } from './terminal';
 
+import { delay } from '@site/src/constants';
 import github from './github';
 import echo from './echo';
 import source from './source';
@@ -31,7 +32,7 @@ const terminal_scripts = [
 ];
 
 function command(term: RefObject<JQueryTerminal>) {
-  const options = { typing: true, delay: 50 };
+  const options = { typing: true, delay };
   return (command: string, silent: boolean = false) => () => {
       setTimeout(() => {
           term.current.focus().exec(command, { ...options, silent });
