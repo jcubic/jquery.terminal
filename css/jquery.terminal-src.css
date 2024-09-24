@@ -847,7 +847,7 @@ terminal .terminal-output > div {
     .cmd div,
     .terminal,
     .terminal.external div {
-        line-height: var(--terminal-line, 1em);
+        line-height: round(var(--terminal-line, 1em));
     }
     .terminal [data-text], .cmd [data-text] {
         /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
