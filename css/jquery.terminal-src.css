@@ -951,34 +951,34 @@ terminal .terminal-output > div {
  * overwrite css variables that don't work with selection in Edge
  */
 @property --color {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: rgba(170, 170, 170, 0.99);
+    syntax: '<color>';
+    inherits: true;
+    initial-value: rgba(170, 170, 170, 0.99);
 }
 @property --background {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #000;
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #000;
 }
 @property --link-color {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #3377FF;
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #3377FF;
 }
 @property --size {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 1;
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 1;
 }
 @property --padding {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 10;
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 10;
 }
 @property --rows {
-  syntax: '<number> | auto';
-  inherits: true;
-  initial-value: auto;
+    syntax: '<number> | auto';
+    inherits: true;
+    initial-value: auto;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
