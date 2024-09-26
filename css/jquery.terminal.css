@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 24 Sep 2024 17:11:19 +0000
+ * Date: Thu, 26 Sep 2024 16:41:01 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -976,8 +976,9 @@ terminal .terminal-output > div {
   initial-value: 10;
 }
 @property --rows {
-  syntax: '<number>';
+  syntax: '<number> | auto';
   inherits: true;
+  initial-value: auto;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,

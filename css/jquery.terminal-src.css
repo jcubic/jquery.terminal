@@ -976,8 +976,9 @@ terminal .terminal-output > div {
   initial-value: 10;
 }
 @property --rows {
-  syntax: '<number>';
+  syntax: '<number> | auto';
   inherits: true;
+  initial-value: auto;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
