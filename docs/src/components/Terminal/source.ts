@@ -36,7 +36,12 @@ export default function source(this: JQueryTerminal) {
       }
       pending = false;
       node.removeClass('pending');
-      this.less(text, { formatters: true });
+      this.less(text, {
+        formatters: true,
+        onExit() {
+          
+        }
+      });
     }
   };
   this.off('.source');

@@ -21,6 +21,7 @@
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
     "cowsay": "^1.6.0",
+    "figlet": "^1.7.0",
     "fortune-cookie": "^0.0.1",
     "isomorphic-lolcat": "^0.3.1",
     "path-browserify": "^1.0.1",
@@ -32,6 +33,7 @@
     "@docusaurus/module-type-aliases": "3.5.2",
     "@docusaurus/tsconfig": "3.5.2",
     "@docusaurus/types": "3.5.2",
+    "@types/figlet": "^1.5.8",
     "@types/jquery": "^3.5.30",
     "jquery.terminal": "github:jcubic/jquery.terminal#docusaurus",
     "typescript": "~5.5.2"

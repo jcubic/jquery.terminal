@@ -26,6 +26,7 @@ import joke from './joke';
 import lolcat from './lolcat';
 import cowsay from './cowsay';
 import fortune from './fortune';
+import figlet from './figlet';
 
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
@@ -68,6 +69,7 @@ export default function Interpreter(): JSX.Element {
           cowsay,
           lolcat,
           fortune,
+          figlet,
           theme,
           record,
           size(num: string) {
@@ -95,6 +97,7 @@ export default function Interpreter(): JSX.Element {
       <Head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+        <link href="https://cdn.jsdelivr.net/npm/terminal-prism/css/prism-coy.css" rel="stylesheet"/>
         {isStatic && terminal_scripts.map(script => {
           return <script key={script} src={script} />
         })}
@@ -121,6 +124,11 @@ export default function Interpreter(): JSX.Element {
             </li>
             <li>
               <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
+            </li>
+            <li>
+              <button onClick={exec('echo jQuery Terminal | figlet -f Slant | lolcat')}>
+                figlet
+              </button>
             </li>
            </ul>
         </div>
