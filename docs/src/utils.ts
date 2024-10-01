@@ -32,7 +32,11 @@ export type TColor = {
 };
 
 export function hex(color: TColor) {
-    return '#' + [color.red, color.green, color.blue].map(n => {
-        return n.toString(16).padStart(2, '0');
-    }).join('');
+  return '#' + [color.red, color.green, color.blue].map(n => {
+    return n.toString(16).padStart(2, '0');
+  }).join('');
+}
+
+export function random(max: number) {
+  return Math.floor(Math.random() * (max + 1));
 }

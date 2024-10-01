@@ -1,7 +1,7 @@
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import lolcat from 'isomorphic-lolcat';
 
-import { TColor, hex } from '@site/src/utils';
+import { TColor, hex, random } from '@site/src/utils';
 import { delay } from '@site/src/constants';
 
 export default async function command(this: JQueryTerminal, ...args: string[]) {
@@ -14,8 +14,9 @@ export default async function command(this: JQueryTerminal, ...args: string[]) {
 
 function rainbow(string: string) {
   const $ = (globalThis as any).$ as JQueryStatic;
+  const seed = random(256);
   return lolcat.rainbow(function(char: string, color: TColor) {
         char = $.terminal.escape_brackets(char);
         return `[[;${hex(color)};]${char}]`;
-    }, string).join('\n');
+  }, string, seed).join('\n');
 }
