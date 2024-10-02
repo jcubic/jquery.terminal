@@ -9785,6 +9785,11 @@
             // -------------------------------------------------------------
             exec: function(command, silent, options) {
                 function invoke(silent) {
+                    // keymap store value in history, we call commands
+                    // directly so we need to directly save in history
+                    if (exec_settings.history) {
+                        command_line.history().append(command);
+                    }
                     // commands may return promise from user code
                     // it will resolve exec promise when user promise
                     // is resolved
@@ -9806,6 +9811,7 @@
                 var exec_settings = $.extend({
                     deferred: null,
                     silent: false,
+                    history: false,
                     typing: false,
                     delay: settings.execAnimationDelay
                 }, options);

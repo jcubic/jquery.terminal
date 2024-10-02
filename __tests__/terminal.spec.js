@@ -5534,7 +5534,9 @@ describe('Terminal plugin', function() {
                     }
                 };
                 spy(interpreter, 'foo');
-                term = $('<div/>').appendTo('body').terminal(interpreter);
+                term = $('<div/>').appendTo('body').terminal(interpreter, {
+                    name: '__exec__'
+                });
                 term.focus();
             });
             afterEach(function() {
@@ -5756,6 +5758,16 @@ describe('Terminal plugin', function() {
                         resolve();
                     }, 800);
                 });
+            });
+            it('should not save command in history', () => {
+                term.clear();
+                term.focus().exec('echo hello');
+                expect(term.history().data()).toEqual([]);
+            });
+            it('should save command in history', () => {
+                term.clear();
+                term.focus().exec('echo hello', { history: true });
+                expect(term.history().data()).toEqual(['echo hello']);
             });
         });
         describe('autologin', function() {

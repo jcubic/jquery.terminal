@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 23 Sep 2024 19:55:52 +0000
+ * Date: Wed, 02 Oct 2024 19:58:38 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5324,7 +5324,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 23 Sep 2024 19:55:52 +0000',
+        date: 'Wed, 02 Oct 2024 19:58:38 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9785,6 +9785,11 @@
             // -------------------------------------------------------------
             exec: function(command, silent, options) {
                 function invoke(silent) {
+                    // keymap store value in history, we call commands
+                    // directly so we need to directly save in history
+                    if (exec_settings.history) {
+                        command_line.history().append(command);
+                    }
                     // commands may return promise from user code
                     // it will resolve exec promise when user promise
                     // is resolved
@@ -9806,6 +9811,7 @@
                 var exec_settings = $.extend({
                     deferred: null,
                     silent: false,
+                    history: false,
                     typing: false,
                     delay: settings.execAnimationDelay
                 }, options);

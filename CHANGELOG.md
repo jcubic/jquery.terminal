@@ -2,6 +2,7 @@
 ### Features
 * new API `terminal::animation()` and `terminal::delay()` [#683](https://github.com/jcubic/jquery.terminal/issues/683)
 * add images in less now have `terminal-less` class
+* add `history` option to `terminal::exec()` [#745](https://github.com/jcubic/jquery.terminal/issues/745)
 ### Bugfix
 * fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
 * fix hidden cursor when using command that change `--size` [#968](https://github.com/jcubic/jquery.terminal/issues/968)
@@ -9,7 +10,7 @@
 * fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
 * fix passing alt and class for image in less
 * fix width of images in less when image is bigger than the terminal
-* fix line-height of the lines to render less slices properly
+* fix line-height of the lines to render less image slices properly
 
 ## 2.43.2
 ### Bugfix

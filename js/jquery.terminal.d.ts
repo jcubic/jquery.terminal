@@ -171,6 +171,7 @@ declare namespace JQueryTerminal {
 
     type execOptions = JQueryTerminal.animationOptions & {
         silent?: boolean;
+        history?: boolean;
         deferred?: JQuery.Deferred<void>
     };
 
