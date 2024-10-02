@@ -7519,6 +7519,7 @@
         processArguments: true,
         execAnimation: false,
         execAnimationDelay: 100,
+        execHistory: false,
         linksNoReferrer: false,
         externalPause: true,
         useCache: true,
@@ -12733,6 +12734,7 @@
                             var i = 0;
                             var options = {
                                 typing: settings.execAnimation,
+                                history: settings.execHistory,
                                 delay: settings.execAnimationDelay
                             };
                             (function recur() {

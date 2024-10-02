@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Wed, 02 Oct 2024 19:58:38 +0000
+ * Date: Wed, 02 Oct 2024 20:07:01 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5324,7 +5324,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Wed, 02 Oct 2024 19:58:38 +0000',
+        date: 'Wed, 02 Oct 2024 20:07:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7519,6 +7519,7 @@
         processArguments: true,
         execAnimation: false,
         execAnimationDelay: 100,
+        execHistory: false,
         linksNoReferrer: false,
         externalPause: true,
         useCache: true,
@@ -12733,6 +12734,7 @@
                             var i = 0;
                             var options = {
                                 typing: settings.execAnimation,
+                                history: settings.execHistory,
                                 delay: settings.execAnimationDelay
                             };
                             (function recur() {
