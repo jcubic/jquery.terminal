@@ -126,7 +126,7 @@ export default function Interpreter(): JSX.Element {
               <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
             </li>
             <li>
-              <button onClick={exec('echo jQuery Terminal | figlet -f Slant | lolcat')}>
+              <button onClick={exec('echo jQuery Terminal | figlet -f Small | lolcat')}>
                 figlet
               </button>
             </li>
