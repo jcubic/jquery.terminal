@@ -14,7 +14,7 @@ export function initTerminal(interpreter: JQueryTerminal.Interpreter) {
   const term = $term.terminal(interpreter, {
     processArguments: false,
     checkArity: false,
-    completion: true,
+    completion: Object.keys(interpreter).concat(['clear']),
     pipe: true,
     execHash: true,
     mousewheel: scroll_event,
