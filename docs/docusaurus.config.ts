@@ -127,6 +127,7 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+  plugins: ['./src/plugins/webpack.ts'],
   noIndex: true,
 };
 

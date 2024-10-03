@@ -1,4 +1,4 @@
-import figlet from 'figlet/lib/figlet.js';
+import figlet from 'figlet';
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 
 let ready: boolean;
