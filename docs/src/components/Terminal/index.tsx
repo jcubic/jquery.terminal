@@ -31,11 +31,11 @@ import figlet from './figlet';
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
   'https://cdn.jsdelivr.net/npm/prismjs/prism.js',
-  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@devel/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,npm/jquery.terminal/js/pipe.js'
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@75bbaa0477/js/jquery.terminal.min.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,npm/jquery.terminal/js/pipe.js'
 ];
 
 function command(term: RefObject<JQueryTerminal>) {
-  const options = { typing: true, delay };
+  const options = { typing: true, delay, history: true };
   return (command: string, silent: boolean = false) => () => {
       setTimeout(() => {
           term.current.focus().exec(command, { ...options, silent });
