@@ -490,6 +490,10 @@ describe('Terminal utils', function() {
             Object.keys($.terminal.xml_formatter).forEach(key => {
                 keys[key] = $.terminal.xml_formatter[key];
             });
+            var formatters = $.terminal.defaults.formatters;
+            if (!formatters.includes($.terminal.xml_formatter)) {
+                $.terminal.new_formatter($.terminal.xml_formatter);
+            }
             term = $('<div/>').terminal({}, {greetings: false});
         });
         afterEach(() => {
@@ -586,6 +590,13 @@ describe('Terminal utils', function() {
             ].join('\n');
             term.echo(input);
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should escape xml tags', () => {
+            expect($.terminal.escape_formatting('<white>hello</white>')).toEqual('&lt;white&gt;hello&lt;/white&gt;');
+        });
+        it('should not escape xml tags', () => {
+            $.terminal.remove_formatter($.terminal.xml_formatter);
+            expect($.terminal.escape_formatting('<white>hello</white>')).toEqual('<white>hello</white>');
         });
     });
     describe('$.terminal.from_ansi', function() {

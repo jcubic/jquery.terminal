@@ -1396,6 +1396,16 @@
         return firstPart + secondPart;
     }
     // ---------------------------------------------------------------------
+    // :: helper to remove item from an array
+    // ---------------------------------------------------------------------
+    function remove(array, callback) {
+        for (var index in array) {
+            if (callback(array[index], index)) {
+                array.splice(index, 1);
+            }
+        }
+    }
+    // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
     function scrollbar_event(e, node, pixel_density) {
@@ -4734,27 +4744,30 @@
         });
     }
     // -------------------------------------------------------------------------
-    function bare_text(string) {
-        if (!string.match(/&/)) {
-            return string;
+    function bare_text(str) {
+        if (!str.match(/&/)) {
+            return str;
         }
-        return render_entities(safe(string));
+        return render_entities(safe(str));
     }
     // -------------------------------------------------------------------------
-    function text(string) {
-        return bare_text($.terminal.strip(string));
+    function text(str) {
+        return bare_text($.terminal.strip(str));
     }
     // -------------------------------------------------------------------------
-    function safe(string) {
-        if (!string.match(/[<>&]/)) {
-            return string;
+    function amp(str) {
+        return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
+    }
+    // -------------------------------------------------------------------------
+    function safe(str) {
+        if (!str.match(/[<>&]/)) {
+            return str;
         }
-        return string.replace(/&(?![^;]+;)/g, '&amp;')
-            .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        return amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     // -------------------------------------------------------------------------
-    function crlf(string) {
-        return string.replace(/\r/g, '');
+    function crlf(str) {
+        return str.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
     function char_len(chr) {
@@ -4762,8 +4775,8 @@
     }
     // -------------------------------------------------------------------------
     function make_re_fn(re) {
-        return function test_re(string) {
-            var m = string.match(re);
+        return function test_re(str) {
+            var m = str.match(re);
             if (starts_with(m)) {
                 return m[1];
             }
@@ -4774,7 +4787,7 @@
         return match && match.index === 0;
     }
     // -------------------------------------------------------------------------
-    function is_simple_text(string) {
+    function is_simple_text(str) {
         var re = [
             entity_re,
             emoji_re,
@@ -4782,7 +4795,7 @@
             astral_symbols_re
         ];
         for (var i = 0; i < re.length; ++i) {
-            if (re[i].test(string)) {
+            if (re[i].test(str)) {
                 return false;
             }
         }
@@ -5803,16 +5816,16 @@
         // :: add format text as 5th paramter to formatting it's used for
         // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
-        normalize: function normalize(string) {
-            string = string.replace(format_re, function callback(_, format, text) {
+        normalize: function normalize(str) {
+            str = str.replace(format_re, function callback(_, format, text) {
                 if (format.match(self_closing_re) && text === '') {
                     return '[[' + format + '] ]';
                 }
                 if (text === '') {
                     return '';
                 }
-                function safe(string) {
-                    return string.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
+                function safe(str) {
+                    return str.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
                         .replace(/&nbsp;/g, ' ');
                 }
                 format = safe(format);
@@ -5835,7 +5848,7 @@
                 format += semicolons + safe(text);
                 return '[[' + format + ']' + text + ']';
             });
-            return $.terminal.amp(string);
+            return $.terminal.amp(str);
         },
         // ---------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be
@@ -5944,9 +5957,7 @@
         // ---------------------------------------------------------------------
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
-        amp: function amp(str) {
-            return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
-        },
+        amp: amp,
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
@@ -5955,8 +5966,7 @@
                 tabs: 4,
                 before: ''
             }, options);
-            return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
+            return safe(str).replace(/ /g, '&nbsp;').split('\n').map(function(line) {
                     var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
                     splitted = splitted.filter(Boolean);
                     return splitted.map(function(str, i) {
@@ -6169,10 +6179,24 @@
             }).join('');
         },
         // ---------------------------------------------------------------------
+        // :: checks if xml formatter is used
+        // ---------------------------------------------------------------------
+        using_xml_formatter: function using_xml_formatter() {
+            if (!('xml_formatter' in $.terminal)) {
+                return false;
+            }
+            var formatters = $.terminal.defaults.formatters;
+            return formatters.includes($.terminal.xml_formatter);
+        },
+        // ---------------------------------------------------------------------
         // :: safe function that will render text as it is
         // ---------------------------------------------------------------------
         escape_formatting: function escape_formatting(string) {
-            return $.terminal.escape_brackets(string);
+            var result = $.terminal.escape_brackets(string);
+            if ($.terminal.using_xml_formatter()) {
+                result = safe(result);
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
@@ -6773,6 +6797,14 @@
         // ---------------------------------------------------------------------
         new_formatter: function(formatter) {
             $.terminal.defaults.formatters.unshift(formatter);
+        },
+        // ---------------------------------------------------------------------
+        // :: helper function to remove existing formatter
+        // ---------------------------------------------------------------------
+        remove_formatter: function(formatter) {
+            remove($.terminal.defaults.formatters, function(item) {
+                return item === formatter;
+            });
         }
     };
     (function() {

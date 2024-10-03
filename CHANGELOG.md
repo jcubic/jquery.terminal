@@ -2,7 +2,9 @@
 ### Features
 * new API `terminal::animation()` and `terminal::delay()` [#683](https://github.com/jcubic/jquery.terminal/issues/683)
 * add images in less now have `terminal-less` class
-* add `execHistory` option to the terminal and `history` option to `terminal::exec()` [#745](https://github.com/jcubic/jquery.terminal/issues/745)
+* add `execHistory` main option and `history` option to `terminal::exec()` [#745](https://github.com/jcubic/jquery.terminal/issues/745)
+* add helper `$.terminal.remove_formatter`
+* escape xml in `$.terminal.escape_formatting` when xml formatter is used [#973](https://github.com/jcubic/jquery.terminal/issues/973)
 ### Bugfix
 * fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
 * fix hidden cursor when using command that change `--size` [#968](https://github.com/jcubic/jquery.terminal/issues/968)
