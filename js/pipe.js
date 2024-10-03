@@ -115,7 +115,7 @@
         var settings = $.extend({
             processArguments: true,
             overwrite: undefined,
-            redirects: {}
+            redirects: []
         }, options);
         var overwrite_buffer;
         var term;

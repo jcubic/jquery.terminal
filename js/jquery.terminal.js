@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 03 Oct 2024 17:09:56 +0000
+ * Date: Thu, 03 Oct 2024 19:26:59 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5337,7 +5337,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 03 Oct 2024 17:09:56 +0000',
+        date: 'Thu, 03 Oct 2024 19:26:59 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5967,31 +5967,31 @@
                 before: ''
             }, options);
             return safe(str).replace(/ /g, '&nbsp;').split('\n').map(function(line) {
-                    var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
-                    splitted = splitted.filter(Boolean);
-                    return splitted.map(function(str, i) {
-                        if (str.match(/\t/)) {
-                            return str.replace(/\t([^\t]*)$/, function(_, end) {
-                                if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
-                                    var sp = new Array(settings.tabs + 1).join('&nbsp;');
-                                    return sp + end;
-                                } else {
-                                    var before = splitted.slice(i - 1, i).join('');
-                                    if (settings.before && i <= 1) {
-                                        before = settings.before + before;
-                                    }
-                                    var len = $.terminal.length(before);
-                                    var chars = settings.tabs - (len % settings.tabs);
-                                    if (chars === 0) {
-                                        chars = 4;
-                                    }
-                                    return new Array(chars + 1).join('&nbsp;') + end;
+                var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
+                splitted = splitted.filter(Boolean);
+                return splitted.map(function(str, i) {
+                    if (str.match(/\t/)) {
+                        return str.replace(/\t([^\t]*)$/, function(_, end) {
+                            if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
+                                var sp = new Array(settings.tabs + 1).join('&nbsp;');
+                                return sp + end;
+                            } else {
+                                var before = splitted.slice(i - 1, i).join('');
+                                if (settings.before && i <= 1) {
+                                    before = settings.before + before;
                                 }
-                            });
-                        }
-                        return str;
-                    }).join('');
-                }).join('\n');
+                                var len = $.terminal.length(before);
+                                var chars = settings.tabs - (len % settings.tabs);
+                                if (chars === 0) {
+                                    chars = 4;
+                                }
+                                return new Array(chars + 1).join('&nbsp;') + end;
+                            }
+                        });
+                    }
+                    return str;
+                }).join('');
+            }).join('\n');
         },
         // -----------------------------------------------------------------------
         // :: Default formatter that allow for nested formatting, example:
