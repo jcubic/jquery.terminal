@@ -53,6 +53,9 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
       return object.name;
     })).join('\n'));
   }
+  async function print(cmd, callback) {
+    return callback.call(term, $.terminal.escape_formatting(await file(cwd + cmd.args[0])));
+  }
   if (user && repo) {
     var cwd = '/';
     base_defer = $.Deferred();
@@ -78,9 +81,9 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
         }
         base_defer.resolve();
       } else if (cmd.name == 'less') {
-        term.less(await file(cwd + cmd.args[0]));
+        print(cmd, term.less);
       } else if (cmd.name == 'cat') {
-        term.echo($.terminal.escape_brackets(await file(cwd + cmd.args[0])));
+        print(cmd, term.echo);
       } else if (cmd.name == 'ls') {
         if (cmd.args.length == 0) {
           list(base_content);
