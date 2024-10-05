@@ -16,13 +16,13 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
   const options = $.terminal.parse_options(args);
   const user = options.u ?? options.username;
   const repo = options.r ?? options.repo;
-  const branch = 'master';
+  const branch = 'docusaurus';
   const base = 'https://api.github.com/repos';
   let base_content: DirResult;
   let base_defer: typeof Deferred<void>;
 
   async function dir(path: string): Promise<DirResult> {
-    const url = `${base}/${user}/${repo}/contents/${path}`;
+    const url = `${base}/${user}/${repo}/contents/${path.replace(/\/$/, '')}?ref=${branch}`;
     const res = await fetch(url);
     if (!res.ok) {
       throw new Error(`Wrong directory ${path}`);
