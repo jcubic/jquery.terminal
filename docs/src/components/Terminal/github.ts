@@ -1,6 +1,7 @@
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import type { Deferred } from 'jquery';
 
+import { prism } from '@site/src/utils';
 import colors from './colors';
 
 type FileEntry = {
@@ -44,7 +45,7 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
     if (!res.ok) {
       throw new Error(`file ${path} not found`);
     }
-    return res.text();
+    return prism(path, await res.text());
   }
   function list(data: DirResult) {
     term.echo(data.dirs.map(function(object: {name: string}) {
@@ -54,7 +55,7 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
     })).join('\n'));
   }
   async function print(cmd, callback) {
-    return callback.call(term, $.terminal.escape_formatting(await file(cwd + cmd.args[0])));
+    return callback.call(term, await file(cwd + cmd.args[0]));
   }
   if (user && repo) {
     var cwd = '/';
@@ -81,9 +82,9 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
         }
         base_defer.resolve();
       } else if (cmd.name == 'less') {
-        print(cmd, term.less);
+        await print(cmd, term.less);
       } else if (cmd.name == 'cat') {
-        print(cmd, term.echo);
+        await print(cmd, term.echo);
       } else if (cmd.name == 'ls') {
         if (cmd.args.length == 0) {
           list(base_content);

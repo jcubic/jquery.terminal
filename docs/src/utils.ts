@@ -1,3 +1,6 @@
+import { extname } from 'path-browserify';
+import type { JQueryStatic } from 'jquery.terminal';
+
 export function omap<T extends unknown, U extends unknown>(object: Record<string, T>, callback: (value: T) => U) {
   const entries = Object.entries(object).map(([key, value]) => {
     return [key, callback(value)];
@@ -39,4 +42,25 @@ export function hex(color: TColor) {
 
 export function random(max: number) {
   return Math.floor(Math.random() * (max + 1));
+}
+
+const ext_mapping = {
+  '.js': 'javascript',
+  '.css': 'css',
+  '.html': 'html',
+  '.json': 'json',
+  '.ts': 'typescript',
+  '.md': 'markdown',
+  '.markdown': 'markdown',
+  '.jsx': 'jsx',
+  '.tsx': 'tsx'
+};
+
+export function prism(filename: string, code: string) {
+  const language = ext_mapping[extname(filename)];
+  if (!language) {
+    return code;
+  }
+  const $ = (globalThis as any).$ as JQueryStatic;
+  return $.terminal.prism(language, code);
 }
