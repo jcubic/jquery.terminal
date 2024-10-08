@@ -13,6 +13,7 @@
 * fix passing alt and class for image in less
 * fix width of images in less when image is bigger than the terminal
 * fix line-height of the lines to render less image slices properly
+* fix flashing of old prompt after prompt animation [#976](https://github.com/jcubic/jquery.terminal/issues/976)
 
 ## 2.43.2
 ### Bugfix

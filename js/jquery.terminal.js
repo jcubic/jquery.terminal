@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 03 Oct 2024 19:26:59 +0000
+ * Date: Tue, 08 Oct 2024 13:08:27 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5337,7 +5337,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 03 Oct 2024 19:26:59 +0000',
+        date: 'Tue, 08 Oct 2024 13:08:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9410,29 +9410,27 @@
                         }
                         if (stop) {
                             clearInterval(interval);
-                            setTimeout(function() {
-                                if (is_partial || options.newline === false) {
-                                    // HACK: fix sequence of animations #930
-                                    var idx = self.last_index();
-                                    var node = output.find('[data-index="' + idx + '"]');
-                                    options.finalize(node);
-                                } else {
-                                    if (optimized) {
-                                        // clear old lines and make one full line
-                                        // so it can wrap when you resize
-                                        anim_lines.forEach(function(line) {
-                                            // ignore skipped lines
-                                            if (typeof line.index !== 'undefined') {
-                                                self.remove_line(line.index);
-                                            }
-                                        });
-                                    }
-                                    finish_typing_fn(message, prompt, options);
+                            if (is_partial || options.newline === false) {
+                                // HACK: fix sequence of animations #930
+                                var idx = self.last_index();
+                                var node = output.find('[data-index="' + idx + '"]');
+                                options.finalize(node);
+                            } else {
+                                if (optimized) {
+                                    // clear old lines and make one full line
+                                    // so it can wrap when you resize
+                                    anim_lines.forEach(function(line) {
+                                        // ignore skipped lines
+                                        if (typeof line.index !== 'undefined') {
+                                            self.remove_line(line.index);
+                                        }
+                                    });
                                 }
-                                if (!was_animating) {
-                                    animating = false;
-                                }
-                            }, options.delay);
+                                finish_typing_fn(message, prompt, options);
+                            }
+                            if (!was_animating) {
+                                animating = false;
+                            }
                         }
                     }, options.delay);
                 }
