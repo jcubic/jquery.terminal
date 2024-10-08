@@ -1,3 +1,7 @@
+## 2.44.1
+### Bugfix
+* fix errors with form autofill outside of the terminal [#977](https://github.com/jcubic/jquery.terminal/issues/977)
+
 ## 2.44.0
 ### Features
 * new API `terminal::animation()` and `terminal::delay()` [#683](https://github.com/jcubic/jquery.terminal/issues/683)
