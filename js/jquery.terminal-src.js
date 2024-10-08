@@ -4077,7 +4077,7 @@
         // we hold text before keydown to fix backspace for Android/Chrome/SwiftKey
         // keyboard that generate keycode 229 for all keys #296
         var prev_command = '';
-        var prev_key;
+        var prev_shortcut;
         // ---------------------------------------------------------------------
         // :: Keydown Event Handler
         // ---------------------------------------------------------------------
@@ -4113,18 +4113,20 @@
             dead_key = no_keypress && single_key && !is_backspace(e);
             // fake event without key #977
             var have_key = typeof e.key !== 'undefined';
+            var key = String(e.key).toLowerCase();
+            var unidentified_key = key === 'unidentified';
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
                     single_key = is_single(e);
-                    no_key = String(e.key).toLowerCase() !== 'unidentified';
+                    no_key = !unidentified_key;
                     // chrome on android support key property but it's "Unidentified"
                     backspace = have_key && is_backspace(e);
                 }
             } catch (exception) {}
             // keydown created in input will have text already inserted and we
             // want text before input
-            if (e.key === "Unidentified") {
+            if (unidentified_key) {
                 no_keydown = true;
                 // android swift keyboard have always which == 229 we will triger proper
                 // event in input with e.fake == true
@@ -4132,14 +4134,14 @@
             }
             // meta and os are special keydown triggered by Emoji picker on Windows 10
             // meta is in Google Chrome is is in Firefox
-            if (!e.fake && have_key && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
+            if (!e.fake && have_key && ['meta', 'os'].indexOf(key) === -1) {
                 no_keydown = false;
             }
             no_keypress = true;
             // Meta+V did bind input but it didin't happen because terminal paste
             // prevent native insert action
             clip.$node.off('input', paste);
-            var key = get_key(e);
+            var shortcut = get_key(e);
             if (is_function(settings.keydown)) {
                 if (have_key) {
                     e.key = ie_key_fix(e);
@@ -4153,19 +4155,19 @@
                     return result;
                 }
             }
-            if (key !== prev_key) {
+            if (shortcut !== prev_shortcut) {
                 clear_hold();
             }
             // CTRL+C hanlding is only exception of cmd aware terminal logic
             // cmd need to call CTRL+C keymap when terminal is not enabled
-            if (enabled || (key === 'CTRL+C' && is_terminal_selected(self))) {
+            if (enabled || (shortcut === 'CTRL+C' && is_terminal_selected(self))) {
                 if (hold) {
-                    prev_key = key;
-                    key = 'HOLD+' + key;
+                    prev_shortcut = shortcut;
+                    shortcut = 'HOLD+' + shortcut;
                     if (hold_pause) {
                         return;
                     }
-                    if (settings.holdRepeatTimeout > 0 && is_delay_key(key)) {
+                    if (settings.holdRepeatTimeout > 0 && is_delay_key(shortcut)) {
                         hold_pause = true;
                         self.oneTime(settings.holdRepeatTimeout, 'delay', function() {
                             hold_pause = false;
@@ -4175,7 +4177,7 @@
                     self.oneTime(settings.holdTimeout, 'hold', function() {
                         hold = true;
                     });
-                    prev_key = key;
+                    prev_shortcut = shortcut;
                 }
                 // if e.fake ignore of space is handled in input and next keydown
                 // is not triggered this is just in case code since on Android
@@ -4186,18 +4188,18 @@
                         skip_keydown = false;
                         return false;
                     }
-                    if (mobile_ignore_key(key)) {
+                    if (mobile_ignore_key(shortcut)) {
                         skip_keydown = true;
-                    } else if (mobile_ignore_key(prev_key)) {
+                    } else if (mobile_ignore_key(prev_shortcut)) {
                         // just in case next key is different then space
                         skip_keydown = false;
                     }
                 }
                 restart_animation();
                 // CTRL+V don't fire keypress in IE11
-                skip_insert = ['CTRL+V', 'META+V'].indexOf(key) !== -1;
+                skip_insert = ['CTRL+V', 'META+V'].indexOf(shortcut) !== -1;
                 // only enter will reset history (and down arrow on last command)
-                if (key.toLowerCase() === 'enter') {
+                if (shortcut === 'ENTER') {
                     first_up_history = true;
                 }
                 if (reverse_search && clear_reverse_search_key(e)) {
@@ -4210,8 +4212,8 @@
                     if (e.which === 13) {
                         keydown_event.call(this, e);
                     }
-                } else if (is_function(keymap[key])) {
-                    result = keymap[key](e);
+                } else if (is_function(keymap[shortcut])) {
+                    result = keymap[shortcut](e);
                     if (result === true) {
                         return;
                     }
