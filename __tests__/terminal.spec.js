@@ -223,20 +223,28 @@ window.Image = class Image {
         }
     }
 };
-window.HTMLCanvasElement.prototype.getContext = function () {
+
+const context = {
+    putImageData: function(data, x, y) {
+    },
+    getImageData: function(x, y, w, h) {
+        return [1,1,1];
+    },
+    drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
+    }
+};
+
+global.OffscreenCanvas = function(width, height) {
     return {
-        putImageData: function(data, x, y) {
-        },
-        getImageData: function(x, y, w, h) {
-            return [1,1,1];
-        },
-        drawImage: function(image, x1, y1, iw, ih, out_x, out_y, out_w, out_h) {
-        }
+        height,
+        width,
+        getContext: () => context,
+        convertToBlob: () => Promise.resolve('<BLOB>')
     };
 };
-window.HTMLCanvasElement.prototype.toBlob = function(fn) {
-    fn('<BLOB>');
-};
+
+window.HTMLCanvasElement.prototype.getContext = () => context;
+window.HTMLCanvasElement.prototype.toBlob = (fn) => fn('<BLOB>');
 global.URL = window.URL = {
     createObjectURL: function(blob) {
         return 'data:image/jpg,' + blob;
@@ -482,6 +490,10 @@ describe('Terminal utils', function() {
             Object.keys($.terminal.xml_formatter).forEach(key => {
                 keys[key] = $.terminal.xml_formatter[key];
             });
+            var formatters = $.terminal.defaults.formatters;
+            if (!formatters.includes($.terminal.xml_formatter)) {
+                $.terminal.new_formatter($.terminal.xml_formatter);
+            }
             term = $('<div/>').terminal({}, {greetings: false});
         });
         afterEach(() => {
@@ -578,6 +590,13 @@ describe('Terminal utils', function() {
             ].join('\n');
             term.echo(input);
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
+        });
+        it('should escape xml tags', () => {
+            expect($.terminal.escape_formatting('<white>hello</white>')).toEqual('&lt;white&gt;hello&lt;/white&gt;');
+        });
+        it('should not escape xml tags', () => {
+            $.terminal.remove_formatter($.terminal.xml_formatter);
+            expect($.terminal.escape_formatting('<white>hello</white>')).toEqual('<white>hello</white>');
         });
     });
     describe('$.terminal.from_ansi', function() {
@@ -2209,6 +2228,7 @@ describe('Terminal utils', function() {
                 numRows: rows
             });
             term.css('width', 800);
+            term.find('.terminal-output').css('width', 800);
             term.focus();
         });
         function key(ord, key) {
@@ -5525,7 +5545,9 @@ describe('Terminal plugin', function() {
                     }
                 };
                 spy(interpreter, 'foo');
-                term = $('<div/>').appendTo('body').terminal(interpreter);
+                term = $('<div/>').appendTo('body').terminal(interpreter, {
+                    name: '__exec__'
+                });
                 term.focus();
             });
             afterEach(function() {
@@ -5747,6 +5769,16 @@ describe('Terminal plugin', function() {
                         resolve();
                     }, 800);
                 });
+            });
+            it('should not save command in history', () => {
+                term.clear();
+                term.focus().exec('echo hello');
+                expect(term.history().data()).toEqual([]);
+            });
+            it('should save command in history', () => {
+                term.clear();
+                term.focus().exec('echo hello', { history: true });
+                expect(term.history().data()).toEqual(['echo hello']);
             });
         });
         describe('autologin', function() {

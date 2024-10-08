@@ -61,7 +61,7 @@
     }
 })(function($) {
     var img_split_re = /(\[\[(?:[^;]*@[^;]*);[^;]*;[^\]]*\]\s*\])/;
-    var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;[^;]*;([^;]*)\] ?\]/;
+    var img_re = /\[\[(?:[^;]*@[^;]*);[^;]*;[^;]*;([^;]*);([^;]*)(?:;[^;]+)?\]([^\]]*)\]/;
     // -------------------------------------------------------------------------
     function find(arr, fn) {
         for (var i in arr) {
@@ -87,20 +87,16 @@
     // slice images into terminal lines - each line is unique blob url
     function slice_image(img_data, width, y1, y2) {
         // render slice on canvas and get Blob Data URI
-        var canvas = document.createElement('canvas');
+        var canvas = new OffscreenCanvas(width, y2 - y1);
         var ctx = canvas.getContext('2d', {willReadFrequently: true});
-        canvas.width = width;
-        canvas.height = y2 - y1;
         ctx.putImageData(img_data, 0, 0);
-        var defer = $.Deferred();
-        canvas.toBlob(function(blob) {
+        return canvas.convertToBlob().then(function(blob) {
             if (blob === null) {
-                defer.resolve(null);
+                return null;
             } else {
-                defer.resolve(URL.createObjectURL(blob));
+                return URL.createObjectURL(blob);
             }
         });
-        return defer.promise();
     }
     function slice(src, options) {
         var settings = $.extend({
@@ -119,10 +115,8 @@
                 height = img.height;
                 width = img.width;
             }
-            var canvas = document.createElement('canvas');
+            var canvas = new OffscreenCanvas(width, height);
             var ctx = canvas.getContext('2d', {willReadFrequently: true});
-            canvas.width = width;
-            canvas.height = height;
             // scale the image to fit the terminal
             ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, width, height);
             (function recur(start) {
@@ -317,12 +311,13 @@
                 return text.split('\n');
             }
             var parts = text.split(img_split_re).filter(Boolean);
+            var width = term.find('.terminal-output').width();
             var result = [];
             (function recur() {
                 function concat_slices(slices) {
                     cache[width][img] = slices;
                     result = result.concat(slices.map(function(uri) {
-                        return '[[@;;;;' + uri + ']]';
+                        return '[[@;;;' + cls + ';' + uri + ']' + alt + ']';
                     }));
                     recur();
                 }
@@ -332,9 +327,15 @@
                 var part = parts.shift();
                 var m = part.match(img_re);
                 if (m) {
-                    var img = m[1];
+                    var img = m[2];
+                    var cls = m[1].trim();
+                    if (cls) {
+                        cls += ' terminal-less';
+                    } else {
+                        cls = 'terminal-less';
+                    }
+                    var alt = m[3];
                     var rect = cursor_size();
-                    var width = term.width();
                     var opts = {
                         width: width,
                         line_height: Math.floor(rect.height)

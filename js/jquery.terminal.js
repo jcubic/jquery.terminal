@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.43.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 08 Sep 2024 09:58:43 +0000
+ * Date: Tue, 08 Oct 2024 13:08:27 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1396,6 +1396,16 @@
         return firstPart + secondPart;
     }
     // ---------------------------------------------------------------------
+    // :: helper to remove item from an array
+    // ---------------------------------------------------------------------
+    function remove(array, callback) {
+        for (var index in array) {
+            if (callback(array[index], index)) {
+                array.splice(index, 1);
+            }
+        }
+    }
+    // ---------------------------------------------------------------------
     // :; detect if mouse event happen on scrollbar
     // ---------------------------------------------------------------------
     function scrollbar_event(e, node, pixel_density) {
@@ -2384,6 +2394,9 @@
                 }
                 history.reset();
 
+                self.set('');
+                clip.val('');
+
                 // for next input event on firefox/android with google keyboard
                 prev_command = '';
                 no_keydown = true;
@@ -2401,8 +2414,6 @@
                         draw_prompt();
                     }
                 }
-                self.set('');
-                clip.val('');
                 if (!is_mobile) {
                     clip.$node.focus();
                 }
@@ -4733,27 +4744,30 @@
         });
     }
     // -------------------------------------------------------------------------
-    function bare_text(string) {
-        if (!string.match(/&/)) {
-            return string;
+    function bare_text(str) {
+        if (!str.match(/&/)) {
+            return str;
         }
-        return render_entities(safe(string));
+        return render_entities(safe(str));
     }
     // -------------------------------------------------------------------------
-    function text(string) {
-        return bare_text($.terminal.strip(string));
+    function text(str) {
+        return bare_text($.terminal.strip(str));
     }
     // -------------------------------------------------------------------------
-    function safe(string) {
-        if (!string.match(/[<>&]/)) {
-            return string;
+    function amp(str) {
+        return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
+    }
+    // -------------------------------------------------------------------------
+    function safe(str) {
+        if (!str.match(/[<>&]/)) {
+            return str;
         }
-        return string.replace(/&(?![^;]+;)/g, '&amp;')
-            .replace(/>/g, '&gt;').replace(/</g, '&lt;');
+        return amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
     // -------------------------------------------------------------------------
-    function crlf(string) {
-        return string.replace(/\r/g, '');
+    function crlf(str) {
+        return str.replace(/\r/g, '');
     }
     // -------------------------------------------------------------------------
     function char_len(chr) {
@@ -4761,8 +4775,8 @@
     }
     // -------------------------------------------------------------------------
     function make_re_fn(re) {
-        return function test_re(string) {
-            var m = string.match(re);
+        return function test_re(str) {
+            var m = str.match(re);
             if (starts_with(m)) {
                 return m[1];
             }
@@ -4773,7 +4787,7 @@
         return match && match.index === 0;
     }
     // -------------------------------------------------------------------------
-    function is_simple_text(string) {
+    function is_simple_text(str) {
         var re = [
             entity_re,
             emoji_re,
@@ -4781,7 +4795,7 @@
             astral_symbols_re
         ];
         for (var i = 0; i < re.length; ++i) {
-            if (re[i].test(string)) {
+            if (re[i].test(str)) {
                 return false;
             }
         }
@@ -5322,8 +5336,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.43.1',
-        date: 'Sun, 08 Sep 2024 09:58:43 +0000',
+        version: 'DEV',
+        date: 'Tue, 08 Oct 2024 13:08:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5802,16 +5816,16 @@
         // :: add format text as 5th paramter to formatting it's used for
         // :: data attribute in format function - and fix unclosed &
         // ---------------------------------------------------------------------
-        normalize: function normalize(string) {
-            string = string.replace(format_re, function callback(_, format, text) {
+        normalize: function normalize(str) {
+            str = str.replace(format_re, function callback(_, format, text) {
                 if (format.match(self_closing_re) && text === '') {
                     return '[[' + format + '] ]';
                 }
                 if (text === '') {
                     return '';
                 }
-                function safe(string) {
-                    return string.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
+                function safe(str) {
+                    return str.replace(/\\\]/g, '&#93;').replace(/\n/g, '\\n')
                         .replace(/&nbsp;/g, ' ');
                 }
                 format = safe(format);
@@ -5834,7 +5848,7 @@
                 format += semicolons + safe(text);
                 return '[[' + format + ']' + text + ']';
             });
-            return $.terminal.amp(string);
+            return $.terminal.amp(str);
         },
         // ---------------------------------------------------------------------
         // :: split text into lines with equal length so each line can be
@@ -5943,9 +5957,7 @@
         // ---------------------------------------------------------------------
         // :: Escape & that's not part of entity
         // ---------------------------------------------------------------------
-        amp: function amp(str) {
-            return str.replace(/&(?!#[0-9]+;|#x[0-9a-f]+;|[a-z]+;)/gi, '&amp;');
-        },
+        amp: amp,
         // ---------------------------------------------------------------------
         // :: Encode formating as html for insertion into DOM
         // ---------------------------------------------------------------------
@@ -5954,33 +5966,32 @@
                 tabs: 4,
                 before: ''
             }, options);
-            return $.terminal.amp(str).replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/ /g, '&nbsp;').split('\n').map(function(line) {
-                    var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
-                    splitted = splitted.filter(Boolean);
-                    return splitted.map(function(str, i) {
-                        if (str.match(/\t/)) {
-                            return str.replace(/\t([^\t]*)$/, function(_, end) {
-                                if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
-                                    var sp = new Array(settings.tabs + 1).join('&nbsp;');
-                                    return sp + end;
-                                } else {
-                                    var before = splitted.slice(i - 1, i).join('');
-                                    if (settings.before && i <= 1) {
-                                        before = settings.before + before;
-                                    }
-                                    var len = $.terminal.length(before);
-                                    var chars = settings.tabs - (len % settings.tabs);
-                                    if (chars === 0) {
-                                        chars = 4;
-                                    }
-                                    return new Array(chars + 1).join('&nbsp;') + end;
+            return safe(str).replace(/ /g, '&nbsp;').split('\n').map(function(line) {
+                var splitted = line.split(/((?:\[\[[^\]]+\])?\t(?:\])?)/);
+                splitted = splitted.filter(Boolean);
+                return splitted.map(function(str, i) {
+                    if (str.match(/\t/)) {
+                        return str.replace(/\t([^\t]*)$/, function(_, end) {
+                            if (i !== 0 && splitted[i - 1].match(/\t\]?$/)) {
+                                var sp = new Array(settings.tabs + 1).join('&nbsp;');
+                                return sp + end;
+                            } else {
+                                var before = splitted.slice(i - 1, i).join('');
+                                if (settings.before && i <= 1) {
+                                    before = settings.before + before;
                                 }
-                            });
-                        }
-                        return str;
-                    }).join('');
-                }).join('\n');
+                                var len = $.terminal.length(before);
+                                var chars = settings.tabs - (len % settings.tabs);
+                                if (chars === 0) {
+                                    chars = 4;
+                                }
+                                return new Array(chars + 1).join('&nbsp;') + end;
+                            }
+                        });
+                    }
+                    return str;
+                }).join('');
+            }).join('\n');
         },
         // -----------------------------------------------------------------------
         // :: Default formatter that allow for nested formatting, example:
@@ -6168,10 +6179,24 @@
             }).join('');
         },
         // ---------------------------------------------------------------------
+        // :: checks if xml formatter is used
+        // ---------------------------------------------------------------------
+        using_xml_formatter: function using_xml_formatter() {
+            if (!('xml_formatter' in $.terminal)) {
+                return false;
+            }
+            var formatters = $.terminal.defaults.formatters;
+            return formatters.includes($.terminal.xml_formatter);
+        },
+        // ---------------------------------------------------------------------
         // :: safe function that will render text as it is
         // ---------------------------------------------------------------------
         escape_formatting: function escape_formatting(string) {
-            return $.terminal.escape_brackets(string);
+            var result = $.terminal.escape_brackets(string);
+            if ($.terminal.using_xml_formatter()) {
+                result = safe(result);
+            }
+            return result;
         },
         // ---------------------------------------------------------------------
         // :: apply custom formatters only to text
@@ -6772,6 +6797,14 @@
         // ---------------------------------------------------------------------
         new_formatter: function(formatter) {
             $.terminal.defaults.formatters.unshift(formatter);
+        },
+        // ---------------------------------------------------------------------
+        // :: helper function to remove existing formatter
+        // ---------------------------------------------------------------------
+        remove_formatter: function(formatter) {
+            remove($.terminal.defaults.formatters, function(item) {
+                return item === formatter;
+            });
         }
     };
     (function() {
@@ -7328,6 +7361,15 @@
         return result;
     }
     // -----------------------------------------------------------------------
+    // :: fix rounding issue #969
+    // -----------------------------------------------------------------------
+    function aproximation(number) {
+        if (number - Math.floor(number) > 0.9) {
+            return Math.ceil(number);
+        }
+        return Math.floor(number);
+    }
+    // -----------------------------------------------------------------------
     // :: calculate numbers of characters
     // -----------------------------------------------------------------------
     function get_num_chars(terminal, char_size) {
@@ -7343,7 +7385,7 @@
     function get_num_rows(terminal, char_size) {
         var filler = terminal.find('.terminal-fill');
         var height = filler.height();
-        return Math.floor(height / char_size.height);
+        return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
     function all(array, fn) {
@@ -7509,6 +7551,7 @@
         processArguments: true,
         execAnimation: false,
         execAnimationDelay: 100,
+        execHistory: false,
         linksNoReferrer: false,
         externalPause: true,
         useCache: true,
@@ -9272,6 +9315,7 @@
                         keepWords: keepWords
                     });
                 }
+                var was_animating = animating;
                 animating = true;
                 var prompt = self.get_prompt();
                 var char_i = 0;
@@ -9366,27 +9410,27 @@
                         }
                         if (stop) {
                             clearInterval(interval);
-                            setTimeout(function() {
-                                if (is_partial || options.newline === false) {
-                                    // HACK: fix sequence of animations #930
-                                    var idx = self.last_index();
-                                    var node = output.find('[data-index="' + idx + '"]');
-                                    options.finalize(node);
-                                } else {
-                                    if (optimized) {
-                                        // clear old lines and make one full line
-                                        // so it can wrap when you resize
-                                        anim_lines.forEach(function(line) {
-                                            // ignore skipped lines
-                                            if (typeof line.index !== 'undefined') {
-                                                self.remove_line(line.index);
-                                            }
-                                        });
-                                    }
-                                    finish_typing_fn(message, prompt, options);
+                            if (is_partial || options.newline === false) {
+                                // HACK: fix sequence of animations #930
+                                var idx = self.last_index();
+                                var node = output.find('[data-index="' + idx + '"]');
+                                options.finalize(node);
+                            } else {
+                                if (optimized) {
+                                    // clear old lines and make one full line
+                                    // so it can wrap when you resize
+                                    anim_lines.forEach(function(line) {
+                                        // ignore skipped lines
+                                        if (typeof line.index !== 'undefined') {
+                                            self.remove_line(line.index);
+                                        }
+                                    });
                                 }
+                                finish_typing_fn(message, prompt, options);
+                            }
+                            if (!was_animating) {
                                 animating = false;
-                            }, options.delay);
+                            }
                         }
                     }, options.delay);
                 }
@@ -9716,6 +9760,7 @@
                 }
                 fire_event('onImport', [view]);
                 when_ready(function ready() {
+                    var bottom = self.is_bottom();
                     self.set_prompt(view.prompt);
                     self.set_command(view.command);
                     command_line.position(view.position);
@@ -9733,6 +9778,9 @@
                         command_line.history().set(view.history);
                     }
                     redraw();
+                    if (bottom) {
+                        self.scroll_to_bottom();
+                    }
                 });
                 return self;
             },
@@ -9768,6 +9816,11 @@
             // -------------------------------------------------------------
             exec: function(command, silent, options) {
                 function invoke(silent) {
+                    // keymap store value in history, we call commands
+                    // directly so we need to directly save in history
+                    if (exec_settings.history) {
+                        command_line.history().append(command);
+                    }
                     // commands may return promise from user code
                     // it will resolve exec promise when user promise
                     // is resolved
@@ -9789,6 +9842,7 @@
                 var exec_settings = $.extend({
                     deferred: null,
                     silent: false,
+                    history: false,
                     typing: false,
                     delay: settings.execAnimationDelay
                 }, options);
@@ -10830,7 +10884,7 @@
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
-                                self.oneTime(1, 'flush', function() {
+                                setTimeout(function() {
                                     cmd_cursor.show();
                                 });
                             }
@@ -11136,6 +11190,33 @@
                 }
                 return self;
             },
+            // -------------------------------------------------------------
+            // :: Animation helper to hide leaky abstraction
+            // -------------------------------------------------------------
+            animation: function(callback) {
+                if (is_function(callback)) {
+                    animating = true;
+                    var prompt = self.get_prompt();
+                    self.set_prompt('');
+                    return unpromise(callback(), function() {
+                        self.set_prompt(prompt);
+                        animating = false;
+                    });
+                }
+                return $.when();
+            },
+            // -------------------------------------------------------------
+            // :: Common async delay function helper
+            // -------------------------------------------------------------
+            delay: function(time) {
+                var d = new $.Deferred();
+                setTimeout(function() {
+                    d.resolve();
+                }, time);
+                return d.promise();
+            },
+            // -------------------------------------------------------------
+            // :: low level typing animation interface
             // -------------------------------------------------------------
             typing: function(type, delay, string, options) {
                 var d = new $.Deferred();
@@ -12683,6 +12764,7 @@
                             var i = 0;
                             var options = {
                                 typing: settings.execAnimation,
+                                history: settings.execHistory,
                                 delay: settings.execAnimationDelay
                             };
                             (function recur() {

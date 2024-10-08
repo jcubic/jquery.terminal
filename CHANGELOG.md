@@ -1,3 +1,24 @@
+## 2.44.0
+### Features
+* new API `terminal::animation()` and `terminal::delay()` [#683](https://github.com/jcubic/jquery.terminal/issues/683)
+* add images in less now have `terminal-less` class
+* add `execHistory` main option and `history` option to `terminal::exec()` [#745](https://github.com/jcubic/jquery.terminal/issues/745)
+* add helper `$.terminal.remove_formatter`
+* escape xml in `$.terminal.escape_formatting` when xml formatter is used [#973](https://github.com/jcubic/jquery.terminal/issues/973)
+### Bugfix
+* fix number of rows when using different `--size` [#969](https://github.com/jcubic/jquery.terminal/issues/969)
+* fix hidden cursor when using command that change `--size` [#968](https://github.com/jcubic/jquery.terminal/issues/968)
+* fix command prop in `export_view()` when in command [#967](https://github.com/jcubic/jquery.terminal/issues/967)
+* fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
+* fix passing alt and class for image in less
+* fix width of images in less when image is bigger than the terminal
+* fix line-height of the lines to render less image slices properly
+* fix flashing of old prompt after prompt animation [#976](https://github.com/jcubic/jquery.terminal/issues/976)
+
+## 2.43.2
+### Bugfix
+* fix scroll to bottom when using `terminal::import_view`
+
 ## 2.43.1
 ### Bugfix
 * fix height when not using `--rows` [#962](https://github.com/jcubic/jquery.terminal/issues/962)
