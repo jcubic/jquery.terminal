@@ -4111,13 +4111,15 @@
             var result;
             process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             dead_key = no_keypress && single_key && !is_backspace(e);
+            // fake event without key #977
+            var have_key = typeof e.key !== 'undefined';
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
                     single_key = is_single(e);
+                    no_key = String(e.key).toLowerCase() !== 'unidentified';
                     // chrome on android support key property but it's "Unidentified"
-                    no_key = String(e.key).toLowerCase() === 'unidentified';
-                    backspace = is_backspace(e);
+                    backspace = have_key && is_backspace(e);
                 }
             } catch (exception) {}
             // keydown created in input will have text already inserted and we
@@ -4130,7 +4132,7 @@
             }
             // meta and os are special keydown triggered by Emoji picker on Windows 10
             // meta is in Google Chrome is is in Firefox
-            if (!e.fake && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
+            if (!e.fake && have_key && ['meta', 'os'].indexOf(e.key.toLowerCase()) === -1) {
                 no_keydown = false;
             }
             no_keypress = true;
@@ -4139,7 +4141,9 @@
             clip.$node.off('input', paste);
             var key = get_key(e);
             if (is_function(settings.keydown)) {
-                e.key = ie_key_fix(e);
+                if (have_key) {
+                    e.key = ie_key_fix(e);
+                }
                 result = settings.keydown.call(self, e);
                 if (result !== undefined) {
                     //skip_keypress = true;
