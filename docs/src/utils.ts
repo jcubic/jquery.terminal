@@ -1,5 +1,7 @@
 import { extname } from 'path-browserify';
 import type { JQueryStatic } from 'jquery.terminal';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import jsSHA from 'jssha/dist/sha1';
 
 export function omap<T extends unknown, U extends unknown>(object: Record<string, T>, callback: (value: T) => U) {
   const entries = Object.entries(object).map(([key, value]) => {
@@ -63,4 +65,18 @@ export function prism(filename: string, code: string) {
   }
   const $ = (globalThis as any).$ as JQueryStatic;
   return $.terminal.prism(language, code);
+}
+
+export function hash(str: string) {
+    const result = new jsSHA("SHA-1", "TEXT", { encoding: "UTF8" });
+    result.update(str);
+    return result.getHash("HEX");
+}
+
+type FingerprintOptions = Parameters<typeof FingerprintJS.load>[0];
+
+export async function identify_user(options: FingerprintOptions = {}) {
+    let fp = await FingerprintJS.load(options);
+    const result = await fp.get();
+    return hash(result.visitorId);
 }
