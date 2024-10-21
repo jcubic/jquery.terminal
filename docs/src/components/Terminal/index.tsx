@@ -27,6 +27,7 @@ import lolcat from './lolcat';
 import cowsay from './cowsay';
 import fortune from './fortune';
 import figlet from './figlet';
+import jargon from './jargon';
 
 const languages = [
   'markdown',
@@ -81,6 +82,7 @@ export default function Interpreter(): JSX.Element {
           lolcat,
           fortune,
           figlet,
+          jargon,
           theme,
           record,
           size(num: string) {
@@ -89,6 +91,16 @@ export default function Interpreter(): JSX.Element {
           rows(num: string) {
             this.css('--rows', num);
           }
+        });
+        term.current.on('click', '.jargon', function() {
+          const href = $(this).attr('href');
+          const command = `jargon ${href}`;
+          term.current.exec(command).then(function() {
+            if (term.current.settings().historyState) {
+              term.current.save_state(command);
+            }
+          });
+          return false;
         });
         set_show_commands(true);
       } else {
@@ -140,6 +152,9 @@ export default function Interpreter(): JSX.Element {
               <button onClick={exec('echo jQuery Terminal | figlet -f Small | lolcat')}>
                 figlet
               </button>
+            </li>
+            <li>
+              <button onClick={exec('jargon hacker')}>jargon</button>
             </li>
            </ul>
         </div>
