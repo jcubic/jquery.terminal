@@ -12,11 +12,11 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
     const options = $.terminal.parse_options(args, { boolean: ['s']} as any);
     if (options._.length) {
         const query = options._.join(' ');
-        const jargon = supabase.from('jargon').select<'*', JargonEntry>();
         if (options.s) {
-            const { data, error } = await jargon.textSearch('term', query, {
-                type: 'websearch'
-            });
+            const { data, error } = await supabase.from('jargon')
+                .select().textSearch('term', query, {
+                    type: 'websearch'
+                });
             if (error) {
                 this.error(error.message);
             } else {
@@ -25,15 +25,16 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
                 }).join('\n'));
             }
         } else {
-            const { data: terms, error } = await jargon.eq('term', query);
-            const abbrev = supabase.from('abbrev').select();
+            const { data: terms, error } = await supabase.from('jargon')
+                .select().eq('term', query).select();
             if (error) {
                 this.error(error.message);
             } else {
                 await Promise.all(terms.map(async (entry: JargonEntry) => {
-                    const { data: abbr_data, error } = await abbrev.eq('term', entry.id);
+                    const { data: abbrev, error } = await supabase.from('abbrev')
+                        .select().eq('term', entry.id);
                     if (!error) {
-                        entry.abbr = abbr_data.map(entry => entry.name);
+                        entry.abbr = abbrev.map(entry => entry.name);
                     }
                 }));
                 const entry = format_entry(terms);
