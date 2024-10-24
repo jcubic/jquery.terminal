@@ -10,10 +10,9 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
     const $ = (globalThis as any).$ as JQueryStatic;
 
     const options = $.terminal.parse_options(args, { boolean: ['s']} as any);
-    console.log({options, args});
     if (options._.length) {
         const query = options._.join(' ');
-        const jargon = supabase.from('jargon').select();
+        const jargon = supabase.from('jargon').select<'*', JargonEntry>();
         if (options.s) {
             const { data, error } = await jargon.textSearch('term', query, {
                 type: 'websearch'
@@ -26,12 +25,18 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
                 }).join('\n'));
             }
         } else {
-            const { data, error } = await jargon.eq('term', query);
+            const { data: terms, error } = await jargon.eq('term', query);
+            const abbrev = supabase.from('abbrev').select();
             if (error) {
                 this.error(error.message);
             } else {
-                console.log(data);
-                const entry = format_entry(data);
+                await Promise.all(terms.map(async (entry: JargonEntry) => {
+                    const { data: abbr_data, error } = await abbrev.eq('term', entry.id);
+                    if (!error) {
+                        entry.abbr = abbr_data.map(entry => entry.name);
+                    }
+                }));
+                const entry = format_entry(terms);
                 this.echo(entry.trim(), {
                     keepWords: true
                 });
@@ -41,8 +46,8 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
         const msg = 'This is the Jargon File, a comprehens'+
             'ive compendium of hacker slang illuminating m'+
             'any aspects of hackish tradition, folklore, a'+
-            'nd humor.\n\nusage: jargon [-s] [QUERY]\n\n-s'+
-            ' search jargon file';
+            'nd humor.\n\nusage: jargon [-s] &lt;QUERY&gt;'+
+            '\n\n-s search jargon file';
         this.echo(msg, {keepWords: true});
     }
 }
@@ -51,6 +56,7 @@ type JargonEntry = {
     id: number;
     term: string;
     def: string;
+    abbr?: string[];
 };
 
 function format_entry(entries: JargonEntry[]) {
@@ -58,6 +64,9 @@ function format_entry(entries: JargonEntry[]) {
 
     let result = entries.map(function(entry: JargonEntry) {
         let text = '[[b;#fff;]' + entry.term + ']';
+        if (entry.abbr) {
+            text += ' (' + entry.abbr.join(', ') + ')';
+        }
         let re = new RegExp("((?:https?|ftps?)://\\S+)|\\.(?!\\s|\\]\\s)\\)?", "g");
         let def = entry.def.replace(re, function(text, g) {
             return g ? g : (text == '.)' ? '.) ' : '. ');
