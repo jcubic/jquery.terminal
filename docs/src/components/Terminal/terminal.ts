@@ -13,6 +13,7 @@ export function initTerminal(interpreter: JQueryTerminal.Interpreter) {
 
   const term = $term.terminal(interpreter, {
     processArguments: false,
+    id: 0,
     checkArity: false,
     completion: Object.keys(interpreter).concat(['clear']),
     pipe: true,
