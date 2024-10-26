@@ -7671,7 +7671,8 @@
             defunctTerminal: "You can't call method '%s' on terminal that was destroyed",
             abortError: 'Abort with CTRL+D',
             timeoutError: 'Signal timed out',
-            invalidId: 'terminal with this `id` aready exists! You need to destroy old terminal before you can create terminal with the same `id`'
+            invalidId: 'terminal with this `id` aready exists! You need to destr' +
+                'oy old terminal before you can create terminal with the same `id`'
         }
     };
     // -------------------------------------------------------------------------
