@@ -1522,7 +1522,9 @@
             set: function(index, value) {
                 if (!data[index]) {
                     data[index] = value;
+                    return true;
                 }
+                return false;
             },
             append: function(item) {
                 data.push(item);
@@ -7668,7 +7670,8 @@
             invalidMask: 'Invalid mask used only string or boolean allowed',
             defunctTerminal: "You can't call method '%s' on terminal that was destroyed",
             abortError: 'Abort with CTRL+D',
-            timeoutError: 'Signal timed out'
+            timeoutError: 'Signal timed out',
+            invalidId: 'terminal with this `id` aready exists! You need to destroy old terminal before you can create terminal with the same `id`'
         }
     };
     // -------------------------------------------------------------------------
@@ -12075,7 +12078,9 @@
             global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
         if (have_custom_id) {
-            terminals.set(settings.id, self);
+            if (!terminals.set(settings.id, self)) {
+                warn(strings().invalidId);
+            }
         } else {
             terminals.append(self);
         }
