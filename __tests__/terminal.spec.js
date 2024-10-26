@@ -374,7 +374,9 @@ function shortcut(ctrl, alt, shift, which, key) {
     doc.trigger(keypress(key));
     doc.trigger($.Event("keyup"));
 }
-
+function key(ord, key) {
+    shortcut(false, false, false, ord, key);
+}
 function click(element) {
     var e = $.Event('mouseup');
     e.button = 0;
@@ -1692,6 +1694,24 @@ describe('Terminal utils', function() {
         describe('set', function() {
             var a = {a: 1};
             var b = {a: 2};
+            var c = {a: 2};
+            var cycle;
+            beforeEach(function() {
+                cycle = new $.terminal.Cycle(a, b);
+            });
+            it('should replace item', () => {
+                cycle.remove(1);
+                cycle.set(1, c);
+                expect(cycle.get()).toEqual([a, c]);
+            });
+            it('should ignore value', () => {
+                cycle.set(1, c);
+                expect(cycle.get()).toEqual([a, b]);
+            });
+        });
+        describe('active', function() {
+            var a = {a: 1};
+            var b = {a: 2};
             var c = {a: 3};
             var d = {a: 4};
             var cycle;
@@ -1699,12 +1719,12 @@ describe('Terminal utils', function() {
                 cycle = new $.terminal.Cycle(a, b, c, d);
             });
             it('should set existing element', function() {
-                cycle.set(c);
+                cycle.active(c);
                 expect(cycle.front()).toEqual(c);
             });
             it('should add new item if not exists', function() {
                 var e = {a: 5};
-                cycle.set(e);
+                cycle.active(e);
                 expect(cycle.length()).toEqual(5);
                 expect(cycle.index()).toEqual(4);
                 expect(cycle.front()).toEqual(e);
@@ -1772,7 +1792,7 @@ describe('Terminal utils', function() {
             });
             it('should add element if cycle at the end', function() {
                 var cycle = new $.terminal.Cycle(1,2,3);
-                cycle.set(3);
+                cycle.active(3);
                 cycle.append(4);
                 expect(cycle.get()).toEqual([1,2,3,4]);
             });
@@ -2231,9 +2251,6 @@ describe('Terminal utils', function() {
             term.find('.terminal-output').css('width', 800);
             term.focus();
         });
-        function key(ord, key) {
-            shortcut(false, false, false, ord, key);
-        }
         function selected() {
             return term.find('.terminal-output > div div span.terminal-inverted');
         }
@@ -7410,6 +7427,24 @@ describe('Terminal plugin', function() {
                 expect(term.level()).toEqual(1);
                 expect(term.get_prompt()).toEqual('1> ');
                 expect(term.get_output()).toEqual(greetings);
+            });
+        });
+        describe('id', function() {
+            it('should restore the history', () => {
+                var term = $('<div/>').terminal($.noop, {
+                    name: 'id'
+                });
+                term.focus();
+                var id = term.id();
+                enter(term, 'ls');
+                term.destroy();
+                term = $('<div/>').terminal($.noop, {
+                    name: 'id',
+                    id
+                });
+                term.focus();
+                key('ARROWUP');
+                expect(term.get_command()).toEqual('ls');
             });
         });
         describe('purge', function() {

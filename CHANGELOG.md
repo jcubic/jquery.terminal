@@ -1,3 +1,7 @@
+## 2.45.0
+### Features
+* add `id` option that allow to create same terminal using hot reload [#978](https://github.com/jcubic/jquery.terminal/issues/978)
+
 ## 2.44.1
 ### Bugfix
 * fix errors with form autofill outside of the terminal [#977](https://github.com/jcubic/jquery.terminal/issues/977)

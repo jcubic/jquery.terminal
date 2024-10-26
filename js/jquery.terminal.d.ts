@@ -224,6 +224,7 @@ declare namespace JQueryTerminal {
         invokeMethods?: boolean;
         useCache?: boolean;
         anyLinks?: boolean;
+        id?: number;
         raw?: boolean;
         allowedAttributes?: Array<RegExp | string>;
         tabindex?: number;

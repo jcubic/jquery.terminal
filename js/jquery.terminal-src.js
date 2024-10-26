@@ -1477,7 +1477,7 @@
             remove: function(index) {
                 delete data[index];
             },
-            set: function(item) {
+            active: function(item) {
                 for (var i = data.length; i--;) {
                     if (data[i] === item) {
                         pos = i;
@@ -1518,6 +1518,11 @@
                         fn(item, i);
                     }
                 });
+            },
+            set: function(index, value) {
+                if (!data[index]) {
+                    data[index] = value;
+                }
             },
             append: function(item) {
                 data.push(item);
@@ -7661,7 +7666,7 @@
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
             invalidMask: 'Invalid mask used only string or boolean allowed',
-            defunctTerminal: "You can't call method on terminal that was destroyed",
+            defunctTerminal: "You can't call method '%s' on terminal that was destroyed",
             abortError: 'Abort with CTRL+D',
             timeoutError: 'Signal timed out'
         }
@@ -10419,7 +10424,7 @@
                                 }
                             }
                         }
-                        terminals.set(self);
+                        terminals.active(self);
                         self.enable(silent);
                     }
                 });
@@ -11953,7 +11958,8 @@
         var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
-        var terminal_id = terminals.length();
+        var have_custom_id = typeof options.id === 'number';
+        var terminal_id = have_custom_id ? options.id : terminals.length();
         var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
         var num_rows; // number of lines that fit without scrollbar
@@ -12068,7 +12074,11 @@
             (typeof settings.login === 'string' || settings.login === true)) {
             global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
-        terminals.append(self);
+        if (have_custom_id) {
+            terminals.set(settings.id, self);
+        } else {
+            terminals.append(self);
+        }
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
@@ -12700,15 +12710,22 @@
                 // don't make sense
                 observe_visibility();
             }
-            // wait for custom font to load #892
-            if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(function() {
+            function fonts_ready() {
+                if (!defunct) {
                     if (have_custom_font(self)) {
                         calculate_char_size();
                         self.resize();
                     }
                     command_queue.resolve();
-                });
+                }
+            }
+            // wait for custom font to load #892
+            if (document.fonts && document.fonts.ready) {
+                if (document.fonts.status === 'loaded') {
+                    fonts_ready();
+                } else {
+                    document.fonts.ready.then(fonts_ready);
+                }
             } else {
                 command_queue.resolve();
             }
