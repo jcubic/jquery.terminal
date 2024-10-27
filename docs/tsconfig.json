@@ -6,6 +6,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "lib": ["ES2021"]
   }
 }

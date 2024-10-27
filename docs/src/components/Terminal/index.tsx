@@ -56,6 +56,39 @@ function command(term: RefObject<JQueryTerminal>) {
   };
 }
 
+
+const commands = {
+  github,
+  source,
+  echo,
+  joke,
+  cowsay,
+  lolcat,
+  fortune,
+  figlet,
+  jargon,
+  cal,
+  help,
+  theme,
+  record,
+  size(num: string) {
+    this.css('--size', num);
+  },
+  rows(num: string) {
+    this.css('--rows', num);
+  }
+};
+
+const formatter = new Intl.ListFormat('en', {
+  style: 'long',
+  type: 'conjunction',
+});
+
+function help() {
+  const list = formatter.format(Object.keys(commands));
+  this.echo(`available commands: ${list}`, { keepWords: true });
+}
+
 export default function Interpreter(): JSX.Element {
   const [show_commands, set_show_commands] = useState<boolean>(false);
   const ref = useRef<HTMLDivElement>();
@@ -74,26 +107,7 @@ export default function Interpreter(): JSX.Element {
   useLayoutEffect(() => {
     (function loop() {
       if (replReady() && styleReady()) {
-        term.current = initTerminal({
-          github,
-          source,
-          echo,
-          joke,
-          cowsay,
-          lolcat,
-          fortune,
-          figlet,
-          jargon,
-          cal,
-          theme,
-          record,
-          size(num: string) {
-            this.css('--size', num);
-          },
-          rows(num: string) {
-            this.css('--rows', num);
-          }
-        });
+        term.current = initTerminal(commands);
         term.current.on('click', '.jargon', function() {
           const href = $(this).attr('href');
           const command = `jargon ${href}`;
