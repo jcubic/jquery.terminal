@@ -22,6 +22,7 @@
     "@fingerprintjs/fingerprintjs": "^3.4.2",
     "@mdx-js/react": "^3.0.0",
     "@supabase/supabase-js": "^2.45.6",
+    "ascii-calendar": "^0.2.2",
     "clsx": "^2.0.0",
     "cowsay": "^1.6.0",
     "figlet": "^1.7.0",

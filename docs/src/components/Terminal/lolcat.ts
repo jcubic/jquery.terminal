@@ -7,7 +7,7 @@ import { delay } from '@site/src/constants';
 export default async function command(this: JQueryTerminal, ...args: string[]) {
   const $ = (globalThis as any).$ as JQueryStatic;
   const { a, animation } = $.terminal.parse_options(args);
-  let input = await this.read('');
+  let input = $.terminal.strip(await this.read(''));
   const options = a || animation ? {typing: true, delay } : undefined;
   this.echo(rainbow(input), options);
 }

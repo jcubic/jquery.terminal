@@ -28,6 +28,7 @@ import cowsay from './cowsay';
 import fortune from './fortune';
 import figlet from './figlet';
 import jargon from './jargon';
+import cal from './cal';
 
 const languages = [
   'markdown',
@@ -83,6 +84,7 @@ export default function Interpreter(): JSX.Element {
           fortune,
           figlet,
           jargon,
+          cal,
           theme,
           record,
           size(num: string) {
