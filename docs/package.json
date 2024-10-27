@@ -32,7 +32,8 @@
     "path-browserify": "^1.0.1",
     "prism-react-renderer": "^2.3.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.5.2",
