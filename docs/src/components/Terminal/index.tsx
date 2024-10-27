@@ -72,10 +72,18 @@ const commands = {
   theme,
   record,
   size(num: string) {
-    this.css('--size', num);
+    if (!num) {
+      this.echo('Change the size of the terminal\nusage\n\tsize &lt;number&gt;\ne.g.: size 1.2');
+    } else {
+      this.css('--size', num);
+    }
   },
   rows(num: string) {
-    this.css('--rows', num);
+    if (!num) {
+      this.echo('Change terminal number of rows\nusage\n\trows &lt;number&gt;');
+    } else {
+      this.css('--rows', num);
+    }
   }
 };
 
