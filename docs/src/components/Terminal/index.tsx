@@ -180,6 +180,9 @@ export default function Interpreter(): JSX.Element {
             <li>
               <button onClick={exec('jargon hacker')}>jargon</button>
             </li>
+            <li>
+              <button onClick={exec('cal')}>cal</button>
+            </li>
            </ul>
         </div>
       )}
