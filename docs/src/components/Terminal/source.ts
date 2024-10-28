@@ -3,6 +3,8 @@ import path from 'path-browserify';
 
 import data from '@site/dir.json';
 
+import { prism } from '@site/src/utils';
+
 function alow_data() {
   const $ = (globalThis as any).$ as JQueryStatic;
   if (!$.terminal.defaults.allowedAttributes.includes('data-path')) {
@@ -18,30 +20,26 @@ function is_image(path_name: string) {
 }
 
 export default function source(this: JQueryTerminal) {
+  const $ = (globalThis as any).$ as JQueryStatic;
   alow_data();
   let pending = false;
   const display = async (node: JQuery<HTMLSpanElement>) => {
     if (!pending) {
       const full_path = node.data('path');
+      const name = path.basename(full_path);
       node.addClass('pending');
       pending = true;
       const url = [root, full_path].join('');
       let text: string;
       if (is_image(full_path)) {
-        const name = path.basename(full_path);
         text = `<img class="less" src="${url}" alt="file ${name}"/>`;
       } else {
         const res = await fetch(url);
-        text = await res.text();
+        text = prism(name, await res.text());
       }
       pending = false;
       node.removeClass('pending');
-      this.less(text, {
-        formatters: true,
-        onExit() {
-          
-        }
-      });
+      this.less(text);
     }
   };
   this.off('.source');
