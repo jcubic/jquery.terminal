@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.44.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 26 Oct 2024 19:45:38 +0000
+ * Date: Tue, 29 Oct 2024 22:55:22 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1522,7 +1522,9 @@
             set: function(index, value) {
                 if (!data[index]) {
                     data[index] = value;
+                    return true;
                 }
+                return false;
             },
             append: function(item) {
                 data.push(item);
@@ -5347,8 +5349,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.44.1',
-        date: 'Sat, 26 Oct 2024 19:45:38 +0000',
+        version: 'DEV',
+        date: 'Tue, 29 Oct 2024 22:55:22 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7668,7 +7670,9 @@
             invalidMask: 'Invalid mask used only string or boolean allowed',
             defunctTerminal: "You can't call method '%s' on terminal that was destroyed",
             abortError: 'Abort with CTRL+D',
-            timeoutError: 'Signal timed out'
+            timeoutError: 'Signal timed out',
+            invalidId: 'terminal with this `id` aready exists! You need to destr' +
+                'oy old terminal before you can create terminal with the same `id`'
         }
     };
     // -------------------------------------------------------------------------
@@ -9932,6 +9936,8 @@
                             if (valid !== false) {
                                 if (is_function(success)) {
                                     success();
+                                } else {
+                                    self.resume();
                                 }
                             } else {
                                 self.resume();
@@ -12075,7 +12081,9 @@
             global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
         if (have_custom_id) {
-            terminals.set(settings.id, self);
+            if (!terminals.set(settings.id, self)) {
+                warn(strings().invalidId);
+            }
         } else {
             terminals.append(self);
         }

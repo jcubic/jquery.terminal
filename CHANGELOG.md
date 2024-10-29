@@ -1,6 +1,8 @@
 ## 2.45.0
 ### Features
 * add `id` option that allow to create same terminal using hot reload [#978](https://github.com/jcubic/jquery.terminal/issues/978)
+### Bugfix
+* fix `terminal::login()` when user already authenticated [#980](https://github.com/jcubic/jquery.terminal/issues/980)
 
 ## 2.44.1
 ### Bugfix

@@ -9936,6 +9936,8 @@
                             if (valid !== false) {
                                 if (is_function(success)) {
                                     success();
+                                } else {
+                                    self.resume();
                                 }
                             } else {
                                 self.resume();

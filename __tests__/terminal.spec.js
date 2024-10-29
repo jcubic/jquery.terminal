@@ -5879,6 +5879,18 @@ describe('Terminal plugin', function() {
                 expect(term.get_prompt()).toEqual('>>> ');
                 term.logout(true).pop().pop();
             });
+            it('should login when already auth', function() {
+                term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
+                if (term.token(true)) {
+                    term.logout(true);
+                }
+                enter(term, 'foo');
+                enter(term, 'bar');
+                expect(term.token(true)).toEqual(token);
+                term.login(login.callback, true);
+                expect(term.paused()).toBe(false);
+                term.logout(true).pop().pop();
+            });
             it('should login to nested interpreter when using login option', function() {
                 term.push($.noop, {
                     prompt: '$$$ ',
