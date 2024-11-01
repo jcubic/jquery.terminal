@@ -1,10 +1,10 @@
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://wnhpsdjbfeldnuclwsgu.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InduaHBzZGpiZmVsZG51Y2x3c2d1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NDU5MzAsImV4cCI6MjA0NTAyMTkzMH0.KcNTiEJTDqkePhjrCKNBW5Y2uqJvWIKvDJSNk94hLm0';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import {
+    jargon_search,
+    jargon_abbrev,
+    jargon_query
+} from '@site/src/supabase';
 
 export default async function jargon(this: JQueryTerminal, ...args: string[]) {
     const $ = (globalThis as any).$ as JQueryStatic;
@@ -13,10 +13,7 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
     if (options._.length) {
         const query = options._.join(' ');
         if (options.s) {
-            const { data, error } = await supabase.from('jargon')
-                .select().textSearch('term', query, {
-                    type: 'websearch'
-                });
+            const { data, error } = await jargon_search(query);
             if (error) {
                 this.error(error.message);
             } else {
@@ -25,14 +22,12 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
                 }).join('\n'));
             }
         } else {
-            const { data: terms, error } = await supabase.from('jargon')
-                .select().eq('term', query).select();
+            const { data: terms, error } = await jargon_query(query);
             if (error) {
                 this.error(error.message);
             } else {
                 await Promise.all(terms.map(async (entry: JargonEntry) => {
-                    const { data: abbrev, error } = await supabase.from('abbrev')
-                        .select().eq('term', entry.id);
+                    const { data: abbrev, error } = await jargon_abbrev(entry.id);
                     if (!error) {
                         entry.abbr = abbrev.map(entry => entry.name);
                     }

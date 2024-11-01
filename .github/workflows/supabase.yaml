@@ -1,0 +1,26 @@
+name: Supabase Ping
+
+on:
+  schedule:
+    - cron: "25 18 * * 1,5"
+
+defaults:
+  run:
+    working-directory: docs
+
+jobs:
+  supabase_ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ping Supabase cloud
+        run: npx ts-node supabase.ts
