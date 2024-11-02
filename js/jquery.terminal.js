@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 02 Nov 2024 21:30:07 +0000
+ * Date: Sat, 02 Nov 2024 21:32:11 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5350,7 +5350,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 02 Nov 2024 21:30:07 +0000',
+        date: 'Sat, 02 Nov 2024 21:32:11 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11964,7 +11964,7 @@
         var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
-        var have_custom_id = typeof options.id === 'number';
+        var have_custom_id = !!(options && typeof options.id === 'number');
         var terminal_id = have_custom_id ? options.id : terminals.length();
         var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line

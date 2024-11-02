@@ -11964,7 +11964,7 @@
         var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
-        var have_custom_id = typeof options.id === 'number';
+        var have_custom_id = !!(options && typeof options.id === 'number');
         var terminal_id = have_custom_id ? options.id : terminals.length();
         var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
