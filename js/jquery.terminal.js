@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 02 Nov 2024 21:32:11 +0000
+ * Date: Sat, 02 Nov 2024 21:39:24 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5350,7 +5350,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 02 Nov 2024 21:32:11 +0000',
+        date: 'Sat, 02 Nov 2024 21:39:24 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6857,6 +6857,8 @@
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
+        var href_re = /^(((?:blob:)?https?|file|ftp):\/\/|\.{0,2}\/)/;
+        var src_re = /^(https?:|file:|blob:|data:)/;
         $.terminal.format = function format(str, options) {
             var settings = $.extend({}, {
                 linksNoReferrer: false,
@@ -6868,11 +6870,11 @@
             }, options || {});
             // -----------------------------------------------------------------
             var valid_href = with_url_validation(function(url) {
-                return url.match(/^(((?:blob:)?https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+                return url.match(href_re) || is_path(url);
             }, settings);
             // -----------------------------------------------------------------
             var valid_src = with_url_validation(function(url) {
-                return url.match(/^(https?:|file:|blob:|data:)/) || is_path(url);
+                return url.match(src_re) || is_path(url);
             }, settings);
             // -----------------------------------------------------------------
             function filter_attr_names(names) {
