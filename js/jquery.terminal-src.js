@@ -1210,7 +1210,7 @@
     var format_end_re = /\[\[(?:-?[@!gbiusor])*;[^;]*;[^\]]*\]?$/i;
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_re = /^(?:#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]+\)|hsla?\([^)]+\))$/i;
-    var url_re = /(\b(?:file|ftp|https?):\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
+    var url_re = /(\b(?:file|ftp|https?|blog:https?):\/\/(?:[^/\s]+\.[^/\s.]+)(?:\/[^\s]*)?(?:#[^\s]*)?)/gi;
     var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
     var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\\\][)])+)$/gi;
@@ -6848,8 +6848,8 @@
                 }
                 var test = fn(url);
                 if (!test) {
-                    warn('Invalid URL ' + url + ' only http(s) ftp and path ' +
-                         'are allowed');
+                    warn('Invalid URL ' + url + ' only http(s), blob, ftp, and ' +
+                         'paths are allowed!');
                 }
                 return test;
             };
@@ -6868,7 +6868,7 @@
             }, options || {});
             // -----------------------------------------------------------------
             var valid_href = with_url_validation(function(url) {
-                return url.match(/^((https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+                return url.match(/^(((?:blob:)?https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
             }, settings);
             // -----------------------------------------------------------------
             var valid_src = with_url_validation(function(url) {
