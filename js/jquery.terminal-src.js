@@ -2649,7 +2649,7 @@
             }
             function set() {
                 clip.val(command);
-                fix_textarea();
+                fix_editable();
             }
             function insert(text) {
                 self.insert(text);
@@ -2924,7 +2924,7 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         // -------------------------------------------------------------------------------
-        function fix_textarea(position_only) {
+        function fix_editable(position_only) {
             if (!self.isenabled()) {
                 return;
             }
@@ -3739,7 +3739,7 @@
                     command = string;
                 }
                 redraw();
-                fix_textarea();
+                fix_editable();
                 fire_change_command();
                 return removed;
             },
@@ -3751,7 +3751,7 @@
                         self.position(bare_text(command).length);
                     }
                     redraw();
-                    fix_textarea();
+                    fix_editable();
                     if (!silent && command_changed) {
                         fire_change_command();
                     }
@@ -3808,7 +3808,7 @@
                 if (!stay) {
                     self.position(len, true, true);
                 }
-                fix_textarea();
+                fix_editable();
                 redraw();
                 fire_change_command();
                 return self;
@@ -3897,7 +3897,7 @@
                         if (!silent && is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
-                        fix_textarea(true);
+                        fix_editable(true);
                     }
                     return self;
                 } else {
@@ -3907,7 +3907,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
-                fix_textarea(true);
+                fix_editable(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep
@@ -4028,7 +4028,7 @@
                         draw_prompt();
                     }
                     fix_cursor();
-                    fix_textarea();
+                    fix_editable();
                 }
                 mobile_focus();
                 return self;
