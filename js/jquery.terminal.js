@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 14 Nov 2024 21:18:02 +0000
+ * Date: Thu, 14 Nov 2024 22:50:34 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2112,8 +2112,7 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var html = '<div class="cmd-editable" contenteditable><br/></div>';
-                var $node = $(html).attr({
+                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     autocomplete: 'new-password',
@@ -2131,8 +2130,6 @@
                     val: function(value) {
                         if (typeof value === 'undefined') {
                             return $node.text();
-                        } else if (value === '') {
-                            $node.html('<br/>');
                         } else {
                             $node.html(value);
                         }
@@ -2649,7 +2646,7 @@
             }
             function set() {
                 clip.val(command);
-                fix_textarea();
+                fix_editable();
             }
             function insert(text) {
                 self.insert(text);
@@ -2924,7 +2921,7 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         // -------------------------------------------------------------------------------
-        function fix_textarea(position_only) {
+        function fix_editable(position_only) {
             if (!self.isenabled()) {
                 return;
             }
@@ -3739,7 +3736,7 @@
                     command = string;
                 }
                 redraw();
-                fix_textarea();
+                fix_editable();
                 fire_change_command();
                 return removed;
             },
@@ -3751,7 +3748,7 @@
                         self.position(bare_text(command).length);
                     }
                     redraw();
-                    fix_textarea();
+                    fix_editable();
                     if (!silent && command_changed) {
                         fire_change_command();
                     }
@@ -3808,7 +3805,7 @@
                 if (!stay) {
                     self.position(len, true, true);
                 }
-                fix_textarea();
+                fix_editable();
                 redraw();
                 fire_change_command();
                 return self;
@@ -3897,7 +3894,7 @@
                         if (!silent && is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
-                        fix_textarea(true);
+                        fix_editable(true);
                     }
                     return self;
                 } else {
@@ -3907,7 +3904,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
-                fix_textarea(true);
+                fix_editable(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep
@@ -4028,7 +4025,7 @@
                         draw_prompt();
                     }
                     fix_cursor();
-                    fix_textarea();
+                    fix_editable();
                 }
                 mobile_focus();
                 return self;
@@ -5348,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 14 Nov 2024 21:18:02 +0000',
+        date: 'Thu, 14 Nov 2024 22:50:34 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

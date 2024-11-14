@@ -2112,8 +2112,7 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var html = '<div class="cmd-editable" contenteditable><br/></div>';
-                var $node = $(html).attr({
+                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
                     autocomplete: 'new-password',
@@ -2131,8 +2130,6 @@
                     val: function(value) {
                         if (typeof value === 'undefined') {
                             return $node.text();
-                        } else if (value === '') {
-                            $node.html('<br/>');
                         } else {
                             $node.html(value);
                         }
