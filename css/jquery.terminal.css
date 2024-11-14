@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.44.1
+ *           \/              /____/                              version DEV
  * http://terminal.jcubic.pl
  *
  * This file is part of jQuery Terminal.
@@ -12,7 +12,7 @@
  * Copyright (c) 2011-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Tue, 08 Oct 2024 20:29:54 +0000
+ * Date: Thu, 14 Nov 2024 21:18:03 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -670,12 +670,12 @@ terminal .terminal-output > div {
         0%, 50% {
             border-bottom-color: var(--color, #aaa);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+            line-height: var(--terminal-font-size);
         }
         50.1%, 100% {
             border-bottom-color: var(--background, #000);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+            line-height: var(--terminal-font-size);
         }
     }
 }
@@ -839,6 +839,7 @@ terminal .terminal-output > div {
     }
     .terminal {
         --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
+        --terminal-font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
         height: auto;
         /* force size when user add --rows */
         height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px));
@@ -865,14 +866,17 @@ terminal .terminal-output > div {
     .terminal,
     .terminal-output > :not(.raw) span,
     .terminal-output > :not(.raw) a,
-    .terminal-output > :not(.raw) div,
+    .terminal-output > :not(.raw) div {
+        font-size: var(--terminal-font-size);
+    }
     .cmd,
     .cmd span,
     .cmd div {
-        font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+        --cmd-font-size: var(--terminal-font-size, calc(var(--size, 1) * (12px / var(--pixel-density, 1))));
+        font-size: var(--cmd-font-size);
     }
     .terminal-output .emoji, .cmd .emoji {
-        height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+        height: var(--terminal-font-size);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
@@ -1117,7 +1121,7 @@ terminal .terminal-output > div {
 }
 .cmd-editable {
     position: absolute;
-    top: calc(var(--cmd-top) * 1px);
+    top: calc(var(--cmd-top) * 1px + var(--cmd-font-size, 1em));
     bottom: 0;
     right: 0;
     left: 0;

@@ -1,3 +1,7 @@
+## 2.45.1
+### Bugfix
+* mobile improvements
+
 ## 2.45.0
 ### Features
 * add `id` option that allow to create same terminal using hot reload [#978](https://github.com/jcubic/jquery.terminal/issues/978)

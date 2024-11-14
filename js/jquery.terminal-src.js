@@ -234,7 +234,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (false) {
+        if (true) {
             console.log(str);
             //$.terminal.active().echo(str);
         }
@@ -2075,7 +2075,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
-            mobileIngoreAutoSpace: [],
+            mobileIgnoreAutoSpace: [],
             repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
@@ -2084,8 +2084,8 @@
     $.fn.cmd = function(options) {
         var settings = $.extend({}, $.cmd.defaults, options);
         function mobile_ignore_key(key) {
-            return settings.mobileIngoreAutoSpace.length &&
-                settings.mobileIngoreAutoSpace.indexOf(key) !== -1 && is_android;
+            return settings.mobileIgnoreAutoSpace.length &&
+                settings.mobileIgnoreAutoSpace.indexOf(key) !== -1 && is_android;
         }
         var self = this;
         var maybe_data = self.data('cmd');
@@ -2112,9 +2112,11 @@
         var clip;
         if (is_mobile) {
             clip = (function() {
-                var $node = $('<div class="cmd-editable" contenteditable/>').attr({
+                var html = '<div class="cmd-editable" contenteditable><br/></div>';
+                var $node = $(html).attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
+                    autocomplete: 'new-password',
                     spellcheck: 'false',
                     tabindex: settings.tabindex
                 }).insertAfter(self);
@@ -2129,6 +2131,8 @@
                     val: function(value) {
                         if (typeof value === 'undefined') {
                             return $node.text();
+                        } else if (value === '') {
+                            $node.html('<br/>');
                         } else {
                             $node.html(value);
                         }
@@ -2940,7 +2944,7 @@
                                 clip.$node.caret(pos);
                             }
                         } catch (e) {
-                            // firefox throw NS_ERROR_FAILURE ignore
+                            // firefox throws NS_ERROR_FAILURE - ignore
                         }
                     });
                 }
@@ -4336,12 +4340,6 @@
                                           !skip_insert &&
                                           (single_key || no_key) && !backspace)) {
                 if (val && val === command) {
-                    if (is_android) {
-                        // ignore autocomplete on GBoard keyboard #693
-                        if (no_keydown) {
-                            event('keydown', 'Enter', 13);
-                        }
-                    }
                     finalize_input_event();
                     return;
                 }
@@ -7604,7 +7602,7 @@
         holdTimeout: 400,
         holdRepeatTimeout: 200,
         repeatTimeoutKeys: [],
-        mobileIngoreAutoSpace: [],
+        mobileIgnoreAutoSpace: [',', '.', ')'],
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -12257,7 +12255,7 @@
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
                 mobileDelete: settings.mobileDelete,
-                mobileIngoreAutoSpace: settings.mobileIngoreAutoSpace,
+                mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
