@@ -11,7 +11,7 @@ import styles from './styles.module.css';
 
 const replReady = () => {
   const jQuery = (globalThis as any).jQuery as JQueryStatic;
-  return jQuery && jQuery.terminal;
+  return jQuery && jQuery.terminal && jQuery.terminal.xml_formatter;
 }
 
 import { initTerminal, destroyTerminal } from './terminal';
@@ -27,7 +27,7 @@ import lolcat from './lolcat';
 import cowsay from './cowsay';
 import fortune from './fortune';
 import figlet from './figlet';
-import jargon from './jargon';
+import { jargon, jargon_init } from './jargon';
 import cal from './cal';
 import chuck_norris from './chuck-norris';
 
@@ -118,6 +118,7 @@ export default function Interpreter(): JSX.Element {
     (function loop() {
       if (replReady() && styleReady()) {
         term.current = initTerminal(commands);
+        jargon_init((globalThis as any).jQuery as JQueryStatic);
         term.current.on('click', '.jargon', function() {
           const href = $(this).attr('href');
           const command = `jargon ${href}`;

@@ -2,11 +2,15 @@ import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 
 import {
     jargon_search,
-    jargon_abbrev,
-    jargon_query
-} from '@site/src/supabase';
+    jargon_term
+} from '@site/src/sqlite';
 
-export default async function jargon(this: JQueryTerminal, ...args: string[]) {
+export function jargon_init($: JQueryStatic) {
+    ($.terminal.xml_formatter as any).tags.name = () => '[[!bu;#fff;;jargon]';
+    ($.terminal.xml_formatter as any).tags.emphasis = () => '[[b;#fff;]';
+}
+
+export async function jargon(this: JQueryTerminal, ...args: string[]) {
     const $ = (globalThis as any).$ as JQueryStatic;
 
     const options = $.terminal.parse_options(args, { boolean: ['s']} as any);
@@ -15,24 +19,18 @@ export default async function jargon(this: JQueryTerminal, ...args: string[]) {
         if (options.s) {
             const { data, error } = await jargon_search(query);
             if (error) {
-                this.error(error.message);
+                this.error(error);
             } else {
-                this.echo(data.map(entry => {
-                    return `[[!bu;#fff;;jargon]${entry.term}]`;
+                this.echo(data.map((term: string) => {
+                    return `<name>${term}</name>`;
                 }).join('\n'));
             }
         } else {
-            const { data: terms, error } = await jargon_query(query);
+            const { data, error } = await jargon_term(query);
             if (error) {
-                this.error(error.message);
+                this.error(error);
             } else {
-                await Promise.all(terms.map(async (entry: JargonEntry) => {
-                    const { data: abbrev, error } = await jargon_abbrev(entry.id);
-                    if (!error) {
-                        entry.abbr = abbrev.map(entry => entry.name);
-                    }
-                }));
-                const entry = format_entry(terms);
+                const entry = format_entry(data);
                 this.echo(entry.trim(), {
                     keepWords: true
                 });
@@ -52,7 +50,7 @@ type JargonEntry = {
     id: number;
     term: string;
     def: string;
-    abbr?: string[];
+    abbrev?: string[];
 };
 
 function format_entry(entries: JargonEntry[]) {
@@ -60,8 +58,8 @@ function format_entry(entries: JargonEntry[]) {
 
     let result = entries.map(function(entry: JargonEntry) {
         let text = '[[b;#fff;]' + entry.term + ']';
-        if (entry.abbr) {
-            text += ' (' + entry.abbr.join(', ') + ')';
+        if (entry.abbrev) {
+            text += ' (' + entry.abbrev.join(', ') + ')';
         }
         let re = new RegExp("((?:https?|ftps?)://\\S+)|\\.(?!\\s|\\]\\s)\\)?", "g");
         let def = entry.def.replace(re, function(text, g) {
