@@ -152,7 +152,7 @@ export default function Interpreter(): JSX.Element {
         })}
       </Head>
       <div className={clsx('terminal', styles.marker)} ref={ref}></div>
-      <div className={styles.term}/>
+      <div className={styles.term} />
       {show_commands && (
         <div className={styles.commands}>
           <p>Commands:</p>
