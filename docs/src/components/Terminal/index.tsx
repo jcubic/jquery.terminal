@@ -29,6 +29,7 @@ import fortune from './fortune';
 import figlet from './figlet';
 import jargon from './jargon';
 import cal from './cal';
+import chuck_norris from './chuck-norris';
 
 const languages = [
   'markdown',
@@ -68,6 +69,7 @@ const commands = {
   figlet,
   jargon,
   cal,
+  'chuck-norris': chuck_norris,
   help,
   theme,
   record,
@@ -168,6 +170,9 @@ export default function Interpreter(): JSX.Element {
             </li>
             <li>
               <button onClick={exec('joke | lolcat -a')}>joke</button>
+            </li>
+            <li>
+              <button onClick={exec('chuck-norris')}>chuck-norris</button>
             </li>
             <li>
               <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
