@@ -8,6 +8,15 @@
     font-display: swap;
 }
 
+.hero_text h1 {
+    font-family: "bambi-bold", sans-serif;
+    letter-spacing: 3px;
+}
+
+.hero_text h1 span:last-child {
+    display: none;
+}
+
 .container {
     display: flex;
     flex-direction: row;
@@ -15,19 +24,16 @@
     gap: 1em;
 }
 
-.heroText {
+.hero_text {
     width: 50%;
+    display: flex;
+    flex-direction: column;
 }
 .terminal_container {
     width: 50%;
 }
 
-.heroText h1 {
-    font-family: "bambi-bold", sans-serif;
-    letter-spacing: 3px;
-}
-
-.heroText p {
+.hero_text p {
     font-size: 1.2em;
     line-height: 2em;
 }
@@ -36,7 +42,16 @@
     .container {
         flex-direction: column;
     }
-    .heroText, .terminal_container {
+    .hero_text, .terminal_container {
         width: 100%;
+    }
+    .hero_text {
+        order: 10;
+    }
+    .hero_text h1 span:first-child {
+        display: none;
+    }
+    .hero_text h1 span:last-child {
+        display: block;
     }
 }

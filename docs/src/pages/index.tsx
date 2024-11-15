@@ -13,15 +13,18 @@ function HomepageHeader() {
   return (
     <header className="hero hero--primary">
       <div className={clsx('container', styles.container)}>
-        <aside className={styles.heroText}>
-          <h1>jQuery Terminal</h1>
+        <aside className={styles.hero_text}>
+          <h1>
+            <span>jQuery Terminal</span>
+            <span>Summary</span>
+          </h1>
           <p>An open-source, feature-rich JavaScript library that adds a terminal interface to your
-          website.</p>
+            website.</p>
           <p>jQuery Terminal uses jQuery only as a dependency, and you can think of it as a
-          framework.</p>
+            framework.</p>
           <p>It's perfect for adding advanced functionality for power users, serving as
-          a debugging tool, or creating cool websites that resemble a terminal from
-          GNU/Linux, macOS, or Windows WSL.</p>
+            a debugging tool, or creating cool websites that resemble a terminal from
+            GNU/Linux, macOS, or Windows WSL.</p>
         </aside>
         <div className={styles.terminal_container}>
           <Terminal />
