@@ -234,7 +234,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (true) {
+        if (false) {
             console.log(str);
             //$.terminal.active().echo(str);
         }

@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 14 Nov 2024 22:50:34 +0000
+ * Date: Fri, 15 Nov 2024 23:08:49 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -234,7 +234,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (true) {
+        if (false) {
             console.log(str);
             //$.terminal.active().echo(str);
         }
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 14 Nov 2024 22:50:34 +0000',
+        date: 'Fri, 15 Nov 2024 23:08:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
