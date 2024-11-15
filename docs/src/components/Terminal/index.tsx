@@ -42,7 +42,7 @@ const languages = [
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
   'https://cdn.jsdelivr.net/npm/prismjs/prism.js',
-  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@d15668252/js/jquery.terminal.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,npm/jquery.terminal/js/pipe.js',
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@eba98ad9/js/jquery.terminal.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,npm/jquery.terminal/js/pipe.js',
   'https://cdn.jsdelivr.net/combine/' + languages.map(lang => {
     return `npm/prismjs/components/prism-${lang}.min.js`;
   }).join(',')
@@ -145,7 +145,7 @@ export default function Interpreter(): JSX.Element {
     <>
       <Head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-        <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/css/jquery.terminal.min.css" rel="stylesheet"/>
+        <link href="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@eba98ad9/css/jquery.terminal.min.css" rel="stylesheet"/>
         <link href="https://cdn.jsdelivr.net/npm/terminal-prism/css/prism-coy.css" rel="stylesheet"/>
         {isStatic && terminal_scripts.map(script => {
           return <script key={script} src={script} />
