@@ -18,9 +18,15 @@ function HomepageHeader() {
             <span>jQuery Terminal</span>
             <span>Summary</span>
           </h1>
-          <p>An open-source, feature-rich JavaScript library that adds a terminal interface to your
+          <p>
+            <span className={styles.hero_intro}>jQuery Terminal is </span>
+            <span className={styles.hero_prefix}>An </span>
+            open-source, feature-rich JavaScript library that adds a terminal interface to your
             website.</p>
-          <p>jQuery Terminal uses jQuery only as a dependency, and you can think of it as a
+          <p>
+            <span className={styles.hero_second}>jQuery Terminal </span>
+            <span className={styles.hero_second}>It </span>
+            uses jQuery only as a dependency, and you can think of it as a
             framework.</p>
           <p>It's perfect for adding advanced functionality for power users, serving as
             a debugging tool, or creating cool websites that resemble a terminal from

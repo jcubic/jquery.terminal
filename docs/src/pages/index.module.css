@@ -13,6 +13,14 @@
     letter-spacing: 3px;
 }
 
+.hero_intro {
+    display: none;
+}
+
+.hero_second:nth-child(2) {
+    display: none;
+}
+
 .hero_text h1 span:last-child {
     display: none;
 }
@@ -53,5 +61,17 @@
     }
     .hero_text h1 span:last-child {
         display: block;
+    }
+    .hero_intro {
+        display: inline;
+    }
+    .hero_prefix {
+        text-transform: lowercase;
+    }
+    .hero_second:first-child {
+        display: none;
+    }
+    .hero_second:nth-child(2) {
+        display: inline;
     }
 }
