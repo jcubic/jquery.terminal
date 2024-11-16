@@ -14,7 +14,7 @@ export default async function chuck_norris(this: JQueryTerminal) {
     const json = await res.json();
     const { data, success } = schema.safeParse(json);
     if (success) {
-        this.echo(`[[;white;]${data.value}]`, { typing: true, delay, keepWords: true });
+        this.echo(`[[b;white;]${data.value}]`, { typing: true, delay, keepWords: true });
     } else {
         this.error('invalid response from remote server');
     }
