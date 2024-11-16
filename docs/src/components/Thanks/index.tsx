@@ -9,7 +9,7 @@ import BrowserStack from '@site/src/components/BrowserStack';
 export default function Thanks() {
   return (
     <div className={clsx('container', 'narrow', styles.container)}>
-      <Header className={styles.header}>Thanks</Header>
+      <Header>Thanks</Header>
       <p>Personal thanks:</p>
       <ul>
         <li><a href="https://stackoverflow.com/users/157247/t-j-crowder">T.J. Crowder</a> for helping with <a href="https://stackoverflow.com/a/46756077/387194">tracking_replace</a>.</li>
@@ -27,9 +27,6 @@ export default function Thanks() {
           <a href="https://www.browserstack.com/">
             <BrowserStack width={200} height={43} />
           </a>
-        </li>
-        <li>
-          <a href="mailto:jcubic@onet.pl?subject=jQuery%20Terminal%20Sponsorship">Become a sposor</a>
         </li>
       </ul>
     </div>
