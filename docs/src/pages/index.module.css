@@ -29,16 +29,16 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    gap: 1em;
+    gap: 2em;
 }
 
 .hero_text {
-    width: 50%;
+    width: 45%;
     display: flex;
     flex-direction: column;
 }
 .terminal_container {
-    width: 50%;
+    width: 55%;
 }
 
 .hero_text p {
