@@ -1,8 +1,3 @@
-.header {
-    font-family: "bambi-bold", sans-serif;
-    letter-spacing: 3px;
-}
-
 .contributors {
     --avatar-size: 52px;
     list-style: none;

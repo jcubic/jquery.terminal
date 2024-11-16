@@ -1,0 +1,6 @@
+html[data-theme="dark"] .dark {
+    display: none;
+}
+html:not([data-theme="dark"]) .light {
+    display: none;
+}

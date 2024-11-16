@@ -1,5 +1,4 @@
-import Heading from '@theme/Heading';
-
+import Header from '@site/src/components/Header';
 import users from '@site/contributors.json';
 import styles from './style.module.css';
 
@@ -13,7 +12,7 @@ type User = {
 export default function Contributors() {
   return (
     <div className="container narrow">
-      <Heading as="h2" id="contributors" className={styles.header}>Contributors</Heading>
+      <Header>Contributors</Header>
       <ul className={styles.contributors}>
         {users.map((user: User) => {
           return (

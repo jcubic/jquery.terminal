@@ -46,6 +46,10 @@
     line-height: 2em;
 }
 
+.spacer {
+    height: 3em;
+}
+
 @media (max-width: 1050px) {
     .container {
         flex-direction: column;

@@ -5,7 +5,7 @@ import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Terminal from '@site/src/components/Terminal';
 import Contributors from '@site/src/components/Contributors';
-
+import Thanks from '@site/src/components/Thanks';
 
 import styles from './index.module.css';
 
@@ -50,6 +50,8 @@ export default function Home(): JSX.Element {
       <main>
         <HomepageFeatures />
         <Contributors />
+        <Thanks />
+        <div className={styles.spacer} />
       </main>
     </Layout>
   );

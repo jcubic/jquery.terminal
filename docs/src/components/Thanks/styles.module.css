@@ -1,0 +1,21 @@
+.header {
+    margin-top: 3em;
+}
+
+.services {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2em;
+    flex-wrap: wrap;
+}
+
+.services a {
+    display: block;
+}
+
+.services li {
+    display: flex;
+    align-items: center;
+}
