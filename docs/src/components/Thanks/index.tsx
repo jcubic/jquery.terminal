@@ -28,6 +28,9 @@ export default function Thanks() {
             <BrowserStack width={200} height={43} />
           </a>
         </li>
+        <li>
+          <a href="mailto:jcubic@onet.pl?subject=jQuery%20Terminal%20Sponsorship">Become a sposor</a>
+        </li>
       </ul>
     </div>
   );
