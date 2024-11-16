@@ -15,7 +15,7 @@
 
 [data-theme='dark'] .term {
     --background: #14232d;
-    --color: white;
+    --color: #ccc;
 }
 
 .commands p {
