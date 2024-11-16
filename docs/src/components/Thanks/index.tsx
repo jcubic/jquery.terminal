@@ -1,3 +1,5 @@
+import { clsx } from 'clsx';
+
 import Header from '@site/src/components/Header';
 
 import styles from './styles.module.css';
@@ -6,7 +8,7 @@ import BrowserStack from '@site/src/components/BrowserStack';
 
 export default function Thanks() {
   return (
-    <div className="container narrow">
+    <div className={clsx('container', 'narrow', styles.container)}>
       <Header className={styles.header}>Thanks</Header>
       <p>Personal thanks:</p>
       <ul>
