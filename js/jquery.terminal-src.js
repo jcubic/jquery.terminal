@@ -9682,10 +9682,9 @@
         }
         // ---------------------------------------------------------------------
         function get_scrollbar_width() {
-            var width = filler.width();
+            var width = filler.outerWidth();
             var container_width = self.width();
-            var padding = get_padding();
-            return container_width - width - (padding.left + padding.right);
+            return container_width - width;
         }
         // ---------------------------------------------------------------------
         function get_padding() {
