@@ -2,6 +2,7 @@
 ### Features
 * add `id` option that allow to create same terminal using hot reload [#978](https://github.com/jcubic/jquery.terminal/issues/978)
 * allow using Object URLs in links [#982](https://github.com/jcubic/jquery.terminal/issues/982)
+* experimental `--cols` CSS variable
 ### Bugfix
 * fix `terminal::login()` when user already authenticated [#980](https://github.com/jcubic/jquery.terminal/issues/980)
 * improve mobile support

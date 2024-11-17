@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 15 Nov 2024 23:08:49 +0000
+ * Date: Sun, 17 Nov 2024 13:13:40 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 15 Nov 2024 23:08:49 +0000',
+        date: 'Sun, 17 Nov 2024 13:13:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9681,6 +9681,13 @@
             return parseInt(style.getPropertyValue(prop), 10) || 0;
         }
         // ---------------------------------------------------------------------
+        function get_scrollbar_width() {
+            var width = filler.width();
+            var container_width = self.width();
+            var padding = get_padding();
+            return container_width - width - (padding.left + padding.right);
+        }
+        // ---------------------------------------------------------------------
         function get_padding() {
             var style = window.getComputedStyle(filler[0]);
             function padding(name) {
@@ -12050,6 +12057,9 @@
         self.addClass('terminal');
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
+        css(self[0], {
+            '--terminal-scrollbar': get_scrollbar_width()
+        });
         // this is needed when terminal have selector with --size that is not
         // bare .terminal so fake terminal will not get the proper size #602
         var need_char_size_recalculate = !terminal_ready(self);

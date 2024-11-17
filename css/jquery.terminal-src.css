@@ -841,8 +841,13 @@ terminal .terminal-output > div {
         --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
         --terminal-font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
         height: auto;
-        /* force size when user add --rows */
+        /* force size when user add --rows and --cols */
         height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px));
+        /*
+         * there is a bug in Chromium https://issues.chromium.org/issues/379430924
+         * it give wrong number of characters per line (off by one), it works fine in Firefox and Epiphany
+         */
+        width: calc((var(--cols) * 1ch) + (var(--padding, 10) * 2px) + (var(--terminal-scrollbar, 10) * 1px));
     }
     .terminal .terminal-output > :not(.raw) > div,
     .cmd div,
