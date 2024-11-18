@@ -12,8 +12,12 @@ async function post(endpoint: string, data: Record<string, string>) {
 
 export function jargon_search(query: string) {
     return post('jargon-search', { query });
-};
+}
 
 export function jargon_term(query: string) {
     return post('jargon-term', { query });
-};
+}
+
+export function register_user(token: string, fingerprint: string) {
+  return post('register', { token, fingerprint });
+}
