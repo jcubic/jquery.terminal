@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getMessaging, getToken } from 'firebase/messaging';
 
 const firebase_config = {
     apiKey: 'AIzaSyCJhLo__GsvoEcP3Tp8G5jAhMo0OLPuBec',
@@ -10,7 +11,14 @@ const firebase_config = {
     appId: '1:1005897028349:web:fc2d0f5524864d5d17e494'
 };
 
-export const vapid_key = 'BCwx3BcH1YFCjBfWy3qmEZyVukPf-cLZUfVe9j3j1bwRcYi1aVhiEHPZqBvAcnvSyfznGoRHQrv3I2fDyBfULxk';
+const vapid_key = 'BCwx3BcH1YFCjBfWy3qmEZyVukPf-cLZUfVe9j3j1bwRcYi1aVhiEHPZqBvAcnvSyfznGoRHQrv3I2fDyBfULxk';
 
 export const firebase = initializeApp(firebase_config);
 
+const messaging = getMessaging(firebase);
+
+function getTokenWrapper() {
+    return getToken(messaging, { vapidKey: vapid_key });
+}
+
+export { getTokenWrapper as getToken };
