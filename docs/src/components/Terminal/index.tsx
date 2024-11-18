@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, RefObject } from 'react';
+import { useLayoutEffect, useRef, useState, RefObject, useCallback } from 'react';
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import clsx from 'clsx';
 
@@ -57,7 +57,6 @@ function command(term: RefObject<JQueryTerminal>) {
   };
 }
 
-
 const commands = {
   github,
   source,
@@ -73,6 +72,9 @@ const commands = {
   help,
   theme,
   record,
+  ls() {
+    this.echo("[[;red;]command `ls' not found. Try [[!u;;;command]help]]");
+  },
   size(num: string) {
     if (!num) {
       this.echo('Change the size of the terminal\nusage\n\tsize &lt;number&gt;\ne.g.: size 1.2');
@@ -112,6 +114,14 @@ export default function Interpreter(): JSX.Element {
 
   useScripts(!jQuery && terminal_scripts);
 
+  const invoke = useCallback(function(command: string) {
+    term.current.exec(command).then(function() {
+      if (term.current.settings().historyState) {
+        term.current.save_state(command);
+      }
+    });
+  }, []);
+
   const exec = command(term);
 
   useLayoutEffect(() => {
@@ -121,12 +131,11 @@ export default function Interpreter(): JSX.Element {
         jargon_init((globalThis as any).jQuery as JQueryStatic);
         term.current.on('click', '.jargon', function() {
           const href = $(this).attr('href');
-          const command = `jargon ${href}`;
-          term.current.exec(command).then(function() {
-            if (term.current.settings().historyState) {
-              term.current.save_state(command);
-            }
-          });
+          invoke(`jargon ${href}`);
+          return false;
+        }).on('click', '.command', function() {
+          const commnad = $(this).attr('href');
+          invoke(commnad);
           return false;
         });
         set_show_commands(true);
