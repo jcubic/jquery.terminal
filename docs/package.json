@@ -25,6 +25,7 @@
     "clsx": "^2.0.0",
     "cowsay": "^1.6.0",
     "figlet": "^1.7.0",
+    "firebase": "^11.0.2",
     "fortune-cookie": "^0.0.1",
     "isomorphic-lolcat": "^0.3.1",
     "jssha": "^3.3.1",
