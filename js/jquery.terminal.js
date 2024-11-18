@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 17 Nov 2024 13:32:31 +0000
+ * Date: Mon, 18 Nov 2024 23:03:37 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 17 Nov 2024 13:32:31 +0000',
+        date: 'Mon, 18 Nov 2024 23:03:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12057,6 +12057,8 @@
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
         css(self[0], {
+            '--char-width': char_size.width,
+            '--char-height': char_size.height,
             '--terminal-scrollbar': get_scrollbar_width()
         });
         // this is needed when terminal have selector with --size that is not
@@ -12580,9 +12582,18 @@
             });
             function calculate_char_size() {
                 var width = char_size.width;
+                var height = char_size.height;
                 char_size = get_char_size(self);
+                var css_vars = {};
                 if (width !== char_size.width) {
                     command_line.option('charWidth', char_size.width).refresh();
+                    css_vars['--char-width'] = char_size.width;
+                }
+                if (height !== char_size.height) {
+                    css_vars['--char-height'] = char_size.height;
+                }
+                if (Object.keys(css_vars).length) {
+                    css(self[0], css_vars);
                 }
             }
             resize();

@@ -845,7 +845,8 @@ terminal .terminal-output > div {
         height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px));
         /*
          * there is a bug in Chromium https://issues.chromium.org/issues/379430924
-         * it give wrong number of characters per line (off by one), it works fine in Firefox and Epiphany
+         * it give wrong number of characters per line (off by one),
+         * it works fine in Firefox and Epiphany
          */
         width: calc((var(--cols) * 1ch) + (var(--padding, 10) * 2px) + (var(--terminal-scrollbar, 10) * 1px));
     }
@@ -985,6 +986,11 @@ terminal .terminal-output > div {
     initial-value: 10;
 }
 @property --rows {
+    syntax: '<number> | auto';
+    inherits: true;
+    initial-value: auto;
+}
+@property --cols {
     syntax: '<number> | auto';
     inherits: true;
     initial-value: auto;
