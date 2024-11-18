@@ -11,8 +11,9 @@ const config: Config = {
   url: 'https://jcubic.github.io/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/jquery.terminal-docs/',
+  baseUrl: process.env.NODE_ENV === 'production' ? '/jquery.terminal-docs/' : '',
 
+  staticDirectories: ['static'],
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
