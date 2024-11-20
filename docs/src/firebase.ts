@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken } from 'firebase/messaging';
 
+import EventEmitter from '@site/src/EventEmitter';
+
 const firebase_config = {
     apiKey: 'AIzaSyCJhLo__GsvoEcP3Tp8G5jAhMo0OLPuBec',
     authDomain: 'jcubic-1500107003772.firebaseapp.com',
@@ -17,8 +19,14 @@ export const firebase = initializeApp(firebase_config);
 
 const messaging = getMessaging(firebase);
 
-function getTokenWrapper() {
-    return getToken(messaging, { vapidKey: vapid_key });
+export async function register() {
+  const emitter = new EventEmitter();
+  const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+  const listen = async () => {
+    const token = await getToken(messaging, { vapidKey: vapid_key, serviceWorkerRegistration: sw });
+    emitter.emit('token', token);
+  };
+  listen();
+  return emitter;
 }
 
-export { getTokenWrapper as getToken };
