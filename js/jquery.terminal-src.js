@@ -7494,24 +7494,23 @@
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
-    var name_ver = 'jQuery Terminal Emulator' +
-        (version_set ? version_string : '');
     function small_string(name) {
-            return '(c) 2011-2024 [[!;;;;https://jcubic.pl/me]' + name + ']';
+        return '(c) 2011-2024 [[!;;;;https://jcubic.pl/me]' + name + ']';
     }
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
         ['jQuery Terminal', small_string('jcubic')],
-        ['      __ ____ ________',
-         '     / // _  /__  ___/__ ___ ______',
-         ' __ / // // /  / // _  // _//     /',
-         '/  / // // /  / // ___// / / / / /',
-         '\\___//____ \\ /_//____//_/ /_/ /_/',
-         '          \\/                    '
-             .replace(reg, ' ') + version_string,
-         small_string('Jakub T. Jankiewicz')],
+        [
+            '      __ ____ ________',
+            '     / // _  /__  ___/__ ___ ______',
+            ' __ / // // /  / // _  // _//     /',
+            '/  / // // /  / // ___// / / / / /',
+            '\\___//____ \\ /_//____//_/ /_/ /_/',
+            '          \\/                    '
+                .replace(reg, ' ') + version_string,
+            small_string('Jakub T. Jankiewicz')],
         [
             '      _______                 ________                        __',
             '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
