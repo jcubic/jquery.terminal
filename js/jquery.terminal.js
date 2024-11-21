@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 21 Nov 2024 14:01:23 +0000
+ * Date: Thu, 21 Nov 2024 14:33:45 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2075,7 +2075,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
-            mobileIgnoreAutoSpace: [],
+            mobileIgnoreAutoSpace: [',', '.', ')'],
             repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 21 Nov 2024 14:01:23 +0000',
+        date: 'Thu, 21 Nov 2024 14:33:45 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

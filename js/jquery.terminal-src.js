@@ -2075,7 +2075,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
-            mobileIgnoreAutoSpace: [],
+            mobileIgnoreAutoSpace: [',', '.', ')'],
             repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
