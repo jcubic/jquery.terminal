@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 21 Nov 2024 14:33:45 +0000
+ * Date: Thu, 21 Nov 2024 14:51:40 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 21 Nov 2024 14:33:45 +0000',
+        date: 'Thu, 21 Nov 2024 14:51:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7496,13 +7496,22 @@
     var reg = new RegExp(' {' + version_string.length + '}$');
     var name_ver = 'jQuery Terminal Emulator' +
         (version_set ? version_string : '');
+    function small_string(name) {
+            return '(c) 2011-2024 [[!;;;;https://jcubic.pl/me]' + name + ']';
+    }
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2024 jcubic'],
-        [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
-        [name_ver, copyright.replace(/^Copyright /, '')],
+        ['jQuery Terminal', small_string('jcubic')],
+        ['      __ ____ ________',
+         '     / // _  /__  ___/__ ___ ______',
+         ' __ / // // /  / // _  // _//     /',
+         '/  / // // /  / // ___// / / / / /',
+         '\\___//____ \\ /_//____//_/ /_/ /_/',
+         '          \\/                    '
+             .replace(reg, ' ') + version_string,
+         small_string('Jakub T. Jankiewicz')],
         [
             '      _______                 ________                        __',
             '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
@@ -10533,7 +10542,7 @@
                 var cols = self.cols();
                 for (var i = signatures.length; i--;) {
                     var lengths = signatures[i].map(function(line) {
-                        return line.length;
+                        return $.terminal.length(line);
                     });
                     if (Math.max.apply(null, lengths) <= cols) {
                         return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';

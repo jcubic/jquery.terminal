@@ -6245,14 +6245,14 @@ describe('Terminal plugin', function() {
             function max_length() {
                 var lines = term.signature().split('\n');
                 return Math.max.apply(null, lines.map(function(line) {
-                    return line.length;
+                    return $.terminal.length(line);
                 }));
             }
             it('should return space', function() {
                 expect(term.signature()).toEqual('');
             });
             it('should return proper max length of signature', function() {
-                var numbers = {20: 20, 36: 33, 60: 56, 70: 66, 100: 75};
+                var numbers = {20: 20, 36: 35, 70: 66, 100: 75};
                 Object.keys(numbers).forEach(function(numChars) {
                     var length = numbers[numChars];
                     term.option('numChars', numChars);
