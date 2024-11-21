@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 18 Nov 2024 23:03:37 +0000
+ * Date: Thu, 21 Nov 2024 14:01:23 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5345,7 +5345,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 18 Nov 2024 23:03:37 +0000',
+        date: 'Thu, 21 Nov 2024 14:01:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8567,6 +8567,7 @@
         // :: Function limit output lines based on outputLimit option
         // ---------------------------------------------------------------------
         function limit_lines() {
+            var $lines = output.find('> div > div');
             if (settings.outputLimit >= 0) {
                 var limit;
                 if (settings.outputLimit === 0) {
@@ -8574,7 +8575,6 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                var $lines = output.find('> div > div');
                 if ($lines.length + 1 > limit) {
                     var max = $lines.length - limit + 1;
                     var for_remove = $lines.slice(0, max);
@@ -8592,8 +8592,10 @@
                         }
                     });
                     lines.limit_snapshot(max);
+                    return max;
                 }
             }
+            return $lines.length;
         }
         // ---------------------------------------------------------------------
         // :: Display user greetings or terminal signature
@@ -10540,6 +10542,12 @@
                 return '';
             },
             // -------------------------------------------------------------
+            // :: returns the number of rendered lines
+            // -------------------------------------------------------------
+            lines: function() {
+                return output_line_count;
+            },
+            // -------------------------------------------------------------
             // :: Return the version number
             // -------------------------------------------------------------
             version: function() {
@@ -10884,7 +10892,7 @@
                             });
                             command_line.__set_prompt_margin(len);
                         }
-                        limit_lines();
+                        output_line_count = limit_lines();
                         fire_event('onFlush');
                         self.stopTime('flush').oneTime(10, 'flush', function() {
                             var cmd_cursor = self.find('.cmd-cursor');
@@ -11971,6 +11979,7 @@
         var terminal_id = have_custom_id ? options.id : terminals.length();
         var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
+        var output_line_count = 0;
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
