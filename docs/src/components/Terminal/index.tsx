@@ -131,11 +131,11 @@ export default function Interpreter(): JSX.Element {
       if (replReady() && styleReady()) {
         term.current = initTerminal(commands);
         jargon_init((globalThis as any).jQuery as JQueryStatic);
-        term.current.on('click', '.jargon', function() {
+        term.current.on('click', 'a.jargon', function() {
           const href = $(this).attr('href');
           invoke(`jargon ${href}`);
           return false;
-        }).on('click', '.command', function() {
+        }).on('click', 'a.command', function() {
           const commnad = $(this).attr('href');
           invoke(commnad);
           return false;
