@@ -165,7 +165,7 @@ export default function Interpreter(): JSX.Element {
       <div className={styles.term} />
       {show_commands && (
         <div className={styles.commands}>
-          <p>Commands:</p>
+          <p>Top-level Commands:</p>
           <ul>
             <li>
               <button onClick={exec('source')}>source</button>
