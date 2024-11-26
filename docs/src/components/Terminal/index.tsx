@@ -99,6 +99,8 @@ const formatter = new Intl.ListFormat('en', {
 function help() {
   const list = formatter.format(Object.keys(commands));
   this.echo(`available commands: ${list}`, { keepWords: true });
+  this.echo('You can also use Unix/Linux pipe operator to send output of one command to the next input');
+  this.echo('Examples are [[!b;white;;command]fortune | cowsay | lolcat]');
 }
 
 export default function Interpreter(): JSX.Element {
