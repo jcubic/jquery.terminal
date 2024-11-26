@@ -1,6 +1,6 @@
+import SVGTheme from '@site/src/components/SVGTheme';
 import Light from '@site/static/img/browserstack-light.svg';
 import Dark from '@site/static/img/browserstack-dark.svg';
-import styles from './styles.module.css';
 
 type BrowserStackProps = {
     width: number;
@@ -8,10 +8,5 @@ type BrowserStackProps = {
 };
 
 export default function BrowserStack({ width, height }: BrowserStackProps) {
-  return (
-    <>
-      <Light className={styles.light} width={width} height={height} role="img"/>
-      <Dark className={styles.dark} width={width} height={height} role="img"/>
-    </>
-  );
+    return <SVGTheme width={width} height={height} Dark={Dark} Light={Light} />;
 }

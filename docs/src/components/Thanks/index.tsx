@@ -5,6 +5,8 @@ import Header from '@site/src/components/Header';
 import styles from './styles.module.css';
 import Coveralls from '@site/static/img/coveralls.svg';
 import BrowserStack from '@site/src/components/BrowserStack';
+import SQLiteCloud from '@site/src/components/SQLiteCloud';
+
 
 export default function Thanks() {
   return (
@@ -26,6 +28,11 @@ export default function Thanks() {
         <li>
           <a href="https://www.browserstack.com/">
             <BrowserStack width={200} height={43} />
+          </a>
+        </li>
+        <li>
+          <a href="https://sqlitecloud.io/">
+            <SQLiteCloud width={127} height={43} />
           </a>
         </li>
       </ul>
