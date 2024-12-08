@@ -42,7 +42,7 @@ const languages = [
 const terminal_scripts = [
   'https://cdn.jsdelivr.net/npm/jquery',
   'https://cdn.jsdelivr.net/npm/prismjs/prism.js',
-  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@90d0b02a/js/jquery.terminal.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/prism.js,gh/jcubic/jquery.terminal@d3a11606/js/pipe.js',
+  'https://cdn.jsdelivr.net/combine/gh/jcubic/jquery.terminal@90d0b02a/js/jquery.terminal.js,npm/js-polyfills/keyboard.js,gh/jcubic/jquery.terminal@9fc5bb9bb2/js/less.js,npm/jquery.terminal/js/xml_formatting.js,npm/jquery.terminal/js/unix_formatting.js,npm/jquery.terminal/js/prism.js,gh/jcubic/jquery.terminal@d3a11606/js/pipe.js',
   'https://cdn.jsdelivr.net/combine/' + languages.map(lang => {
     return `npm/prismjs/components/prism-${lang}.min.js`;
   }).join(',')
