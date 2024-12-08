@@ -9,7 +9,7 @@ import useScripts from '@site/src/hooks/useScripts';
 import '@site/src/types';
 import styles from './styles.module.css';
 
-const replReady = () => {
+const repl_ready = () => {
   const jQuery = (globalThis as any).jQuery as JQueryStatic;
   return jQuery && jQuery.terminal && jQuery.terminal.xml_formatter;
 }
@@ -128,7 +128,7 @@ export default function Interpreter(): JSX.Element {
 
   useLayoutEffect(() => {
     (function loop() {
-      if (replReady() && styleReady()) {
+      if (repl_ready() && style_ready()) {
         term.current = initTerminal(commands);
         jargon_init((globalThis as any).jQuery as JQueryStatic);
         term.current.on('click', 'a.jargon', function() {
@@ -148,7 +148,7 @@ export default function Interpreter(): JSX.Element {
     return destroyTerminal;
   }, []);
 
-  function styleReady() {
+  function style_ready() {
     // hack to prevent initalizaing of jQuery Terminal before style is loaded
     return !!getComputedStyle(ref.current).getPropertyValue('--base-background');
   }
