@@ -7,11 +7,37 @@
     text-align: left;
     resize: vertical;
     overflow: hidden;
-}
-
-.term[class*="terminal"] {
     box-shadow: 4px 4px 10px 2px rgba(0, 0, 0, 0.3);
 }
+
+.term:empty::before {
+    content: '';
+    display: block;
+    width: 50px;
+    padding: 8px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color);
+    --_m:
+        conic-gradient(#0000 10%,#000),
+        linear-gradient(#000 0 0) content-box;
+    -webkit-mask: var(--_m);
+            mask: var(--_m);
+    -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(1turn)
+    }
+}
+
 
 .commands p {
     margin: 0;
@@ -24,11 +50,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
-}
-
-.marker {
-    position: absolute;
-    left: -9999999999px;
 }
 
 .shake {

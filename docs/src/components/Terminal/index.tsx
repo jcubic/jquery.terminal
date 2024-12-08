@@ -163,8 +163,7 @@ export default function Interpreter(): JSX.Element {
           return <script key={script} src={script} />
         })}
       </Head>
-      <div className={clsx('terminal', styles.marker)} ref={ref}></div>
-      <div className={styles.term} />
+      <div className={clsx('terminal', styles.term)} ref={ref}/>
       {show_commands && (
         <div className={styles.commands}>
           <p>Top-level Commands:</p>
