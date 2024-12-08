@@ -145,9 +145,10 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
     term.echo(`Browse github repo using unix commands
 
 usage:
-github -u <user> -r <repo>
-  -u | --username <user>
-  -r | --repo <repo>
+github -u <user> -r <repo> [-b <branch>]
+  -u | --username <user> - username or organization
+  -r | --repo <repo> - name of the repository
+  -b | --branch <branch> - optional branch
 `);
   }
 }
