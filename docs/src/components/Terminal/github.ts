@@ -68,7 +68,7 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
       base_defer.resolve();
     });
     term.push(async function(command) {
-      var cmd = $.terminal.parse_command(command);
+      var cmd = $.terminal.split_command(command);
       if (cmd.name == 'cd') {
         var path = cmd.args[0];
         if (cmd.args[0] == '..') {
