@@ -96,6 +96,9 @@ export default function github(this: JQueryTerminal, ...args: string[]) {
         }
       } else if (cmd.name === 'help') {
         term.echo('available commands: cd, ls, less, cat');
+      } else if (cmd.name === 'exit') {
+        // exit command is only created when there is login
+        term.pop();
       } else {
         term.echo('unknown command ' + cmd.name + ' try [[;#fff;]help]');
       }

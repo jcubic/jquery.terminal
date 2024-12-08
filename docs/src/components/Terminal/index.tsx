@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, RefObject, useCallback } from 'react';
+import { useLayoutEffect, useRef, useState, RefObject, useCallback, Fragment } from 'react';
 import type { JQueryTerminal, JQueryStatic } from 'jquery.terminal';
 import clsx from 'clsx';
 
@@ -105,6 +105,7 @@ function help() {
 
 export default function Interpreter(): JSX.Element {
   const [show_commands, set_show_commands] = useState<boolean>(false);
+  const [nested_command, set_nested_command] = useState<string>(null);
   const ref = useRef<HTMLDivElement>();
   const term = useRef<JQueryTerminal>(null);
 
@@ -153,6 +154,31 @@ export default function Interpreter(): JSX.Element {
     return !!getComputedStyle(ref.current).getPropertyValue('--base-background');
   }
 
+  const exec_github = exec('github -u jcubic -r jquery.terminal -b docusaurus');
+  const exec_source = exec('source');
+  const exec_exit = exec('exit');
+
+  const github_shell = () => {
+    exec_github();
+    set_nested_command('github');
+  };
+
+  const exit_shell = () => {
+    exec_exit();
+    set_nested_command(null);
+  };
+
+  const run_source = () => {
+    exec_source();
+    set_nested_command('source');
+  };
+
+  const exit_less = () => {
+    term.current.invoke_key('q');
+    // TODO: figure out number of less calls
+    set_nested_command(null);
+  };
+
   return (
     <>
       <Head>
@@ -168,37 +194,53 @@ export default function Interpreter(): JSX.Element {
         <div className={styles.commands}>
           <p>Top-level Commands:</p>
           <ul>
-            <li>
-              <button onClick={exec('source')}>source</button>
-            </li>
-            <li>
-              <button onClick={exec('github -u jcubic -r jquery.terminal')}>
-                github
-              </button>
-            </li>
-            <li>
-              <button onClick={exec('theme', true)}>theme</button>
-            </li>
-            <li>
-              <button onClick={exec('joke | lolcat -a')}>joke</button>
-            </li>
-            <li>
-              <button onClick={exec('chuck-norris')}>chuck-norris</button>
-            </li>
-            <li>
-              <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
-            </li>
-            <li>
-              <button onClick={exec('echo jQuery Terminal | figlet -f Small | lolcat')}>
-                figlet
-              </button>
-            </li>
-            <li>
-              <button onClick={exec('jargon hacker')}>jargon</button>
-            </li>
-            <li>
-              <button onClick={exec('cal')}>cal</button>
-            </li>
+            {nested_command === 'github' && (
+              <li>
+                <button onClick={exit_shell}>exit</button>
+              </li>
+            )}
+            {nested_command === 'source' && (
+              <Fragment>
+                <li>
+                  <button onClick={exit_less}>exit</button>
+                </li>
+              </Fragment>
+            )}
+            {nested_command === null && (
+              <Fragment>
+                <li>
+                  <button onClick={run_source}>source</button>
+                </li>
+                <li>
+                  <button onClick={github_shell}>
+                    github
+                  </button>
+                </li>
+                <li>
+                  <button onClick={exec('theme', true)}>theme</button>
+                </li>
+                <li>
+                  <button onClick={exec('joke | lolcat -a')}>joke</button>
+                </li>
+                <li>
+                  <button onClick={exec('chuck-norris')}>chuck-norris</button>
+                </li>
+                <li>
+                  <button onClick={exec('fortune | cowsay | lolcat')}>cowsay</button>
+                </li>
+                <li>
+                  <button onClick={exec('echo jQuery Terminal | figlet -f Small | lolcat')}>
+                    figlet
+                  </button>
+                </li>
+                <li>
+                  <button onClick={exec('jargon hacker')}>jargon</button>
+                </li>
+                <li>
+                  <button onClick={exec('cal')}>cal</button>
+                </li>
+              </Fragment>
+            )}
            </ul>
         </div>
       )}
