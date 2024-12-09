@@ -5,6 +5,7 @@
 * experimental `--cols` CSS variable [#956](https://github.com/jcubic/jquery.terminal/issues/956)
 * add `terminal::lines()` [#966](https://github.com/jcubic/jquery.terminal/issues/966)
 * add small ASCII Art to signature [#972](https://github.com/jcubic/jquery.terminal/issues/972)
+* add `termina::view_ready()` [#987](https://github.com/jcubic/jquery.terminal/issues/987)
 ### Bugfix
 * fix `terminal::login()` when user already authenticated [#980](https://github.com/jcubic/jquery.terminal/issues/980)
 * improve mobile support

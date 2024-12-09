@@ -1617,6 +1617,63 @@ describe('Terminal utils', function() {
             expect(output).toMatchSnapshot();
         });
     });
+    describe('EventEmitter', function() {
+        var emitter;
+        beforeEach(() => {
+            emitter = new $.terminal.EventEmitter();
+        });
+        it('should fire events', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(2);
+        });
+        it('should call different handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('bar', bar);
+            emitter.emit('foo', 10);
+            emitter.emit('bar', 20);
+            expect(foo).toHaveBeenCalledWith(10);
+            expect(bar).toHaveBeenCalledWith(20);
+        });
+        it('should fire event once', () => {
+            var handler = jest.fn();
+            emitter.once('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(1);
+        });
+        it('should remove event handler', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.off('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(0);
+        });
+        it('should add mutiple event handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('foo', bar);
+            emitter.emit('foo');
+            expect(foo).toHaveBeenCalledWith();
+            expect(bar).toHaveBeenCalledWith();
+        });
+        it('should remove all event handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('foo', foo);
+            emitter.off('foo');
+            emitter.emit('foo');
+            expect(foo).not.toHaveBeenCalled();
+            expect(bar).not.toHaveBeenCalled();
+        });
+    });
     describe('Cycle', function() {
         describe('create', function() {
             it('should create Cycle from init values', function() {
@@ -5183,6 +5240,26 @@ describe('Terminal plugin', function() {
                     expect(top.prompt).toEqual(prompt);
                     expect(top.greetings).toEqual(greetings);
                     expect(top.completion).toEqual('settings');
+                });
+                it('it should export/import async echo', function(done) {
+                    term.clear();
+                    term.echo(async () => {
+                        await term.delay(100);
+                        return 'helo';
+                    });
+                    term.echo(async () => {
+                        await term.delay(50);
+                        return 'world';
+                    });
+                    term.view_ready().then(() => {
+                        const view = term.export_view();
+                        term.clear();
+                        term.import_view(view);
+                        setTimeout(() => {
+                            expect(term.get_output()).toEqual('world\nhelo');
+                            done();
+                        }, 200);
+                    });
                 });
                 it('should import view', function() {
                     term.clear().push($.noop).set_prompt('# ')

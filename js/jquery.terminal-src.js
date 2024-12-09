@@ -260,6 +260,59 @@
         };
     }
     // -----------------------------------------------------------------------
+    // :: EventEmitter class
+    // -----------------------------------------------------------------------
+    function EventEmitter() {
+        this._events = {};
+    }
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.on = function(event, listener) {
+        if (!this._events[event]) {
+            this._events[event] = [];
+        }
+        this._events[event].push(listener);
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.emit = function(event) {
+        if (this._events[event]) {
+            const args = Array.prototype.slice.call(arguments, 1);
+            this._events[event].forEach(function(listener) {
+                listener.apply(null, args);
+            });
+        }
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.off = function(event, listener) {
+        if (!listener) {
+            delete this._events[event];
+        } else if (this._events[event]) {
+            this._events[event] = this._events[event].filter(function(l) {
+                return l !== listener;
+            });
+        }
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.once = function(event, listener) {
+        const self = this;
+
+        function wrapper() {
+            self.off(event, wrapper);
+            listener.apply(null, arguments);
+        }
+
+        this.on(event, wrapper);
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.wait_for = function(event) {
+        const deferred = new $.Deferred();
+
+        this.once(event, function() {
+            deferred.resolve();
+        });
+
+        return deferred.promise();
+    };
+    // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
@@ -5385,6 +5438,7 @@
         Cycle: Cycle,
         History: History,
         Stack: Stack,
+        EventEmitter: EventEmitter,
         // ---------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
@@ -8999,6 +9053,7 @@
                 }
             }
         }
+        // ---------------------------------------------------------------------
         var scroll_to_view = (function() {
             function scroll_to_view(visible) {
                 if (!visible) {
@@ -9762,6 +9817,14 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: Return a promise that is resolved when it's safe to
+            // :: call export_view, it wait for all async function echo
+            // :: to finish
+            // -------------------------------------------------------------
+            view_ready: function() {
+                return event_hub.wait_for('async_echo_ready');
+            },
+            // -------------------------------------------------------------
             // :: Return an object that can be used with import_view to
             // :: restore the state
             // -------------------------------------------------------------
@@ -9796,7 +9859,8 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines.import(clone(view.lines).filter(function(line) {
+                    var cloned_lines = clone(view.lines);
+                    lines.import(cloned_lines.filter(function(line) {
                         return line[0];
                     }));
                     if (view.interpreters instanceof Stack) {
@@ -11027,16 +11091,24 @@
             echo: function(arg, options, deferred) {
                 var arg_defined = arguments.length > 0;
                 var d = deferred || new $.Deferred();
-                function cont() {
+                function cont(value) {
                     echo_promise = false;
                     var original = echo_delay;
                     echo_delay = [];
                     for (var i = 0; i < original.length; ++i) {
                         self.echo.apply(self, original[i]);
                     }
+                    if (value) {
+                        async_echo = async_echo.filter(function(promise) {
+                            return promise !== value;
+                        });
+                        if (!async_echo.length) {
+                            event_hub.emit('async_echo_ready');
+                        }
+                    }
                 }
-                function error(e) {
-                    cont();
+                function error(e, value) {
+                    cont(value);
                     display_exception(e, 'ECHO', true);
                 }
                 function echo(arg) {
@@ -11170,6 +11242,7 @@
                             // queue async functions in echo
                             if (is_promise(next)) {
                                 echo_promise = true;
+                                async_echo.push(next);
                             }
                             lines.push([value, locals]);
                             unpromise(next, function() {
@@ -11191,15 +11264,17 @@
                                             if (line) {
                                                 self.update(-1, line[0], line[1]);
                                             }
-                                            cont();
+                                            cont(next);
                                         });
                                     }
                                     fire_event('onAfterEcho', [arg]);
                                 }
                                 if (!contination_run) {
-                                    cont();
+                                    cont(next);
                                 }
-                            }, error);
+                            }, function(e) {
+                                error(e, next);
+                            });
                         }, error);
                     } catch (e) {
                         // if echo throw exception we can't use error to
@@ -11997,6 +12072,8 @@
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
+        var async_echo = [];
+        var event_hub = new EventEmitter();
         var is_bottom_detected;
         var is_bottom_observer;
         var in_login = false;// some Methods should not be called when login
