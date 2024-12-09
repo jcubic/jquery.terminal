@@ -275,7 +275,7 @@
     // -----------------------------------------------------------------------
     EventEmitter.prototype.emit = function(event) {
         if (this._events[event]) {
-            const args = Array.prototype.slice.call(arguments, 1);
+            var args = Array.prototype.slice.call(arguments, 1);
             this._events[event].forEach(function(listener) {
                 listener.apply(null, args);
             });
@@ -293,7 +293,7 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.once = function(event, listener) {
-        const self = this;
+        var self = this;
 
         function wrapper() {
             self.off(event, wrapper);
@@ -304,7 +304,7 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.wait_for = function(event) {
-        const deferred = new $.Deferred();
+        var deferred = new $.Deferred();
 
         this.once(event, function() {
             deferred.resolve();
