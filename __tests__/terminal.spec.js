@@ -1654,6 +1654,14 @@ describe('Terminal utils', function() {
             emitter.emit('test');
             expect(handler.mock.calls.length).toEqual(0);
         });
+        it('should not remove wrong event', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.off('test_2');
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(2);
+        });
         it('should add mutiple event handlers', () => {
             var foo = jest.fn();
             var bar = jest.fn();

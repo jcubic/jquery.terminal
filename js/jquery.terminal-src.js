@@ -260,7 +260,7 @@
         };
     }
     // -----------------------------------------------------------------------
-    // :: EventEmitter class
+    // :: EventEmitter class, created by ChatGPT (with small refactoring)
     // -----------------------------------------------------------------------
     function EventEmitter() {
         this._events = {};
@@ -283,9 +283,13 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.off = function(event, listener) {
+        if (!this._events[event]) {
+            return;
+        }
+
         if (!listener) {
             delete this._events[event];
-        } else if (this._events[event]) {
+        } else {
             this._events[event] = this._events[event].filter(function(l) {
                 return l !== listener;
             });

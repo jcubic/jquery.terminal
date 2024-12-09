@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 09 Dec 2024 15:38:00 +0000
+ * Date: Mon, 09 Dec 2024 20:30:04 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -260,7 +260,7 @@
         };
     }
     // -----------------------------------------------------------------------
-    // :: EventEmitter class
+    // :: EventEmitter class, created by ChatGPT (with small refactoring)
     // -----------------------------------------------------------------------
     function EventEmitter() {
         this._events = {};
@@ -275,7 +275,7 @@
     // -----------------------------------------------------------------------
     EventEmitter.prototype.emit = function(event) {
         if (this._events[event]) {
-            const args = Array.prototype.slice.call(arguments, 1);
+            var args = Array.prototype.slice.call(arguments, 1);
             this._events[event].forEach(function(listener) {
                 listener.apply(null, args);
             });
@@ -283,9 +283,13 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.off = function(event, listener) {
+        if (!this._events[event]) {
+            return;
+        }
+
         if (!listener) {
             delete this._events[event];
-        } else if (this._events[event]) {
+        } else {
             this._events[event] = this._events[event].filter(function(l) {
                 return l !== listener;
             });
@@ -293,7 +297,7 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.once = function(event, listener) {
-        const self = this;
+        var self = this;
 
         function wrapper() {
             self.off(event, wrapper);
@@ -304,7 +308,7 @@
     };
     // -----------------------------------------------------------------------
     EventEmitter.prototype.wait_for = function(event) {
-        const deferred = new $.Deferred();
+        var deferred = new $.Deferred();
 
         this.once(event, function() {
             deferred.resolve();
@@ -5398,7 +5402,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 09 Dec 2024 15:38:00 +0000',
+        date: 'Mon, 09 Dec 2024 20:30:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
