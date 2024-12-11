@@ -1233,6 +1233,9 @@
         // ---------------------------------------------------------------------
         function format_text(data) {
             var text = data.text;
+            if (!data.formatting.length) {
+                return text;
+            }
             var result = '';
             var last_pos = 0;
             var open_formats = [];
@@ -1259,7 +1262,7 @@
 
             result += text.slice(last_pos);
 
-            return result;
+            return result.replace(/\\]/g, '&#92;]');
         }
         // ---------------------------------------------------------------------
         // :: Replace ANSI formatting with terminal formatting
