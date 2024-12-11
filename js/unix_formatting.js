@@ -1642,10 +1642,11 @@
                     settings.ansiParser[name] = parser_events[name];
                 }
             });
+            var process_text = settings.format_text || format_text;
             var parser = new AnsiParser(parser_events);
             parser.parse(input);
             var output = parser_events.result.map(function(line) {
-                return format_text(line);
+                return process_text(line);
             }).join('\n');
             if (input !== output) {
                 return output;
