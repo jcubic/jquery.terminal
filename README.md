@@ -386,7 +386,7 @@ Other code used inside the project or inspired by:
 * [CodeMirror](https://codemirror.net/) by Marijn Haverbeke, was inspiration for some clipboard handling solutions.
 
 ASNSI Art used by this project
-* [Denis Richie by SanderFocus](https://sanderfocus.nl/)
+* [Dennis Ritchie by SanderFocus](https://sanderfocus.nl/)
 * [Regina Pacis by burps](https://16colo.rs/pack/fuel27/bs-pacis.ans)
 * [marble by Necrofiliac](https://16colo.rs/pack/fuel27/nf-marble.ans)
 
