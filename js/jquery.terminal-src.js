@@ -4801,8 +4801,13 @@
     };
     // -------------------------------------------------------------------------
     function render_entities(str) {
-        return str.replace(/&#(x?)([0-9]+);/g, function(_, hex, code) {
-            code = parseInt(code, hex ? 16 : 10);
+        return str.replace(/&#(?:x([0-9a-f]+)|([0-9]+));/gi, function(_, hex, dec) {
+            var code;
+            if (hex) {
+                code = parseInt(hex, 16);
+            } else {
+                code = parseInt(dec, 10);
+            }
             return String.fromCharCode(code);
         }).replace(/(&[^;]+;)/g, function(_, entity) {
             return entities[entity] || entity;

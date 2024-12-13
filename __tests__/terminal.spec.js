@@ -882,6 +882,16 @@ describe('Terminal utils', function() {
             });
         });
     });
+    describe('$.terminal.length', function() {
+        it('shoud count html entitites', () => {
+            const input = '&#x25B2;&#x25BC;&#92;';
+            expect($.terminal.length(input)).toBe(3);
+        });
+        it('should count emoji', () => {
+            const input = '💩💩💩';
+            expect($.terminal.length(input)).toBe(3);
+        });
+    });
     describe('$.terminal.is_formatting', function() {
         it('should detect terminal formatting', function() {
             var formattings = [

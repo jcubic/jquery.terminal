@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 09 Dec 2024 20:30:04 +0000
+ * Date: Fri, 13 Dec 2024 15:04:35 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4801,8 +4801,13 @@
     };
     // -------------------------------------------------------------------------
     function render_entities(str) {
-        return str.replace(/&#(x?)([0-9]+);/g, function(_, hex, code) {
-            code = parseInt(code, hex ? 16 : 10);
+        return str.replace(/&#(?:x([0-9a-f]+)|([0-9]+));/gi, function(_, hex, dec) {
+            var code;
+            if (hex) {
+                code = parseInt(hex, 16);
+            } else {
+                code = parseInt(dec, 10);
+            }
             return String.fromCharCode(code);
         }).replace(/(&[^;]+;)/g, function(_, entity) {
             return entities[entity] || entity;
@@ -5402,7 +5407,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 09 Dec 2024 20:30:04 +0000',
+        date: 'Fri, 13 Dec 2024 15:04:35 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

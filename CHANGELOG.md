@@ -10,6 +10,7 @@
 * fix `terminal::login()` when user already authenticated [#980](https://github.com/jcubic/jquery.terminal/issues/980)
 * improve mobile support
 * ignore empty command in Pipe extension [#984](https://github.com/jcubic/jquery.terminal/issues/984)
+* fix processing Hex HTML entities [#992](https://github.com/jcubic/jquery.terminal/issues/992)
 
 ## 2.44.1
 ### Bugfix
