@@ -42,6 +42,7 @@ export default async function command(this: JQueryTerminal, delay_arg = '50') {
     stop = true;
     this.cmd().show();
     this.import_view(view);
+    return false;
   }
   this.push($.noop, {
     onExit: exit,
