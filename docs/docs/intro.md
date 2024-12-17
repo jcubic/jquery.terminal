@@ -2,46 +2,220 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Getting Started
 
-Let's discover **Docusaurus in less than 5 minutes**.
+## Introduction
 
-## Getting Started
+jQuery Terminal is a JavaScript library that requires jQuery to work properly. It's a library that
+allow you to create terminal based web apps. It's different from
+[xterm.js](https://github.com/xtermjs/xterm.js/), because you need to write your whole logic in
+client JavaScript code. In comparison, Xterm.js is a library to create a real terminal interface for
+a real Linux system on the backend. It allows running a real
+[CLI](https://en.wikipedia.org/wiki/Command-line_interface)/[TUI](https://en.wikipedia.org/wiki/Text-based_user_interface)
+applications like VI that run on the backend.  To have the same in jQuery Terminal you will need to
+have a VI implemented in JavaScript. For this you can check [jsvi](https://github.com/jcubic/jsvi).
 
-Get started by **creating a new site**.
 
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
+To create an app using jQuery Terminal, first, you need to create an HTML page, and then include
+jQuery and both the JavaScript and CSS files from jQuery Terminal. You can also use [webpack or other
+bundlers](#???). In this tutorial, you will learn all the basics needed to create your own
+Terminal on a webpage.
 
-### What you'll need
+## jsDelivr CDN
 
-- [Node.js](https://nodejs.org/en/download/) version 18.0 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
+The best way to get jQuery Terminal is using [jsDelivr](https://www.jsdelivr.com/), it's CDN (Content Delivery Network),
+that makes loading static assets (like JavaScript or CSS files) faster.
 
-## Generate a new site
+Those are main files that you need to include:
 
-Generate a new Docusaurus site using the **classic template**.
+* `https://cdn.jsdelivr.net/npm/jquery.terminal@2.x.x/js/jquery.terminal.min.js`
+* `https://cdn.jsdelivr.net/npm/jquery.terminal@2.x.x/css/jquery.terminal.min.css`
 
-The classic template will automatically be added to your project after you run the command:
+## HTML page
 
-```bash
-npm init docusaurus@latest my-website classic
+Below is basic HTML code that you need:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/jquery"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css" />
+</head>
+<body>
+<scrpt>/* your code here */</script>
+</body>
+</html>
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+The version `@2.x.x` is optional.
 
-The command also installs all necessary dependencies you need to run Docusaurus.
+:::note
+You can write your code inline like in the code above, or write separate file and use HTML like this:
+```html
+<script src="your-file.js"></script>
+```
+:::
 
-## Start your site
+## Older browsers
 
-Run the development server:
+If you need to support older browsers (like IE11) you can also include this JavaScript file:
 
-```bash
-cd my-website
-npm run start
+```html
+<script src="https://cdn.jsdelivr.net/npm/js-polyfills/keyboard.js"></script>
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+It's a polyfill for key property on keyboard events. You can see the
+[browser support for this feature](https://caniuse.com/keyboardevent-key).
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+## Chinese and Japanese character support
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+There are characters like Chinese and Japanese that are wider then 1 character. To display those
+characters properly on the terminal you can use [wcwidth](https://github.com/timoxley/wcwidth) libary,
+which calculates the width of the characters.
+
+You can add this code to your HTML:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/jcubic/static/js/wcwidth.js"></script>
+```
+
+Above file is a collection of libraries converted to [UMD](https://github.com/umdjs/umd) using
+browserify.
+
+
+## Terminal Initialization
+
+To initialize the terminal you need to use code like this:
+
+```javascript
+$('body').terminal();
+```
+
+Above code is specific to jQuery. If you're not familar with it, it's basically dolar function that accept a CSS selector
+that points to element that will be transformed into your terminal. When you use `body` as the selector, it will create
+full screen terminal. But you can also use element that is part of your webpage, like a
+[window that have a terminal inside](#???).
+
+## Interpreter
+
+The first argument to the terminal is an interpreter, the simplest way to add multiple commands is using an object.
+
+```javascript
+$('body').terminal({
+    hello() {
+        this.echo('hello, world!');
+    },
+    bye() {
+        this.echo('goodby');
+    }
+});
+```
+
+This code will create two commands:
+* `hello` which prints on the terminal text `"hello, world!"`,
+* `bye` which prints `"goodby"`
+
+To create arguments to the commands you add them as function paramters:
+
+```javascript
+$('body').terminal({
+    hello(what) {
+        this.echo(`hello, this is ${what}!`);
+    },
+    bye() {
+        this.echo('goodby');
+    }
+});
+```
+
+If you type `hello Terminal` it will print "hello, this is Terminal"
+
+## Terminal Options
+
+### Arity
+
+If you want the argument to be optional you need to `checkArity: false` option (options is
+an object that is a second argumnet to the termianal).
+
+```javascript
+$('body').terminal({
+    hello(what = 'world') {
+        this.echo(`hello, this is ${what}!`);
+    },
+    bye() {
+        this.echo('goodby');
+    }
+}, {
+    checkArity: false
+});
+```
+
+### Greetings
+
+Another usefull option that you want to change is `greetings`, by default it display jQuery Terminal
+[ASCII Art](https://en.wikipedia.org/wiki/ASCII_art), but you can change it.
+
+```javascript
+$('body').terminal({
+    hello(what = 'world') {
+        this.echo(`hello, this is ${what}!`);
+    },
+    bye() {
+        this.echo('goodby');
+    }
+}, {
+    greetings: 'My Terminal\n',
+    checkArity: false
+});
+```
+
+### Prompt
+
+You can also change the prompt, which is the thing before the cursor, when there is no command typed yet.
+By default it's a string `'> '`. But you can change it and use different string:
+
+```javascript
+$('body').terminal({
+    hello(what = 'world') {
+        this.echo(`hello, this is ${what}!`);
+    },
+    bye() {
+        this.echo('goodby');
+    }
+}, {
+    greetings: 'My Terminal\n',
+    prompt: '$ ',
+    checkArity: false
+});
+```
+
+### Completion
+
+By default when you press `<TAB>` key, the terminal will insert a `TAB` key. You can make it complete the command,
+you're typing. When using object as an interpreter (like in above examples) all you have to do is to set an option:
+`completion: true`:
+
+```javascript
+$('body').terminal({
+    hello(what = 'world') {
+        this.echo(`hello, this is ${what}!`);
+    },
+    bye() {
+        this.echo('goodby');
+    }
+}, {
+    greetings: 'My Terminal\n',
+    prompt: '$ ',
+    completion: true,
+    checkArity: false
+});
+```
+
+## See also
+
+* [What you can echo?](#???)
+* [Terminal Interpreter](#???)
+* [All about completion](#???)
+* [Coloring the terminal](#???)
