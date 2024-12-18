@@ -6,12 +6,24 @@ type CodePenProps = {
   height: number;
 };
 
-export default function CodePen({ id, title }: CodePenProps) {
+export default function CodePen({ id, title, height = 300 }: CodePenProps) {
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cpwebassets.codepen.io/assets/embed/ei.js';
-    script.async = true;
-    document.body.appendChild(script);
+    globalThis.__codepen_loaded__ ??= 0;
+    globalThis.__codepen_loaded__ += 1;
+    const count = globalThis.__codepen_loaded__;
+    if (count === 1) {
+      const script = document.createElement('script');
+      script.className = 'codepen';
+      script.dataset.id = count;
+      script.src = 'https://cpwebassets.codepen.io/assets/embed/ei.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    return () => {
+      globalThis.__codepen_loaded__ -= 1;
+      const script = document.querySelector(`script.codepen[data-id="${count}"]`);
+      script?.remove();
+    };
   }, []);
   return (
     <p className="codepen"
