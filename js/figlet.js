@@ -95,4 +95,8 @@
     function all_include(items, list) {
         return items.every(item => list.includes(item));
     }
+
+    function trim(str) {
+        return str.replace(/[\s\n]+$/, '').replace(/^\s+\n/, '');
+    }
 });
