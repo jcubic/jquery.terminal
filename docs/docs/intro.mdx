@@ -78,7 +78,9 @@ characters properly on the terminal you can use [wcwidth](https://github.com/tim
 which calculates the width of the characters.
 
 :::note
+
 `wcwidth` library needs to be included before the jQuery Terminal script file.
+
 :::
 
 You can add this code to your HTML:
@@ -122,6 +124,15 @@ $('body').terminal({
 This code will create two commands:
 * `hello` which prints on the terminal text `"hello, world!"`,
 * `bye` which prints `"goodby"`
+
+:::note
+
+`this` inside methods is jQuery Terminal object, and `echo` is one of the methods supported by this object.
+
+Read more about [terminal instance](/docs/deep-dive/terminal) and [echo](/docs/deep-dive/echo).
+
+:::
+
 
 To create arguments to the commands you add them as function paramters:
 
