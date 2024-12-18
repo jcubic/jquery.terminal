@@ -1,5 +1,158 @@
 ---
-sidebar_position: 1
+sidebar_position: 2
 ---
 
-# What you can echo?
+import CodePen from '@site/src/CodePen';
+
+# What You Can Echo?
+
+`echo` is the most important method of jQuery Terminal. You use it to print stuff on the terminal.
+
+## String and other primitives
+
+You can `echo` strings and basic datatypes that can be converted to string.
+
+This includes:
+
+* Numbers
+* Booleans
+* Regular Expressions
+* Null
+
+## Promises
+
+You can print a promise of the object that can be printed on the terminal. It can be any promise like object,
+same as with [async/await](https://javascript.info/async-await). Which means that it can be real promise,
+[jQuery Deferred](https://api.jquery.com/jquery.deferred/), or even any object that have then then method.
+
+### ES6 Promise
+
+```javascript
+const promise = new Promise(resolve => {
+    setTimeout(() => resolve('hello'), 100):
+});
+
+term.echo(promise);
+```
+
+### Promise like object
+
+```javascript
+const promise = {
+    then(fn) {
+        fn('hello');
+        return promise;
+    }
+};
+
+term.echo(promise);
+```
+
+This object will work the same with async/await:
+
+```javascript
+(async () => {
+    term.echo(await promise);
+})();
+```
+
+## Array
+
+When you echo an array it will print it in columns.
+
+```javascript
+const array = [
+    "Lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "Huic",
+    "mori", "optimum", "esse", "propter", "desperationem", "sapientiae", "illi",
+    "propter", "spem", "vivere", "Duo", "Reges", "constructio", "interrete"
+];
+
+term.echo(array);
+```
+
+<CodePen id="OPLpOLM" title="Echo Array" height={400} />
+
+## Function
+
+You can echo function that will be called on each render, that happen when you resize the
+terminal. With function you can create respnsive text that addapt to the size of the terminal. This
+is how default Greetings is created. It shows different [ASCII
+Art](https://en.wikipedia.org/wiki/ASCII_art) based on the size of the terminal.
+
+With function, you can print dynamic text using [Figlet library](https://github.com/patorjk/figlet.js),
+that renders ASCII text using different fonts.
+
+```javascript
+term.echo(function() {
+    const cols = this.cols();
+    if (cols > 100) {
+        return 'Large ASCII';
+    } else if (cols > 50) {
+        return 'Medium ASCII';
+    } else (cols > 20) {
+        return 'Small ASCII'
+    }
+});
+
+```
+
+### Using figlet
+
+First you need to include the figlet library:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/figlet/lib/figlet.js"></script>
+```
+
+And jQuery Terminal figlet helper:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/jcubic/jquery.terminal@devel/js/figlet.js"></script>
+```
+
+Then you can create a helper function that will display
+
+```javascript
+const term = $('body').terminal({}, {
+    greetings: false
+});
+
+(async () => {
+    await $.terminal.figlet.load(['Slant']);
+    term.echo($.terminal.figlet('Slant', 'jQuery Terminal'));
+})();
+```
+
+`$.terminal.figlet.load` async function load all specified fonts, you can see the list of available
+fonts, on [figlet demo website](https://patorjk.com/software/taag/) (type some text and click test
+all to see all fonts).
+
+`$.terminal.figlet` return a function that renders the text using figlet, because of this you have
+responsive text. See below demo how it works, you can resize the window, to see how the ASCII Art
+change.
+
+<CodePen id="xbKqpZG" title="Terminal Figlet" />
+
+## renderHandler
+
+When you have renderHandler you can print basciall anything, any kind of objects. Even [React
+components](#???).  Below code use renderHandler to print object literals that by default are
+converted to string and display `[object Object]`.
+
+```javascript
+const term = $('body').terminal(/* your interpreter */, {
+    renderHandler(value) {
+        if ($.isPlainObject(value)) {
+            this.echo(JSON.stringify(value, null, 2));
+            return false;
+        }
+    }
+});
+
+term.echo({
+    name: 'James Bond',
+    code: '007'
+});
+```
+
+<CodePen id="ByBWJRV" title="Echo Object" height={340} />
