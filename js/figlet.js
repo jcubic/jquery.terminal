@@ -15,21 +15,7 @@
  */
 /* global define */
 (function(factory, undefined) {
-    var root;
-    if (typeof window !== 'undefined') {
-        root = window;
-    } else if (typeof self !== 'undefined') {
-        root = self;
-    } else if (typeof global !== 'undefined') {
-        root = global;
-    } else {
-        throw new Error('Unknow context');
-    }
-    if (typeof define === 'function' && define.amd) {
-        // AMD. Register as an anonymous module.
-        // istanbul ignore next
-        define(['jquery', 'jquery.terminal', 'figlet'], factory);
-    } else if (typeof module === 'object' && module.exports) {
+    if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
         module.exports = function(root, jQuery) {
             if (jQuery === undefined) {
@@ -57,7 +43,7 @@
     } else {
         // Browser
         // istanbul ignore next
-        factory(root.jQuery, root.figlet);
+        factory(jQuery, figlet);
     }
 })(function($, figlet) {
     if (!$) {
