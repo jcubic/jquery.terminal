@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 type CodePenProps = {
   id: string;
   title: string;
+  height: number;
 };
 
 export default function CodePen({ id, title }: CodePenProps) {
@@ -14,7 +15,7 @@ export default function CodePen({ id, title }: CodePenProps) {
   }, []);
   return (
     <p className="codepen"
-       data-height="300"
+       data-height={height}
        data-default-tab="result"
        data-slug-hash={id}
        data-pen-title={title}
