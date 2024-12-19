@@ -31,7 +31,7 @@ Those are main files that you need to include:
 * `https://cdn.jsdelivr.net/npm/jquery.terminal@2.x.x/js/jquery.terminal.min.js`
 * `https://cdn.jsdelivr.net/npm/jquery.terminal@2.x.x/css/jquery.terminal.min.css`
 
-## HTML page
+## HTML Page
 
 Below is basic HTML code that you need:
 
@@ -60,7 +60,7 @@ You can write your code inline like in the code above, or write separate file an
 ```
 :::
 
-## Older browsers
+## Older Browsers
 
 If you need to support older browsers (like IE11) you can also include this JavaScript file:
 
@@ -71,7 +71,7 @@ If you need to support older browsers (like IE11) you can also include this Java
 It's a polyfill for key property on keyboard events. You can see the
 [browser support for this feature](https://caniuse.com/keyboardevent-key).
 
-## Chinese and Japanese character support
+## Chinese and Japanese Character Support
 
 There are characters like Chinese and Japanese that are wider then 1 character. To display those
 characters properly on the terminal you can use [wcwidth](https://github.com/timoxley/wcwidth) libary,
@@ -133,7 +133,6 @@ Read more about [terminal instance](/docs/deep-dive/terminal) and [echo](/docs/d
 
 :::
 
-
 To create arguments to the commands you add them as function paramters:
 
 ```javascript
@@ -151,7 +150,7 @@ If you type `hello Terminal` it will print "hello, this is Terminal"
 
 ## Terminal Options
 
-### Variable number of arguments
+### Variable Number of Arguments
 
 If you want the argument to be optional you need to `checkArity: false` option (options is an object
 that is a second argumnet to the termianal). Variable number of arguments is so called
