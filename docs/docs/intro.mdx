@@ -136,7 +136,7 @@ Read more about [terminal instance](/docs/deep-dive/terminal) and [echo](/docs/d
 To create arguments to the commands you add them as function paramters:
 
 ```javascript
-$('body').terminal({
+const term = $('body').terminal({
     hello(what) {
         this.echo(`hello, this is ${what}!`);
     },
@@ -146,7 +146,15 @@ $('body').terminal({
 });
 ```
 
-If you type `hello Terminal` it will print "hello, this is Terminal"
+If you type `hello Terminal` it will print "hello, this is Terminal".
+
+:::info
+
+Note that `terminal` returns Terminal object with methods that allow you to interact with the
+terminal. It's the same object you can access with `this`. Terminal object is in fact jQuery object
+extended with additional methods.
+
+:::
 
 ## Terminal Options
 
