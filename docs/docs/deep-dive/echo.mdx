@@ -133,6 +133,29 @@ change.
 
 <CodePen id="xbKqpZG" title="Terminal Figlet" />
 
+## DOM Nodes and jQuery Objects
+
+jQuery Terminal don't allow to echo HTML directly, to prevent any misbehavior of your users, but you can
+echo DOM nodes (elements that represent HTML tags inside the browser):
+
+```javascript
+const para = document.createElement('p');
+para.innerText = 'hello, world!';
+term.echo(para);
+```
+
+and jQuery object:
+
+```javascript
+const $iframe = $('<iframe src="https://example.com"></iframe>');
+term.echo($iframe);
+```
+
+Dolar function from jQuery also accepts HTML code and it create jQuery object from it, that object
+which wraps DOM node, can later be inserted into document.
+
+<CodePen id="VYZpVQY" title="echo DOM node and jQuery object" height={460} />
+
 ## renderHandler
 
 When you have renderHandler you can print basciall anything, any kind of objects. Even [React
