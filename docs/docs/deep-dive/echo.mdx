@@ -180,3 +180,96 @@ term.echo({
 ```
 
 <CodePen id="ByBWJRV" title="Echo Object" height={340} />
+
+## Formatting The Text
+
+When working with normal text, the jQuery Terminal library allow for basic text formatting, with so
+called Terminal Formatting. It's a special syntax that you can use to change the style and color of the text.
+
+### Formatting syntax
+
+The formatting syntax looks like this:
+
+```
+[[bi;red;green]this is text]
+```
+
+This is basic example of the text "this is text" that will be bold and italic (b and i
+mnemonics). The text will have red color and green background.
+
+#### List of Style Mnemonics
+Here is a list of all possible styles:
+
+* `b` &mdash; bold
+* `i` &mdash; italic
+* `u` &mdash; underline
+* `o` &mdash; overline
+* `g` &mdash; glow
+* `s` &mdash; strike
+
+And there are two special characters:
+* `!` &mdash; exclamation mark indicates that this is a link
+* `@` &mdash; at sign indicates that this is an image
+
+There are 2 required semicolons, which makes 3 arguments but they can be left blank.
+
+This is valid formatting:
+
+```
+[[;;]this is text]
+```
+
+This will be converted as text wrapped in a `span` (generic inline element).
+
+### List of the Arguments
+
+1. Style with any order of mneminics as a single string
+2. color, can be hex value, any CSS color name, or rgba color
+3. Background color that can be a vlue like color
+4. Class name or names separated by space
+5. Text of the formatting that will be included in data-text attribute, when you have long text and
+   it wraps, the terminal will put the original text into data-text attribute so you can use it
+   e.g. if you want to implement clicking on the link and do something with text that is clicked.
+   The 5th argumnet is also where you put your URL for the images or links.
+6. The last argument is JSON object that contain attributes that will be added to a given element represented
+   by the formatting. Because of security you're not allowed to put any argumnt. You can only add attributes
+   that are listed on `$.terminal.defaults.allowedAttributes` array. The default list of attributes consist of:
+   `['title', 'target', 'rel', /^aria-/, 'id', /^data-/]`.
+
+### Text inside formatting
+
+Inside formatting you can have normal text that will have the specified style. For the case of Images the text,
+will be `alt` attribute. Where you can describe what's on the image, for accessibility.
+
+Here is full example of Terminal formatting:
+
+```
+[[!ub;#fff;#000;command;echo "hello";{"title": "this will execute echo command"}]echo "hello"]
+```
+
+With formatting like this you can add click event to the terminal and handle clicks:
+
+```javascript
+term.on('click', '.command', function() {
+    const command = $(this).data('text');
+    this.exec(command);
+    return false;
+});
+```
+
+:::info
+
+In above example we used `exec` terminal method, more about automation of the terminal in
+[Automation Guide](/docs/deep-dive/automation).
+
+:::
+
+:::info
+
+Terminal formatting is considered a low level way of formatting text. You can read about different ways
+in [Formatters and Syntax Highlighting Guide](/docs/deep-dive/formatters).
+
+:::
+
+<CodePen id="ogvWWRa" title="Terminal formatting" height={310} />
+
