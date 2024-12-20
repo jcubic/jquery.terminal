@@ -72,3 +72,7 @@
     transform: rotate(360deg);
   }
 }
+
+.cp_embed_wrapper {
+    margin-bottom: 1em;
+}
