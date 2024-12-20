@@ -36,7 +36,11 @@ the second are options. More about echo method in [What you can echo?](/docs/dee
 
 ### Inserting Text Into the Command
 
-### Chaning Command
+To insert text into the command you can use 
+
+### Changing the Command
+
+To change the command you can use 
 
 ### Getting The Command
 
