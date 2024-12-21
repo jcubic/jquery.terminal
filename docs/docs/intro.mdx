@@ -247,6 +247,18 @@ commands.  By default you will also have `clear` command that you can disable wi
 option. There is also second default command which is exit, that appear only when you use
 [authentication](#???) or [nested interpreters](#???).
 
+
+## Chaining
+
+Because jQuery Terminal use jQuery, you can use chaining of methods. Because most methods return terminal instance.
+
+```javascript
+term.echo('This is').echo('jQuery Terminal');
+```
+
+There are more terminal methods that you can use, check [Terminal
+Interpreter](/docs/deep-dive/termnal) Guide, for more information.
+
 ## Demo
 
 import CodePen from '@site/src/CodePen';
@@ -255,7 +267,7 @@ import CodePen from '@site/src/CodePen';
 
 ## See also
 
-* [What you can echo?](#???)
-* [Terminal Interpreter](#???)
+* [What you can echo?](/docs/deep-divce/echo)
+* [Terminal Interpreter](/docs/deep-dive/termnal)
 * [All about completion](#???)
-* [Coloring the terminal](#???)
+* [Coloring the terminal](/docs/deep-dive/formatters)
