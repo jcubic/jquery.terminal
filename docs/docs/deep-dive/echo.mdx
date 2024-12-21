@@ -273,3 +273,66 @@ in [Formatters and Syntax Highlighting Guide](/docs/deep-dive/formatters).
 
 <CodePen id="ogvWWRa" title="Terminal formatting" height={310} />
 
+## Newline Ending
+
+By default, `echo()` method adds a newline at the end. But you can change this behavior by using
+an option: `newline: false`.
+
+```javascript
+term.echo('hello, ', { newline: false }).echo('world!');
+```
+
+## Text Wrapping
+
+The text wrapping in jQuery Terminal library is handled in JavaScript. It's not handled by CSS.  By
+default,the Terminal use hard wrapping, which means that whole line if filled with characters and
+the word can break, where part of the word is in one line and the other in next line. You can change
+this behavior using keepWords option.
+
+```javascript
+term.echo('Nobody expects the Spanish Inquisition!', { keepWords: true });
+```
+
+This of course is more important when text is long. Like in a demo below.
+
+<CodePen id="KwPmBVa" title="echo + keepWords" height={500} />
+
+## Buffering
+
+Terminal library use buffering for the printed stuff, but the buffer is flushed after each echo. You
+can change this behavior by using `flush: false` option and flushing manually.
+
+```javascript
+import numberToWords from 'number-to-words';
+
+for (let i = 0; i <= 100; ++i) {
+    const num = numberToWords.toWords(i);
+    term.echo(num, { flush: false });
+}
+
+term.flush();
+```
+
+You can also get the output buffer content as a string, similar to [`ob_get_contents()` in
+PHP](https://www.php.net/manual/en/function.ob-get-contents.php).
+
+```javascript
+import numberToWords from 'number-to-words';
+
+for (let i = 0; i <= 100; ++i) {
+    const num = numberToWords.toWords(i);
+    term.echo(num, { flush: false });
+}
+
+console.log(term.get_output_buffer());
+term.flush();
+```
+
+<CodePen id="gbYWKJN" title="flush buffer" />
+
+:::info
+
+The CodePen demo use [importmap](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script/type/importmap)
+(inside HTML Tab) in order to use ESM modules inside the browser.
+
+:::
