@@ -309,7 +309,7 @@ More examples [here](http://terminal.jcubic.pl/examples.php). You can also check
 [Full Documentation](http://terminal.jcubic.pl/api_reference.php) or
 [Getting Started Guide on Wiki](https://github.com/jcubic/jquery.terminal/wiki/Getting-Started).
 
-### Quick Start Tutorials
+### Quick Start
 
 If you want to start with jQuery Terminal you can look at those tutorials:
 
@@ -319,6 +319,8 @@ If you want to start with jQuery Terminal you can look at those tutorials:
 The first tutorial is have all the basics, even if you're new to programming and JavaScript. The
 second one explain everything but it assume that you know the basics. If you pick the second and and
 stuck you can reference the first one. It's worth checking the first one anyway.
+
+TL;DR: You can also use this [Terminal Website Template](https://github.com/jcubic/terminal-website-template).
 
 ### Security
 
