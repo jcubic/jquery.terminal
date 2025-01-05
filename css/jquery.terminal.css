@@ -23,7 +23,7 @@
 }
 .cmd .cmd-clipboard {
     position: absolute !important;
-    let: -16px;
+    left: -16px;
     left: calc(-16px / var(--pixel-density, 1)) !important;
     top: 0 !important;
     width: 16px;
