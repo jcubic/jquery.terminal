@@ -1416,17 +1416,10 @@ describe('Terminal utils', function() {
                 var lines = $.terminal.split_equal(string, cols[i]);
                 var max_len;
                 var lengths;
-                if (fn) {
-                    lengths = lines.map(function(line) {
-                        return fn(line).length;
-                    });
-                    max_len = fn(string).length;
-                } else {
-                    lengths = lines.map(function(line) {
-                        return line.length;
-                    });
-                    max_len = fn.length;
-                }
+                lengths = lines.map(function(line) {
+                    return fn(line).length;
+                });
+                max_len = fn(string).length;
                 lengths.forEach(function(length, j) {
                     var max = max_len < cols[i] ? max_len : cols[i];
                     if (j < lengths - 1) {
