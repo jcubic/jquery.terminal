@@ -3719,7 +3719,7 @@ describe('Terminal plugin', function() {
                         unobserve: function() {
                             for (var i = i_callback.length; --i;) {
                                 if (i_callback[i] === callback) {
-                                    i_callback.slice(i, 1);
+                                    i_callback.splice(i, 1);
                                     break;
                                 }
                             }
@@ -5131,7 +5131,6 @@ describe('Terminal plugin', function() {
                     }
                 })();
             });
-            term.destroy().remove();
         });
         it('should complete when text have escaped quotes', function() {
             term = $('<div/>').appendTo('body').terminal({}, {

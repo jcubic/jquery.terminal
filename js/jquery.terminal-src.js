@@ -1269,9 +1269,9 @@
     var color_re = /^(?:#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]+\)|hsla?\([^)]+\))$/i;
     var url_re = /(\b(?:file|ftp|https?|blog:https?):\/\/(?:[^/\s]+\.[^/\s.]+)(?:\/[^\s]*)?(?:#[^\s]*)?)/gi;
     var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
-    var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var email_re = /((([^<>('")[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\\\][)])+)$/gi;
-    var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
+    var email_full_re = /^((([^<>('")[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_exec_split_re = /(\[\[(?:-?[@!gbiusor])*;[^\]]+\](?:\\[[\]]|[^\]])*\]|\[\[[\s\S]+?\]\])/;
@@ -3185,7 +3185,7 @@
                     }
                 }
             } else {
-                array = split(prompt_marker + prompt + string, num_chars);
+                array = split(prompt_marker + prompt + string);
                 array[0] = array[0].replace(re, '');
             }
             // fix issue with cursor that was cut off #379
@@ -5878,7 +5878,7 @@
             }
             string = start_formatting + string.slice(start, end);
             if (end_formatting) {
-                string = string.replace(/(\[\[^\]]+)?\]$/, '');
+                string = string.replace(/(\[\[[^\]]+)?\]$/, '');
                 string += ']';
             }
             return string;
@@ -6317,10 +6317,7 @@
                 var ret = formatter(input[0], options);
                 if (typeof ret === 'string') {
                     test_lengths(formatter, i - 1, ret, input[0]);
-                    if (typeof ret === 'string') {
-                        return [ret, options.position];
-                    }
-                    return input;
+                    return [ret, options.position];
                 } else if (is_array(ret) && ret.length === 2) {
                     return ret;
                 } else {
@@ -7415,14 +7412,12 @@
                          '></div></div><div class="terminal-pixel"></div></div>')
                 .appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
-            if (term) {
-                var style = term.attr('style');
-                if (style) {
-                    style = style.split(/\s*;\s*/).filter(function(s) {
-                        return !s.match(/display\s*:\s*none/i);
-                    }).join(';');
-                    temp.attr('style', style);
-                }
+            var style = term.attr('style');
+            if (style) {
+                style = style.split(/\s*;\s*/).filter(function(s) {
+                    return !s.match(/display\s*:\s*none/i);
+                }).join(';');
+                temp.attr('style', style);
             }
             var node = temp.find('.terminal-line');
             result = {
@@ -11470,10 +11465,10 @@
                     pos = scroller.prop('scrollTop');
                     scroller.scrollTop(pos + amount);
                 } else {
-                    if (amount > scroller.prop('scrollTop') && amount > 0) {
-                        scroller.prop('scrollTop', 0);
+                    if (amount > scroller.attr('scrollTop') && amount > 0) {
+                        scroller.attr('scrollTop', 0);
                     }
-                    pos = scroller.prop('scrollTop');
+                    pos = scroller.attr('scrollTop');
                     scroller.scrollTop(pos + amount);
                 }
                 return self;

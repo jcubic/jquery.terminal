@@ -117,7 +117,6 @@ function format_lines(str, len) {
             ansiArt: true
         }
     });
-    var lines;
     if (len) {
         var lines = $.terminal.split_equal(str, len);
         // unix formatting don't handle \r\n at the end
