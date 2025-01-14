@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 14 Jan 2025 23:13:58 +0000
+ * Date: Tue, 14 Jan 2025 23:23:39 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2074,7 +2074,7 @@
         }
 
         // don't sort single chunk
-        if (chunks.lenght === 1) {
+        if (chunks.length === 1) {
             return;
         }
 
@@ -5436,7 +5436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 14 Jan 2025 23:13:58 +0000',
+        date: 'Tue, 14 Jan 2025 23:23:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

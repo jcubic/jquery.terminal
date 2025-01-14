@@ -2074,7 +2074,7 @@
         }
 
         // don't sort single chunk
-        if (chunks.lenght === 1) {
+        if (chunks.length === 1) {
             return;
         }
 
