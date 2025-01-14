@@ -9822,10 +9822,10 @@
             },
             // -------------------------------------------------------------
             // :: Return a promise that is resolved when it's safe to
-            // :: call export_view, it wait for all async function echo
+            // :: call export_view or flush, it wait for all async echo
             // :: to finish
             // -------------------------------------------------------------
-            view_ready: function() {
+            output_ready: function() {
                 return event_hub.wait_for('async_echo_ready');
             },
             // -------------------------------------------------------------

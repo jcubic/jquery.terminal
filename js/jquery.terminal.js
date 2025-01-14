@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 05 Jan 2025 17:04:29 +0000
+ * Date: Tue, 14 Jan 2025 21:24:13 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5407,7 +5407,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 05 Jan 2025 17:04:29 +0000',
+        date: 'Tue, 14 Jan 2025 21:24:13 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9822,10 +9822,10 @@
             },
             // -------------------------------------------------------------
             // :: Return a promise that is resolved when it's safe to
-            // :: call export_view, it wait for all async function echo
+            // :: call export_view or flush, it wait for all async echo
             // :: to finish
             // -------------------------------------------------------------
-            view_ready: function() {
+            output_ready: function() {
                 return event_hub.wait_for('async_echo_ready');
             },
             // -------------------------------------------------------------

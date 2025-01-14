@@ -5255,18 +5255,18 @@ describe('Terminal plugin', function() {
                     term.clear();
                     term.echo(async () => {
                         await term.delay(100);
-                        return 'helo';
+                        return 'hello';
                     });
                     term.echo(async () => {
                         await term.delay(50);
                         return 'world';
                     });
-                    term.view_ready().then(() => {
+                    term.output_ready().then(() => {
                         const view = term.export_view();
                         term.clear();
                         term.import_view(view);
                         setTimeout(() => {
-                            expect(term.get_output()).toEqual('world\nhelo');
+                            expect(term.get_output()).toEqual('world\nhello');
                             done();
                         }, 200);
                     });
@@ -6440,6 +6440,27 @@ describe('Terminal plugin', function() {
                 term.refresh();
                 expect(term.find('[data-index="1"]').length).toEqual(1);
                 expect(term.find('[data-index="1"]').children().last().text()).toEqual(nbsp('ccc> !!!'));
+            });
+            it('should flush async echo', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.echo(async () => {
+                    await term.delay(100);
+                    return 'hello';
+                }, {
+                    flush: false
+                });
+                term.echo(async () => {
+                    await term.delay(50);
+                    return 'world';
+                }, {
+                    flush: false
+                });
+                return term.output_ready().then(() => {
+                    term.flush();
+                    expect(term.get_output()).toEqual('hello\nworld');
+                });
             });
         });
         describe('output_buffer', function() {
