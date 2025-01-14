@@ -2059,6 +2059,35 @@
         this._output_buffer = [];
     };
     // -------------------------------------------------------------------------
+    // :: the buffer needs to be sorted when using import_view and async echo
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.sort = function() {
+        var chunk = [];
+        var chunks = [];
+        for (var i = 0; i < this._output_buffer.length; i++) {
+            var item = this._output_buffer[i];
+            chunk.push(item);
+            if (item !== FormatBuffer.NEW_LINE && 'index' in item) {
+                chunks.push(chunk);
+                chunk = [];
+            }
+        }
+
+        // don't sort single chunk
+        if (chunks.lenght === 1) {
+            return;
+        }
+
+        chunks.sort(function(a, b) {
+            return a[2].index - b[2].index;
+        });
+
+        this._output_buffer = [];
+        chunks.forEach(function(chunk) {
+            this._output_buffer = this._output_buffer.concat(chunk);
+        }, this);
+    };
+    // -------------------------------------------------------------------------
     FormatBuffer.prototype.forEach = function(fn) {
         var i = 0;
         while (i < this._output_buffer.length) {
@@ -10858,6 +10887,7 @@
                         if (!options.update) {
                             partial = self.find('.partial');
                             snapshot = lines.get_partial();
+                            buffer.sort();
                         }
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place

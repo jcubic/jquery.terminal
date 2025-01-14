@@ -5266,7 +5266,7 @@ describe('Terminal plugin', function() {
                         term.clear();
                         term.import_view(view);
                         setTimeout(() => {
-                            expect(term.get_output()).toEqual('world\nhello');
+                            expect(term.get_output()).toEqual('hello\nworld');
                             done();
                         }, 200);
                     });
