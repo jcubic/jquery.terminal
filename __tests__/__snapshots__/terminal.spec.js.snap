@@ -58,6 +58,16 @@ exports[`Terminal plugin cmd plugin should move cursor 2`] = `
 
 exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=">&nbsp;foo">&gt;&nbsp;foo</span>"`;
 
+exports[`Terminal plugin interprer return should render array 1`] = `
+"> cmd
+"foo" "bar" 10"
+`;
+
+exports[`Terminal plugin interprer return should rener promise of array 1`] = `
+"> cmd
+"foo" "bar" 10"
+`;
+
 exports[`Terminal plugin jQuery Terminal methods exec should invoke array of commands when each command pause terminal 1`] = `
 "> exec_async_array
 > async_command 0

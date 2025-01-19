@@ -8849,7 +8849,8 @@
             }
             // -----------------------------------------------------------------
             function show(result, promise) {
-                if (typeof result !== 'undefined') {
+                // don't attempt to return terminal instance #994
+                if (typeof result !== 'undefined' && result !== self) {
                     display_object(result);
                 }
                 after_exec();

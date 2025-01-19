@@ -3682,6 +3682,46 @@ describe('Terminal plugin', function() {
             }).toThrow(error);
         });
     });
+    describe('interprer return', () => {
+        let term;
+        beforeEach(() => {
+            term = $('<div/>').appendTo('body').terminal({}, {
+                greetings: false
+            });
+        });
+        afterEach(() => {
+            term.destroy().remove();
+        });
+        function render(value) {
+            term.push(function() {
+                return value;
+            });
+            term.exec('cmd');
+        }
+        it('should render jQuery object', () => {
+            const node = $('<span class="x">hello</span>');
+            render(node);
+            expect(term.find('.x').is(node)).toBeTruthy();
+        });
+        it('should ignore Terminal instance', () => {
+            render(term);
+            expect(term.closest('body').length).toBe(1);
+        });
+        it('should render a promise', async () => {
+            render(Promise.resolve(10));
+            await term.delay(0);
+            expect(term.get_output()).toEqual('> cmd\n10');
+        });
+        it('should rener promise of array', async () => {
+            render(Promise.resolve(['foo', 'bar', 10]));
+            await term.delay(0);
+            expect(term.get_output()).toMatchSnapshot();
+        });
+        it('should render array', () => {
+            render(['foo', 'bar', 10]);
+            expect(term.get_output()).toMatchSnapshot();
+        });
+    });
     describe('cursor', function() {
         it('only one terminal should have blinking cursor', function() {
             var term1 = $('<div/>').appendTo('body').terminal($.noop);

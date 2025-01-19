@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 14 Jan 2025 23:23:39 +0000
+ * Date: Sun, 19 Jan 2025 22:25:51 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5436,7 +5436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Tue, 14 Jan 2025 23:23:39 +0000',
+        date: 'Sun, 19 Jan 2025 22:25:51 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8849,7 +8849,8 @@
             }
             // -----------------------------------------------------------------
             function show(result, promise) {
-                if (typeof result !== 'undefined') {
+                // don't attempt to return terminal instance #994
+                if (typeof result !== 'undefined' && result !== self) {
                     display_object(result);
                 }
                 after_exec();
