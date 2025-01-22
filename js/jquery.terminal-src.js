@@ -9893,10 +9893,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    var cloned_lines = clone(view.lines);
-                    lines.import(cloned_lines.filter(function(line) {
-                        return line[0];
-                    }));
+                    lines.import(clone(view.lines));
                     if (view.interpreters instanceof Stack) {
                         interpreters = view.interpreters;
                     }

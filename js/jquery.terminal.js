@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 19 Jan 2025 22:25:51 +0000
+ * Date: Wed, 22 Jan 2025 14:44:04 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5436,7 +5436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 19 Jan 2025 22:25:51 +0000',
+        date: 'Wed, 22 Jan 2025 14:44:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9893,10 +9893,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    var cloned_lines = clone(view.lines);
-                    lines.import(cloned_lines.filter(function(line) {
-                        return line[0];
-                    }));
+                    lines.import(clone(view.lines));
                     if (view.interpreters instanceof Stack) {
                         interpreters = view.interpreters;
                     }

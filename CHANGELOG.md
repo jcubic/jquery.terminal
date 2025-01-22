@@ -13,6 +13,7 @@
 * ignore empty command in Pipe extension [#984](https://github.com/jcubic/jquery.terminal/issues/984)
 * fix processing Hex HTML entities [#992](https://github.com/jcubic/jquery.terminal/issues/992)
 * fix returning Terminal instance from interpreter [#994](https://github.com/jcubic/jquery.terminal/issues/994)
+* fix removing blank lines when using `import_view()` [#1007](https://github.com/jcubic/jquery.terminal/issues/1007)
 
 ## 2.44.1
 ### Bugfix
