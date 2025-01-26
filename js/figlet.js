@@ -9,7 +9,7 @@
  *
  * This is wrapper over Figlet.js library by patorjk
  *
- * Copyright (c) 2024 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2024-2025 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 26 Jan 2025 13:33:38 +0000
+ * Date: Sun, 26 Jan 2025 13:39:43 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5436,7 +5436,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 26 Jan 2025 13:33:38 +0000',
+        date: 'Sun, 26 Jan 2025 13:39:43 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7576,13 +7576,13 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2024 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2010-2025 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
     function small_string(name) {
-        return '(c) 2011-2024 [[!;;;;https://jcubic.pl/me]' + name + ']';
+        return '(c) 2010-2025 [[!;;;;https://jcubic.pl/me]' + name + ']';
     }
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
