@@ -8112,7 +8112,7 @@
                         completion: type === 'object' ? commands : undefined
                     });
                 } else if (is_function(fallback)) {
-                    fallback(user_command, self);
+                    return fallback(user_command, self);
                 } else if (is_function(settings.onCommandNotFound)) {
                     settings.onCommandNotFound.call(self, user_command, self);
                 } else {
