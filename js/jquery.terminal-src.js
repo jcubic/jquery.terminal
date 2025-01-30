@@ -346,6 +346,9 @@
                     return object;
                 } else {
                     for (var key in object) {
+                        if (!object.hasOwnProperty(key)) {
+                            continue;
+                        }
                         if (Array.isArray(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] === 'object') {
