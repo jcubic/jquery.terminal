@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 30 Jan 2025 13:12:50 +0000
+ * Date: Sat, 22 Feb 2025 14:31:01 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5439,7 +5439,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Thu, 30 Jan 2025 13:12:50 +0000',
+        date: 'Sat, 22 Feb 2025 14:31:01 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9785,7 +9785,6 @@
         // ---------------------------------------------------------------------
         function get_scrollbar_width() {
             var width = filler.outerWidth();
-            var container_width = self.width();
             return container_width - width;
         }
         // ---------------------------------------------------------------------
@@ -10436,6 +10435,7 @@
             // -------------------------------------------------------------
             geometry: function() {
                 var padding = get_padding();
+                var height = old_height + padding.top + padding.bottom;
                 return {
                     terminal: {
                         padding: {
@@ -10444,8 +10444,12 @@
                             top: padding.top,
                             bottom: padding.bottom
                         },
-                        width: old_width + padding.left + padding.right,
-                        height: old_height + padding.top + padding.bottom
+                        content: {
+                            width: old_width + padding.left + padding.right,
+                            height: height
+                        },
+                        width: container_width,
+                        height: height
                     },
                     density: pixel_density,
                     char: char_size,
@@ -12114,7 +12118,7 @@
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height, old_pixel_density;
+        var old_width, old_height, old_pixel_density, container_width;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend(
             {},
@@ -12751,6 +12755,7 @@
                     }
                     old_height = height;
                     old_width = width;
+                    container_width = self.width();
                     old_pixel_density = pixel_density;
                 }
             }
