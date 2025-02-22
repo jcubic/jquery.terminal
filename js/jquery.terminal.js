@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Feb 2025 14:31:01 +0000
+ * Date: Sat, 22 Feb 2025 15:06:30 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5439,7 +5439,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 22 Feb 2025 14:31:01 +0000',
+        date: 'Sat, 22 Feb 2025 15:06:30 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11283,8 +11283,8 @@
                                 echo_promise = true;
                                 async_echo.push(next);
                             }
-                            lines.push([value, locals]);
                             unpromise(next, function() {
+                                lines.push([value, locals]);
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
                                 var have_partial = self.find('.partial').length;

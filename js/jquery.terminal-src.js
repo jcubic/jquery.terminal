@@ -11283,8 +11283,8 @@
                                 echo_promise = true;
                                 async_echo.push(next);
                             }
-                            lines.push([value, locals]);
                             unpromise(next, function() {
+                                lines.push([value, locals]);
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
                                 var have_partial = self.find('.partial').length;
