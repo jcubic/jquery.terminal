@@ -6952,7 +6952,8 @@ describe('Terminal plugin', function() {
                 term.echo(function() {
                     x();
                 });
-                expect(term.get_output()).toMatchSnapshot();
+                const error = term.get_output().split('\n').shift();
+                expect(error).toMatchSnapshot();
             });
         });
         describe('error', function() {

@@ -184,6 +184,16 @@ body.full-screen-terminal {
     color: var(--base-background, #000) !important;
     text-decoration: none;
 }
+/*
+ * make text on hover links visible when background is transparent #990
+ */
+@container style(--background: transparent) {
+  .terminal .terminal-output > :not(.raw) a[href]:hover,
+  .cmd a[href]:hover,
+  .terminal.external a[href]:hover {
+    --base-background: black;
+  }
+}
 .terminal .terminal-output > :not(.raw) a[href] span,
 .cmd a[href] span,
 .terminal.external a[href] span {
