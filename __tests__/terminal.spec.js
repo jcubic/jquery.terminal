@@ -6947,6 +6947,13 @@ describe('Terminal plugin', function() {
                     ]);
                 });
             });
+            it('should show error in sync echo', function() {
+                term.clear();
+                term.echo(function() {
+                    x();
+                });
+                expect(term.get_output()).toMatchSnapshot();
+            });
         });
         describe('error', function() {
             var term = $('<div/>').terminal($.noop, {

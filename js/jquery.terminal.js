@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Feb 2025 15:55:40 +0000
+ * Date: Sat, 22 Feb 2025 16:29:23 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1204,7 +1204,15 @@
             //       when value is undefined
             //       when moving this line outside if
             //       it breaks all completion unit tests
-            return callback(value);
+            try {
+                return callback(value);
+            } catch(e) {
+                if (is_function(error)) {
+                    error(e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
     // -----------------------------------------------------------------------
@@ -5448,7 +5456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 22 Feb 2025 15:55:40 +0000',
+        date: 'Sat, 22 Feb 2025 16:29:23 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8537,7 +8545,7 @@
             return string;
         }
         // ---------------------------------------------------------------------
-        function process_line(line) {
+        function process_line(line, safe_throw) {
             // prevent exception in display exception
             try {
                 var use_cache = !is_function(line.value);
@@ -8625,6 +8633,10 @@
                 }
                 buffer.append(arg, line.index, line_settings, raw);
             } catch (e) {
+                if (safe_throw) {
+                    // exception from echo function is handled by echo #997
+                    throw e;
+                }
                 buffer.clear();
                 // don't display exception if exception throw in terminal
                 if (is_function(settings.exceptionHandler)) {
@@ -11288,7 +11300,7 @@
                                 value: value,
                                 options: locals,
                                 index: index
-                            });
+                            }, true);
                             // queue async functions in echo
                             if (is_promise(next)) {
                                 echo_promise = true;

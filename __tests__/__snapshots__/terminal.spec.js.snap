@@ -72,6 +72,49 @@ exports[`Terminal plugin interprer return should rener promise of array 1`] = `
 "foo" "bar" 10"
 `;
 
+exports[`Terminal plugin jQuery Terminal methods echo should show error in sync echo 1`] = `
+"[[;;;terminal-error]&#91;ECHO&#93;: x is not defined]
+[[;;;terminal-error;ReferenceError: x is not defined]ReferenceError: x is not defined]
+[[;;;terminal-error;    at jQuery.fn.init.x (/home/kuba/projects/jcubic/terminal/repo/__tests__/terminal.spec.js:6953:21)]    at jQuery.fn.init.x (/home/kuba/projects/jcubic/terminal/repo/__tests__/terminal.spec.js:6953:21]
+[[;;;terminal-error;    at jQuery.fn.init.x (/home/kuba/projects/jcubic/terminal/repo/__tests__/terminal.spec.js:6953:21)])]
+[[;;;terminal-error;    at value (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:12273:25)]    at value (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:12273:25)]
+[[;;;terminal-error;    at stringify_value (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:8561:30)]    at stringify_value (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:8561:30)]
+[[;;;terminal-error;    at process_line (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11299:40)]    at process_line (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11299:40)]
+[[;;;terminal-error;    at callback (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:1208:24)]    at callback (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:1208:24)]
+[[;;;terminal-error;    at unpromise (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11280:25)]    at unpromise (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11280:25)]
+[[;;;terminal-error;    at jQuery.fn.init.echo (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11359:21)]    at jQuery.fn.init.echo (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11359]
+[[;;;terminal-error;    at jQuery.fn.init.echo (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:11359:21)]:21)]
+[[;;;terminal-error;    at jQuery.fn.init.apply &#91;as echo&#93; (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:12093:32)]    at jQuery.fn.init.apply &#91;as echo&#93; (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-s]
+[[;;;terminal-error;    at jQuery.fn.init.apply &#91;as echo&#93; (/home/kuba/projects/jcubic/terminal/repo/js/jquery.terminal-src.js:12093:32)]rc.js:12093:32)]
+[[;;;terminal-error;    at Object.echo (/home/kuba/projects/jcubic/terminal/repo/__tests__/terminal.spec.js:6952:22)]    at Object.echo (/home/kuba/projects/jcubic/terminal/repo/__tests__/terminal.spec.js:6952:22)]
+[[;;;terminal-error;    at Promise.then.completed (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/utils.js:298:28)]    at Promise.then.completed (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/bui]
+[[;;;terminal-error;    at Promise.then.completed (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/utils.js:298:28)]ld/utils.js:298:28)]
+[[;;;terminal-error;    at new Promise (<anonymous>)]    at new Promise (<anonymous>)]
+[[;;;terminal-error;    at callAsyncCircusFn (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/utils.js:231:10)]    at callAsyncCircusFn (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/ut]
+[[;;;terminal-error;    at callAsyncCircusFn (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/utils.js:231:10)]ils.js:231:10)]
+[[;;;terminal-error;    at _callCircusTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:316:40)]    at _callCircusTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.]
+[[;;;terminal-error;    at _callCircusTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:316:40)]js:316:40)]
+[[;;;terminal-error;    at _runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:252:3)]    at _runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:252:]
+[[;;;terminal-error;    at _runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:252:3)]3)]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:126:9)]    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:126:9)]build/run.js:126:9)]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]build/run.js:121:9)]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]build/run.js:121:9)]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/]
+[[;;;terminal-error;    at _runTestsForDescribeBlock (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:121:9)]build/run.js:121:9)]
+[[;;;terminal-error;    at run (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:71:3)]    at run (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/run.js:71:3)]
+[[;;;terminal-error;    at runAndTransformResultsToJestFormat (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)]    at runAndTransformResultsToJestFormat (/home/kuba/projects/jcubic/terminal/repo/node_modules/jes]
+[[;;;terminal-error;    at runAndTransformResultsToJestFormat (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)]t-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)]
+[[;;;terminal-error;    at jestAdapter (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)]    at jestAdapter (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/legacy-c]
+[[;;;terminal-error;    at jestAdapter (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)]ode-todo-rewrite/jestAdapter.js:79:19)]
+[[;;;terminal-error;    at runTestInternal (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runTest.js:367:16)]    at runTestInternal (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runT]
+[[;;;terminal-error;    at runTestInternal (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runTest.js:367:16)]est.js:367:16)]
+[[;;;terminal-error;    at runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runTest.js:444:34)]    at runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runTest.js:4]
+[[;;;terminal-error;    at runTest (/home/kuba/projects/jcubic/terminal/repo/node_modules/jest-runner/build/runTest.js:444:34)]44:34)]"
+`;
+
 exports[`Terminal plugin jQuery Terminal methods exec should invoke array of commands when each command pause terminal 1`] = `
 "> exec_async_array
 > async_command 0
