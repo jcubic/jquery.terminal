@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Feb 2025 15:06:30 +0000
+ * Date: Sat, 22 Feb 2025 15:55:40 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4212,6 +4212,7 @@
             var have_key = typeof e.key !== 'undefined';
             var key = String(e.key).toLowerCase();
             var unidentified_key = key === 'unidentified';
+            var skip_keymap;
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
@@ -4249,7 +4250,11 @@
                     if (!result) {
                         skip_insert = true;
                     }
-                    return result;
+                    if (result === true) {
+                        skip_keymap = true;
+                    } else {
+                        return result;
+                    }
                 }
             }
             if (shortcut !== prev_shortcut) {
@@ -4326,6 +4331,10 @@
                 // this will prevent for instance backspace to go back one page
                 //skip_keypress = true;
                 //e.preventDefault();
+            } else if (skip_keymap && is_function(keymap[shortcut])) {
+                // when terminal is disabled/paused we only want to prevent
+                // terminal shortcuts, see: #1005
+                return false;
             }
         }
         function clear_hold() {
@@ -5439,7 +5448,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 22 Feb 2025 15:06:30 +0000',
+        date: 'Sat, 22 Feb 2025 15:55:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -9396,7 +9405,9 @@
                         }
                         self.resume();
                     }
-                    return false;
+                    // tell cmd keydown to prevent default only terminal shortcuts
+                    // see #1005
+                    return true;
                 }
             }
         }
