@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Feb 2025 16:29:23 +0000
+ * Date: Sat, 22 Feb 2025 16:30:44 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1206,7 +1206,7 @@
             //       it breaks all completion unit tests
             try {
                 return callback(value);
-            } catch(e) {
+            } catch (e) {
                 if (is_function(error)) {
                     error(e);
                 } else {
@@ -5456,7 +5456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 22 Feb 2025 16:29:23 +0000',
+        date: 'Sat, 22 Feb 2025 16:30:44 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

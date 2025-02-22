@@ -1206,7 +1206,7 @@
             //       it breaks all completion unit tests
             try {
                 return callback(value);
-            } catch(e) {
+            } catch (e) {
                 if (is_function(error)) {
                     error(e);
                 } else {
