@@ -7,6 +7,7 @@
 * add small ASCII Art to signature [#972](https://github.com/jcubic/jquery.terminal/issues/972)
 * add `termina::output_ready()` [#987](https://github.com/jcubic/jquery.terminal/issues/987) [#1000](https://github.com/jcubic/jquery.terminal/issues/1000)
 * add `figlet.js` helper extension
+* update terminal::geometry [#995](https://github.com/jcubic/jquery.terminal/issues/995)
 ### Bugfix
 * fix `terminal::login()` when user already authenticated [#980](https://github.com/jcubic/jquery.terminal/issues/980)
 * improve mobile support
@@ -15,6 +16,11 @@
 * fix returning Terminal instance from interpreter [#994](https://github.com/jcubic/jquery.terminal/issues/994)
 * fix removing blank lines when using `import_view()` [#1007](https://github.com/jcubic/jquery.terminal/issues/1007)
 * fix fallback interpreter return value [#1008](https://github.com/jcubic/jquery.terminal/issues/1008)
+* fix for external terminal style [#1009](https://github.com/jcubic/jquery.terminal/issues/1009)
+* fix redraw when echo async function which throws [#998](https://github.com/jcubic/jquery.terminal/issues/998)
+* fix browser shorcuts when terminal is paused [#1005](https://github.com/jcubic/jquery.terminal/issues/1005)
+* display exception from sync echo function [#997](https://github.com/jcubic/jquery.terminal/issues/997)
+* fix text on hover links when background is transparent [#990](https://github.com/jcubic/jquery.terminal/issues/990)
 
 ## 2.44.1
 ### Bugfix
