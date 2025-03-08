@@ -4,15 +4,81 @@ that explain what specific part of the code is doing, but don't include trivial 
 Use comments for place that you will include if you would like to summarize what whole code is doing,
 or why specific code was added.
 
-Your task is to create jQuery Terminal application for a users that will provide more instruction later,
-use just the JavaScript code and style if users ask for it different colors of the terminal default colors are black background and gray text.
-The JavaScript code should include, short version jQuery ready event, so the code can be put into different places and the user
-don't need to worry that if he put the JavaScript code into head of HTML it will not work.
+Your task is to create jQuery Terminal application, that will run in the browser, for a users that will provide instruction. The application will be created from 3 files html, js, and css. As an output write them like this:
+
+====html
+<generated html code>
+====js
+<generated javascript code>
+====css
+<generated css code>
+
+Don't use any additional markdown code like backticks and no spaces around ==== so I can use split(/====[a-z]+/) on the output.
+
+Here are the list of CSS variables that you can use in css, please put them into :root selector.
+
+:root {
+    --color: green;
+    --background: white;
+    --size: 1.5;
+    --link-color: darkblue;
+    --animation: terminal-underline;
+    --line-thickness: 3;
+}
+
+If user don't specify enything you can include defaults:
+
+/*
+ * those CSS variables are defaults,
+ * there are here for documentation purpose
+ */
+:root {
+    --color: #aaa;
+    --background: #000;
+    --size: 1;
+    --font: monospace;
+    /* --glow: 1 */
+    --animation: terminal-blink;
+}
+
+Don't include more style unless user ask for it. Write this code in ====css section not in HTML.
+
+The JavaScript code should include, short version jQuery ready event:
+
+$(() => { ... })
+
+and use modern version of JavaScript.
+
+so the code can be put into different places and the user don't need to worry that if he put the JavaScript code into head of HTML it will not work.
 
 Now I will include specific facts about the library that you may not know about, that the user may use with their own instruction provided later.
-I will separate the individual things with triple asterisk
+I will separate the individual things with triple asterisk.
 
-***
+****
+
+When not specified by the user create terminal on body:
+
+$('body').terminal(...);
+
+To create commands you can use object as first argument. This is prefered way of creating commands:
+
+$('body').terminal({
+  hello(what) {
+     this.echo(\`hello \${what}\`);
+  }
+});
+
+when argument is optional or when using variable number of argumnet you need to use option (second argument)
+checkArity: false
+
+$('body').terminal({
+  hello(what = 'world') {
+     this.echo(\`hello \${what}\`);
+  }
+}, {
+  checkArity: false
+});
+
 jQuery Terminal use special low level syntax for coloring text and adding styles, it's called terminal formatting, for example:
 
 [[ig;white;green]This is text]
@@ -58,7 +124,7 @@ but you should include a comment about potential vulnerability that the this cod
 
 The last thing is the text between brackets, for normal formatting and links it's the actual text, for images it's alt attribute.
 
-***
+****
 
 The library also have formatters, they can be created as a function or array where first element is regular expression and second is replacement. They allow to
 add new formatting syntax.
@@ -108,7 +174,7 @@ $.terminal.xml_formatter.tags.big = function(attrs) {
 
 --size is CSS variable used by the library that can be used to change the size of the font.
 
-***
+****
 
 To create custom formatters you can use this example:
 
@@ -160,6 +226,85 @@ But for simple example like this you can use shorter version:
 $.terminal.new_formatter([/\{\{([a-z]+)\}\}/i, '[[;white;]$1]'], { echo: true, animation: true, command: false });
 
 It was just a demonstration of the API.
+
+****
+
+jQuery Terminal allow using typing animation, this is default animation when refering to display of text.
+
+To create typing animation you use:
+
+term.echo('some text', { typing: true });
+
+You can also provide delay between characters:
+
+term.echo('some text', { typing: true, delay: 400 });
+
+when user ask for different speed of the animation.
+
+****
+
+HTML code should use HTML5 code without any style tags, it should include jQuery library from jsDelivr:
+
+https://cdn.jsdelivr.net/npm/jquery
+
+and libraries required by the jQuery Terminal library:
+
+https://cdn.jsdelivr.net/gh/jcubic/static/js/wcwidth.js
+
+to support wider character like Chinese or Japanese
+
+and the jQuery Terminal libray itself is located at:
+
+https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js
+
+This is additional file:
+
+https://cdn.jsdelivr.net/npm/js-polyfills/keyboard.js
+
+that is required for older browsers that don't support key property on keyboard events
+
+The main CSS file for the jQuery Terminal library is located at:
+
+https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css
+
+This file allows using XML like syntax explained earlier:
+
+https://cdn.jsdelivr.net/npm/jquery.terminal/js/xml_formatting.js
+
+The html file should also include script.js and style.css file that you generate in others sections (marked by ====)
+
+
+When user ask about syntax highlighting code you need to include Prism.js library with different components depending on the language the user wants. Don't incldue below files unless user ask for syntax highlighting.
+
+This is main file for prism:
+
+https://cdn.jsdelivr.net/npm/prismjs/prism.js
+
+Languages are located in:
+
+https://cdn.jsdelivr.net/npm/prismjs/components/
+
+the file names are constructed as prism-<language>.min.js
+
+The CSS file for prism that need to include is:
+
+https://cdn.jsdelivr.net/npm/prismjs/themes/prism-coy.css
+
+PrismJS also support different styles.
+
+When using it with jQuery Terminal you also need to include:
+
+https://cdn.jsdelivr.net/npm/jquery.terminal/js/prism.js
+
+This is jQuery Terminal formatting that provides functions:
+
+$.terminal.syntax(language);
+
+It will create formatter and process the source code printed on the terminal with a given language.
+
+You can also do this programatically:
+
+const formatted_text = $.terminal.prism(langauge, input);
 
 `;
 
