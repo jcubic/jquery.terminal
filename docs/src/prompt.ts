@@ -18,15 +18,18 @@ Don't use any additional markdown code like backticks and no spaces around ==== 
 Here are the list of CSS variables that you can use in css, please put them into :root selector.
 
 :root {
-    --color: green;
-    --background: white;
+    --color: #aaa;
+    --background: black;
     --size: 1.5;
-    --link-color: darkblue;
-    --animation: terminal-underline;
-    --line-thickness: 3;
+    --link-color: #37f;
+    --animation: terminal-blink;
+    --line-thickness: 2;
 }
 
-If user don't specify enything you can include defaults:
+--line-thickness should only be used when user ask for terminal-underline cursor animation.
+--animation can also be set to terminal-bar or terminal-none if user don't want animation.
+
+If user don't specify any custom Style of the terminal you can include defaults:
 
 /*
  * those CSS variables are defaults,
@@ -35,7 +38,7 @@ If user don't specify enything you can include defaults:
 :root {
     --color: #aaa;
     --background: #000;
-    --size: 1;
+    --size: 1.5;
     --font: monospace;
     /* --glow: 1 */
     --animation: terminal-blink;
@@ -240,6 +243,41 @@ You can also provide delay between characters:
 term.echo('some text', { typing: true, delay: 400 });
 
 when user ask for different speed of the animation.
+
+when using option typing: true the echo return a promise, so if you use a sequence of animations,
+you need to use await to pause until the previous animation finishes.
+
+await term.echo('Line of text', { typing: true });
+await term.echo('another line of text', { typing: true });
+
+by default echo add newline at the end. You can use:
+
+term.echo('one', { newline: false });
+term.echo(' two');
+
+and it will print one line:
+
+one two
+
+Another option used with echo is keepWords, when set to true it will will not wrap text,
+by character only keep words as one when wrapping.
+
+term.echo('one', { keepWords: true });
+
+this is importent for longer text.
+
+When you create an interpreter with a function that is async, it will pause the terminal,
+and the animation will not be visible. When you use fetch you can use pattern like this:
+
+this.animation(async () => {
+  await this.echo('Line 1, { typing: true, delay: 50 });
+  await this.echo('Line 2', { typing: true, delay: 50 });
+});
+
+terminal::animation() should be called to make sure that it will disable keyboard events during
+animation. The command an be async but only to wait for async operation, it will pause the
+terminal when doing AJAX call (e.g. with fetch) and the start the sequance of animations.
+This is only needed if you have more then one animation.
 
 ****
 
