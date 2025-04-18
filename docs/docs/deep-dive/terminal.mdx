@@ -2,6 +2,8 @@
 sidebar_position: 1
 ---
 
+import CodePen from '@site/src/CodePen';
+
 # Terminal Instance
 
 Terminal instance is the main API that allow you to interact with the jQuery Terminal library. To
@@ -36,11 +38,22 @@ the second are options. More about echo method in [What you can echo?](/docs/dee
 
 ### Inserting Text Into the Command
 
-To insert text into the command you can use 
+To insert text into the command you can use `term.insert('text');`. You need to call this method outside of interpreter.
+You can do this outside of terminal, or inside an event, see [Terminal Events](#???).
+
+This function insert the text at current cursor position. You can change the position and then insert.
+
+```javascript
+term.set_command('heworld');
+term.set_position(2);
+term.insert('llo ');
+```
+
+<CodePen id="dPbWKZm" title="insert + position" />
 
 ### Changing the Command
 
-To change the command you can use 
+Besides inserting text and current cursor position.
 
 ### Getting The Command
 
