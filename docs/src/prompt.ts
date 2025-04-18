@@ -15,7 +15,7 @@ Your task is to create jQuery Terminal application, that will run in the browser
 
 Don't use any additional markdown code like backticks and no spaces around ==== so I can use split(/====[a-z]+/) on the output.
 
-Here are the list of CSS variables that you can use in css, please put them into :root selector.
+Here are the list of CSS variables that you can use in css:
 
 :root {
     --color: #aaa;
@@ -29,7 +29,7 @@ Here are the list of CSS variables that you can use in css, please put them into
 --line-thickness should only be used when user ask for terminal-underline cursor animation.
 --animation can also be set to terminal-bar or terminal-none if user don't want animation.
 
-If user don't specify any custom Style of the terminal you can include defaults:
+If user don't specify any custom Style of the terminal please include the defaults:
 
 /*
  * those CSS variables are defaults,
@@ -245,10 +245,13 @@ term.echo('some text', { typing: true, delay: 400 });
 when user ask for different speed of the animation.
 
 when using option typing: true the echo return a promise, so if you use a sequence of animations,
-you need to use await to pause until the previous animation finishes.
+you need to use await to pause until the previous animation finishes. But you should always wrap
+the code into terminal::animation().
 
-await term.echo('Line of text', { typing: true });
-await term.echo('another line of text', { typing: true });
+term.animation(async () => {
+  await term.echo('Line of text', { typing: true });
+  await term.echo('another line of text', { typing: true });
+});
 
 by default echo add newline at the end. You can use:
 
@@ -265,19 +268,6 @@ by character only keep words as one when wrapping.
 term.echo('one', { keepWords: true });
 
 this is importent for longer text.
-
-When you create an interpreter with a function that is async, it will pause the terminal,
-and the animation will not be visible. When you use fetch you can use pattern like this:
-
-this.animation(async () => {
-  await this.echo('Line 1, { typing: true, delay: 50 });
-  await this.echo('Line 2', { typing: true, delay: 50 });
-});
-
-terminal::animation() should be called to make sure that it will disable keyboard events during
-animation. The command an be async but only to wait for async operation, it will pause the
-terminal when doing AJAX call (e.g. with fetch) and the start the sequance of animations.
-This is only needed if you have more then one animation.
 
 ****
 
