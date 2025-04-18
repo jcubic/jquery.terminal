@@ -1,0 +1,11 @@
+#!/bin/bash
+
+ENDPOINT="jargon-term"
+API_URL="https://cuho3e4lik.sqlite.cloud:8090/v2/functions/$ENDPOINT"
+API_KEY="SBmxqjlBbI1Q0xlz3xr9vMNHBOewByrbAsEGYmfxlKE"
+
+curl -X POST "$API_URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\": \"hack value\", \"apikey\": \"$API_KEY\"}"
+
+echo
