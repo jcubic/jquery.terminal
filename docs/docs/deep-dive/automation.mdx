@@ -2,10 +2,70 @@
 sidebar_position: 5
 ---
 
+import CodePen from '@site/src/CodePen';
+
 # Automation
+
+There are few ways to automate the usage of the Terminal.
 
 ## Executing Commands
 
+You can execute a command just like the user typed a command:
+
+```javascript
+const term = $('body').terminal({
+  echo(arg) {
+      this.echo(arg.toUpperCase());
+  }
+});
+
+term.exec('echo hello');
+```
+
+this will show the output:
+
+```
+> echo hello
+HELLO
+```
+
+Just as user typed this command, it will show the prompt and command. Internaly this is
+called "echo command". You can also exeucute the command but don't show the command that
+you executed (without echo command).
+
+```javascript
+const term = $('body').terminal();
+
+term.exec('echo hello', true);
+```
+
+This will output just text:
+
+```
+HELLO
+```
+
+The second argument can also be an object with option:
+
+```javascript
+const term = $('body').terminal();
+
+term.exec('command', { silent: true });
+```
+
+This is needed when using animation, where you need to put more options. The boolean
+`silent` parameter is an old API, but to not creating a breaking change the old behavior
+is supported together with object.
+
+
 ## Echo Command Without Execution
+
+You can also just echo the command without executing the command.
+
+```javascript
+const term = $('body').terminal();
+
+term.enter('command');
+```
 
 ## Invoking Shortcuts
