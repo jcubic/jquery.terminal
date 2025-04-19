@@ -82,4 +82,13 @@ To destroy the terminal and clean the DOM, you can use `destroy()` method.
 
 ### Reading Text from User
 
+To read the data from the user you can use Nested Interpreter, or a syntax sugar in form of
+`read()` method. It returns a promise that resolve into the command the user type:
+
+```javascript
+term.read('name: ').then(name => {
+  term.echo(`Your name is ${name}`);
+});
+```
+
 ### Updating Lines
