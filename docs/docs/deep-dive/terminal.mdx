@@ -23,25 +23,31 @@ const term = $('body').terminal({
 term.echo('Welcome to my terminal');
 ```
 
-In above code you code we disabled the terminal and call echo on terminal instance in `term`
-constant.  We also use `this.echo(...)` to implement `echo` command.
+In above code we call `echo()` method on terminal instance in `term` constant.  We also use
+`this.echo` to implement `echo` command.
 
 ## Common Tasks
 
-Here is a list of most common task you can use with the Terminal. The full list of methos is in
+Here is a list of most common task you can use with the Terminal. The full list of methods are in
 [Reference Guide](#???).
 
 ### Print Text on the Terminal
 
-To print the text you use the `echo` method. The first argument is a value that you want to echo and
-the second are options. More about echo method in [What you can echo?](/docs/deep-dive/echo) Guide.
+To print the text you use the `echo()` method. The first argument is a value that you want to echo
+and the second are options. More about echo method in [What you can echo?](/docs/deep-dive/echo)
+Guide.
+
+### Changing the Command
+To change the current command you can use `set_command()` method:
+
+```javascript
+term.set_command('hello world);
+```
 
 ### Inserting Text Into the Command
 
-To insert text into the command you can use `term.insert('text');`. You need to call this method outside of interpreter.
-You can do this outside of terminal, or inside an event, see [Terminal Events](#???).
-
-This function insert the text at current cursor position. You can change the position and then insert.
+You can also modify the command by inserting text at given cursor position, with `term.insert('text');`.
+You can change the cursor position and then insert the string.
 
 ```javascript
 term.set_command('heworld');
@@ -51,17 +57,28 @@ term.insert('llo ');
 
 <CodePen id="dPbWKZm" title="insert + position" />
 
-### Changing the Command
-
-Besides inserting text and current cursor position.
-
 ### Getting The Command
+
+To get the current command, you can use `get_command()` method.
+
+<CodePen id="MYYaYoO" title="get_command" />
 
 ### Clear the Terminal
 
+To clear the terminal you use `clear()` method or default `clear` command. To remove this default command.
+You can use `clear: false` option, as second argument to the terminal.
+
+```javascript
+const term = $('body').terminal({}, {
+  clear: false
+});
+
+term.clear();
+```
+
 ### Destroy the Terminal
 
-### Pause and Resume the Terminal
+To destroy the terminal and clean the DOM, you can use `destroy()` method.
 
 ### Reading Text from User
 
