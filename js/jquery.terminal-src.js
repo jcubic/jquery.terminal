@@ -8893,16 +8893,17 @@
                 abort_controllers = [];
             }
             function invoke() {
-                // Call user interpreter function
+                // call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 before_async_exec();
                 if (result) {
-                    // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
                     if (!force_awake) {
+                        // typing animations need visible prompt
                         if (is_animation_promise(result)) {
                             paused = true;
                         } else if (is_promise(result)) {
+                            // auto pause/resume when user return a promise
                             self.pause(settings.softPause);
                         }
                     }
