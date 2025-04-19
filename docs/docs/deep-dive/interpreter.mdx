@@ -1,0 +1,69 @@
+---
+sidebar_position: 3
+---
+
+# Interpreter
+
+## Pausing and Resuming the Terminal
+
+When using commands that do something asynchronous you should pause the terminal and resume it when
+you're done. This is needed when for example you want to execute a sequence of command or when you
+don't want the user to execute a command when one is already running. When you don't pause, you may
+get [race conditions](https://en.wikipedia.org/wiki/Race_condition#In_software) and unexpected
+behavior.
+
+```javascript
+const url = 'https://jsonplaceholder.typicode.com/posts/1';
+const term = $('body').terminal({
+    test() {
+        this.pause();
+        fetch(url).then(res => {
+            return res.json();
+        }).then(data => {
+            this.echo(data.title);
+            this.resume();
+        });
+    }
+});
+```
+
+pause/resume is an old API. You can also use modern API, when you return a promise from the command.
+
+```javascript
+const url = 'https://jsonplaceholder.typicode.com/posts/1';
+const term = $('body').terminal({
+    test() {
+        return fetch(url).then(res => {
+            return res.json();
+        }).then(data => {
+            this.echo(data.title);
+        });
+    }
+});
+```
+
+And because async/await is a syntax sugare of returing a promise from a function you can use it as well.
+
+```javascript
+const url = 'https://jsonplaceholder.typicode.com/posts/1';
+const term = $('body').terminal({
+    async test() {
+        const res = await fetch(url);
+        const data = await res.json();
+        this.echo(data.title);
+    }
+});
+```
+
+The return value from the intepreter is also printed on the terminal, so you can use:
+
+```javascript
+const url = 'https://jsonplaceholder.typicode.com/posts/1';
+const term = $('body').terminal({
+    async test() {
+        const res = await fetch(url);
+        const data = await res.json();
+        return data.title;
+    }
+});
+```
