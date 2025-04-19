@@ -8,6 +8,9 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Send HTTP request to wake up database
         run: |
           bash ./scripts/ping-sqlite
