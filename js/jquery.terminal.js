@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version DEV
+ *           \/              /____/                              version 2.45.0
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 22 Feb 2025 16:30:44 +0000
+ * Date: Wed, 02 Jul 2025 23:04:21 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5455,8 +5455,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: 'DEV',
-        date: 'Sat, 22 Feb 2025 16:30:44 +0000',
+        version: '2.45.0',
+        date: 'Wed, 02 Jul 2025 23:04:21 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8893,16 +8893,17 @@
                 abort_controllers = [];
             }
             function invoke() {
-                // Call user interpreter function
+                // call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 before_async_exec();
                 if (result) {
-                    // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
                     if (!force_awake) {
+                        // typing animations need visible prompt
                         if (is_animation_promise(result)) {
                             paused = true;
                         } else if (is_promise(result)) {
+                            // auto pause/resume when user return a promise
                             self.pause(settings.softPause);
                         }
                     }
