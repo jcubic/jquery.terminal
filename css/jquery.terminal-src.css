@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal.
  *
- * Copyright (c) 2011-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Date: {{DATE}}
@@ -42,6 +42,9 @@
     white-space: pre !important;
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * var(--size, 1) * (14px / var(--pixel-density, 1))) !important;
+}
+.cmd .visually-hidden, .cmd .cmd-clipboard {
+    user-select: none;
 }
 .visually-hidden {
     clip: rect(0 0 0 0);
@@ -100,7 +103,7 @@ body.terminal, body.full-screen-terminal {
     margin: 0;
     height: 100%;
 }
-body.full-screen-terminal .terminal {
+body.full-screen-terminal .terminal:not(.terminal-external) {
     height: 100% !important;
 }
 body.full-screen-terminal {
@@ -183,6 +186,16 @@ body.full-screen-terminal {
     color: #000;
     color: var(--base-background, #000) !important;
     text-decoration: none;
+}
+/*
+ * make text on hover links visible when background is transparent #990
+ */
+@container style(--background: transparent) {
+  .terminal .terminal-output > :not(.raw) a[href]:hover,
+  .cmd a[href]:hover,
+  .terminal.external a[href]:hover {
+    --base-background: black;
+  }
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
 .cmd a[href] span,
@@ -670,12 +683,12 @@ terminal .terminal-output > div {
         0%, 50% {
             border-bottom-color: var(--color, #aaa);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+            line-height: var(--terminal-font-size);
         }
         50.1%, 100% {
             border-bottom-color: var(--background, #000);
             line-height: 12px;
-            line-height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+            line-height: var(--terminal-font-size);
         }
     }
 }
@@ -839,9 +852,16 @@ terminal .terminal-output > div {
     }
     .terminal {
         --terminal-line: calc(var(--size, 1) * (16px / var(--pixel-density, 1)) + 1px / var(--pixel-density, 1));
+        --terminal-font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
         height: auto;
-        /* force size when user add --rows */
+        /* force size when user add --rows and --cols */
         height: calc((var(--terminal-line) * var(--rows)) + (var(--padding, 10) * 2px));
+        /*
+         * there is a bug in Chromium https://issues.chromium.org/issues/379430924
+         * it give wrong number of characters per line (off by one),
+         * it works fine in Firefox and Epiphany
+         */
+        width: calc((var(--cols) * 1ch) + (var(--padding, 10) * 2px) + (var(--terminal-scrollbar, 10) * 1px));
     }
     .terminal .terminal-output > :not(.raw) > div,
     .cmd div,
@@ -865,14 +885,17 @@ terminal .terminal-output > div {
     .terminal,
     .terminal-output > :not(.raw) span,
     .terminal-output > :not(.raw) a,
-    .terminal-output > :not(.raw) div,
+    .terminal-output > :not(.raw) div {
+        font-size: var(--terminal-font-size);
+    }
     .cmd,
     .cmd span,
     .cmd div {
-        font-size: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+        --cmd-font-size: var(--terminal-font-size, calc(var(--size, 1) * (12px / var(--pixel-density, 1))));
+        font-size: var(--cmd-font-size);
     }
     .terminal-output .emoji, .cmd .emoji {
-        height: calc(var(--size, 1) * (12px / var(--pixel-density, 1)));
+        height: var(--terminal-font-size);
     }
     .cmd .clipboard {
         top: calc(var(--size, 1) * (14 / var(--pixel-density, 1)) * var(--cursor-line, 0) * 1px);
@@ -976,6 +999,11 @@ terminal .terminal-output > div {
     initial-value: 10;
 }
 @property --rows {
+    syntax: '<number> | auto';
+    inherits: true;
+    initial-value: auto;
+}
+@property --cols {
     syntax: '<number> | auto';
     inherits: true;
     initial-value: auto;
@@ -1117,7 +1145,7 @@ terminal .terminal-output > div {
 }
 .cmd-editable {
     position: absolute;
-    top: calc(var(--cmd-top) * 1px);
+    top: calc(var(--cmd-top) * 1px + var(--cmd-font-size, 1em));
     bottom: 0;
     right: 0;
     left: 0;

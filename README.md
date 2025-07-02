@@ -1,14 +1,14 @@
 <h1 align="center">
-  <img src="https://github.com/jcubic/jquery.terminal/blob/master/assets/ascii_art.svg?raw=true&ver=2.44.1"
+  <img src="https://github.com/jcubic/jquery.terminal/blob/devel/assets/ascii_art.svg?raw=true&ver=DEV"
        alt="ASCII Art that represent text jQuery Terminal - JavaScript Library for Web Based Terminal Emulators" />
 </h1>
 
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
-[![npm](https://img.shields.io/badge/npm-2.44.1-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-2.44.1-yellow.svg)
-[![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=master&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=master&0f20bf6eaa4edcca15f83f8bbf243c1e)](https://coveralls.io/github/jcubic/jquery.terminal?branch=master)
+[![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
+![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
+[![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=devel&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&fd1428cc07b47e9b924bc0bef4da0f89)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
 [![jsDelivr Downloads](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded&n=1)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![Paid Support](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
@@ -87,7 +87,7 @@ You can test current version at this URL:
 
 or if it doesn't use latest version (because of jsDelivr cache) you can force it with this URL:
 
-* [https://jcubic.github.io/jquery.terminal/?ver=2.44.1](https://jcubic.github.io/jquery.terminal/?ver=2.44.1)
+* [https://jcubic.github.io/jquery.terminal/?ver=DEV](https://jcubic.github.io/jquery.terminal/?ver=DEV)
 
 And development version using:
 
@@ -106,20 +106,20 @@ or use jsDelivr:
 
 ```
 
-Then include js/jquery.terminal-2.44.1.min.js and css/jquery.terminal-2.44.1.min.css
+Then include js/jquery.terminal-DEV.min.js and css/jquery.terminal-DEV.min.css
 
 You can grab the files from CDN:
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.44.1/js/jquery.terminal.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.44.1/css/jquery.terminal.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/js/jquery.terminal.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/DEV/css/jquery.terminal.min.css" rel="stylesheet"/>
 ```
 
 or
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.44.1/js/jquery.terminal.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.44.1/css/jquery.terminal.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/js/jquery.terminal.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery.terminal@DEV/css/jquery.terminal.min.css"/>
 ```
 
 If you always want latest version, you can get it from [unpkg](https://unpkg.com/) without specifying version,
@@ -408,10 +408,10 @@ You can request paid support, you can find details at [support.jcubic.pl](https:
 
 ### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=jcubic/jquery.terminal&type=Date&branch=master)](https://star-history.com/#jcubic/jquery.terminal&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=jcubic/jquery.terminal&type=Date&branch=devel)](https://star-history.com/#jcubic/jquery.terminal&Date)
 
 ### License
 
 Licensed under [MIT](http://opensource.org/licenses/MIT) license
 
-Copyright (c) 2011-2024 [Jakub T. Jankiewicz](https://jcubic.pl/me)
+Copyright (c) 2010-2025 [Jakub T. Jankiewicz](https://jcubic.pl/me)

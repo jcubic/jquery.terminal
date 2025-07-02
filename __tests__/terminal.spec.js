@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
- * Copyright (c) 2010-2024 Jakub T. Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2025 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Image Credit: Author Peter Hamer, source Wikipedia
@@ -374,7 +374,9 @@ function shortcut(ctrl, alt, shift, which, key) {
     doc.trigger(keypress(key));
     doc.trigger($.Event("keyup"));
 }
-
+function key(ord, key) {
+    shortcut(false, false, false, ord, key);
+}
 function click(element) {
     var e = $.Event('mouseup');
     e.button = 0;
@@ -878,6 +880,16 @@ describe('Terminal utils', function() {
                 var normalized = $.terminal.normalize(string);
                 expect($.terminal.normalize(normalized)).toEqual(normalized);
             });
+        });
+    });
+    describe('$.terminal.length', function() {
+        it('shoud count html entitites', () => {
+            const input = '&#x25B2;&#x25BC;&#92;';
+            expect($.terminal.length(input)).toBe(3);
+        });
+        it('should count emoji', () => {
+            const input = '💩💩💩';
+            expect($.terminal.length(input)).toBe(3);
         });
     });
     describe('$.terminal.is_formatting', function() {
@@ -1404,17 +1416,10 @@ describe('Terminal utils', function() {
                 var lines = $.terminal.split_equal(string, cols[i]);
                 var max_len;
                 var lengths;
-                if (fn) {
-                    lengths = lines.map(function(line) {
-                        return fn(line).length;
-                    });
-                    max_len = fn(string).length;
-                } else {
-                    lengths = lines.map(function(line) {
-                        return line.length;
-                    });
-                    max_len = fn.length;
-                }
+                lengths = lines.map(function(line) {
+                    return fn(line).length;
+                });
+                max_len = fn(string).length;
                 lengths.forEach(function(length, j) {
                     var max = max_len < cols[i] ? max_len : cols[i];
                     if (j < lengths - 1) {
@@ -1615,6 +1620,71 @@ describe('Terminal utils', function() {
             expect(output).toMatchSnapshot();
         });
     });
+    describe('EventEmitter', function() {
+        var emitter;
+        beforeEach(() => {
+            emitter = new $.terminal.EventEmitter();
+        });
+        it('should fire events', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(2);
+        });
+        it('should call different handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('bar', bar);
+            emitter.emit('foo', 10);
+            emitter.emit('bar', 20);
+            expect(foo).toHaveBeenCalledWith(10);
+            expect(bar).toHaveBeenCalledWith(20);
+        });
+        it('should fire event once', () => {
+            var handler = jest.fn();
+            emitter.once('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(1);
+        });
+        it('should remove event handler', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.off('test', handler);
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(0);
+        });
+        it('should not remove wrong event', () => {
+            var handler = jest.fn();
+            emitter.on('test', handler);
+            emitter.off('test_2');
+            emitter.emit('test');
+            emitter.emit('test');
+            expect(handler.mock.calls.length).toEqual(2);
+        });
+        it('should add mutiple event handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('foo', bar);
+            emitter.emit('foo');
+            expect(foo).toHaveBeenCalledWith();
+            expect(bar).toHaveBeenCalledWith();
+        });
+        it('should remove all event handlers', () => {
+            var foo = jest.fn();
+            var bar = jest.fn();
+            emitter.on('foo', foo);
+            emitter.on('foo', foo);
+            emitter.off('foo');
+            emitter.emit('foo');
+            expect(foo).not.toHaveBeenCalled();
+            expect(bar).not.toHaveBeenCalled();
+        });
+    });
     describe('Cycle', function() {
         describe('create', function() {
             it('should create Cycle from init values', function() {
@@ -1692,6 +1762,24 @@ describe('Terminal utils', function() {
         describe('set', function() {
             var a = {a: 1};
             var b = {a: 2};
+            var c = {a: 2};
+            var cycle;
+            beforeEach(function() {
+                cycle = new $.terminal.Cycle(a, b);
+            });
+            it('should replace item', () => {
+                cycle.remove(1);
+                cycle.set(1, c);
+                expect(cycle.get()).toEqual([a, c]);
+            });
+            it('should ignore value', () => {
+                cycle.set(1, c);
+                expect(cycle.get()).toEqual([a, b]);
+            });
+        });
+        describe('active', function() {
+            var a = {a: 1};
+            var b = {a: 2};
             var c = {a: 3};
             var d = {a: 4};
             var cycle;
@@ -1699,12 +1787,12 @@ describe('Terminal utils', function() {
                 cycle = new $.terminal.Cycle(a, b, c, d);
             });
             it('should set existing element', function() {
-                cycle.set(c);
+                cycle.active(c);
                 expect(cycle.front()).toEqual(c);
             });
             it('should add new item if not exists', function() {
                 var e = {a: 5};
-                cycle.set(e);
+                cycle.active(e);
                 expect(cycle.length()).toEqual(5);
                 expect(cycle.index()).toEqual(4);
                 expect(cycle.front()).toEqual(e);
@@ -1772,7 +1860,7 @@ describe('Terminal utils', function() {
             });
             it('should add element if cycle at the end', function() {
                 var cycle = new $.terminal.Cycle(1,2,3);
-                cycle.set(3);
+                cycle.active(3);
                 cycle.append(4);
                 expect(cycle.get()).toEqual([1,2,3,4]);
             });
@@ -2231,9 +2319,6 @@ describe('Terminal utils', function() {
             term.find('.terminal-output').css('width', 800);
             term.focus();
         });
-        function key(ord, key) {
-            shortcut(false, false, false, ord, key);
-        }
         function selected() {
             return term.find('.terminal-output > div div span.terminal-inverted');
         }
@@ -3597,6 +3682,46 @@ describe('Terminal plugin', function() {
             }).toThrow(error);
         });
     });
+    describe('interprer return', () => {
+        let term;
+        beforeEach(() => {
+            term = $('<div/>').appendTo('body').terminal({}, {
+                greetings: false
+            });
+        });
+        afterEach(() => {
+            term.destroy().remove();
+        });
+        function render(value) {
+            term.push(function() {
+                return value;
+            });
+            term.exec('cmd');
+        }
+        it('should render jQuery object', () => {
+            const node = $('<span class="x">hello</span>');
+            render(node);
+            expect(term.find('.x').is(node)).toBeTruthy();
+        });
+        it('should ignore Terminal instance', () => {
+            render(term);
+            expect(term.closest('body').length).toBe(1);
+        });
+        it('should render a promise', async () => {
+            render(Promise.resolve(10));
+            await term.delay(0);
+            expect(term.get_output()).toEqual('> cmd\n10');
+        });
+        it('should rener promise of array', async () => {
+            render(Promise.resolve(['foo', 'bar', 10]));
+            await term.delay(0);
+            expect(term.get_output()).toMatchSnapshot();
+        });
+        it('should render array', () => {
+            render(['foo', 'bar', 10]);
+            expect(term.get_output()).toMatchSnapshot();
+        });
+    });
     describe('cursor', function() {
         it('only one terminal should have blinking cursor', function() {
             var term1 = $('<div/>').appendTo('body').terminal($.noop);
@@ -3634,7 +3759,7 @@ describe('Terminal plugin', function() {
                         unobserve: function() {
                             for (var i = i_callback.length; --i;) {
                                 if (i_callback[i] === callback) {
-                                    i_callback.slice(i, 1);
+                                    i_callback.splice(i, 1);
                                     break;
                                 }
                             }
@@ -5046,7 +5171,6 @@ describe('Terminal plugin', function() {
                     }
                 })();
             });
-            term.destroy().remove();
         });
         it('should complete when text have escaped quotes', function() {
             term = $('<div/>').appendTo('body').terminal({}, {
@@ -5166,6 +5290,26 @@ describe('Terminal plugin', function() {
                     expect(top.prompt).toEqual(prompt);
                     expect(top.greetings).toEqual(greetings);
                     expect(top.completion).toEqual('settings');
+                });
+                it('it should export/import async echo', function(done) {
+                    term.clear();
+                    term.echo(async () => {
+                        await term.delay(100);
+                        return 'hello';
+                    });
+                    term.echo(async () => {
+                        await term.delay(50);
+                        return 'world';
+                    });
+                    term.output_ready().then(() => {
+                        const view = term.export_view();
+                        term.clear();
+                        term.import_view(view);
+                        setTimeout(() => {
+                            expect(term.get_output()).toEqual('hello\nworld');
+                            done();
+                        }, 200);
+                    });
                 });
                 it('should import view', function() {
                     term.clear().push($.noop).set_prompt('# ')
@@ -5862,6 +6006,18 @@ describe('Terminal plugin', function() {
                 expect(term.get_prompt()).toEqual('>>> ');
                 term.logout(true).pop().pop();
             });
+            it('should login when already auth', function() {
+                term.push($.noop, {prompt: '>>> '}).login(login.callback, true);
+                if (term.token(true)) {
+                    term.logout(true);
+                }
+                enter(term, 'foo');
+                enter(term, 'bar');
+                expect(term.token(true)).toEqual(token);
+                term.login(login.callback, true);
+                expect(term.paused()).toBe(false);
+                term.logout(true).pop().pop();
+            });
             it('should login to nested interpreter when using login option', function() {
                 term.push($.noop, {
                     prompt: '$$$ ',
@@ -6216,14 +6372,14 @@ describe('Terminal plugin', function() {
             function max_length() {
                 var lines = term.signature().split('\n');
                 return Math.max.apply(null, lines.map(function(line) {
-                    return line.length;
+                    return $.terminal.length(line);
                 }));
             }
             it('should return space', function() {
                 expect(term.signature()).toEqual('');
             });
             it('should return proper max length of signature', function() {
-                var numbers = {20: 20, 36: 33, 60: 56, 70: 66, 100: 75};
+                var numbers = {20: 20, 36: 35, 70: 66, 100: 75};
                 Object.keys(numbers).forEach(function(numChars) {
                     var length = numbers[numChars];
                     term.option('numChars', numChars);
@@ -6324,6 +6480,27 @@ describe('Terminal plugin', function() {
                 term.refresh();
                 expect(term.find('[data-index="1"]').length).toEqual(1);
                 expect(term.find('[data-index="1"]').children().last().text()).toEqual(nbsp('ccc> !!!'));
+            });
+            it('should flush async echo', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.echo(async () => {
+                    await term.delay(100);
+                    return 'hello';
+                }, {
+                    flush: false
+                });
+                term.echo(async () => {
+                    await term.delay(50);
+                    return 'world';
+                }, {
+                    flush: false
+                });
+                return term.output_ready().then(() => {
+                    term.flush();
+                    expect(term.get_output()).toEqual('hello\nworld');
+                });
             });
         });
         describe('output_buffer', function() {
@@ -6769,6 +6946,14 @@ describe('Terminal plugin', function() {
                         'baz'
                     ]);
                 });
+            });
+            it('should show error in sync echo', function() {
+                term.clear();
+                term.echo(function() {
+                    x();
+                });
+                const error = term.get_output().split('\n').shift();
+                expect(error).toMatchSnapshot();
             });
         });
         describe('error', function() {
@@ -7410,6 +7595,24 @@ describe('Terminal plugin', function() {
                 expect(term.level()).toEqual(1);
                 expect(term.get_prompt()).toEqual('1> ');
                 expect(term.get_output()).toEqual(greetings);
+            });
+        });
+        describe('id', function() {
+            it('should restore the history', () => {
+                var term = $('<div/>').terminal($.noop, {
+                    name: 'id'
+                });
+                term.focus();
+                var id = term.id();
+                enter(term, 'ls');
+                term.destroy();
+                term = $('<div/>').terminal($.noop, {
+                    name: 'id',
+                    id
+                });
+                term.focus();
+                key('ARROWUP');
+                expect(term.get_command()).toEqual('ls');
             });
         });
         describe('purge', function() {

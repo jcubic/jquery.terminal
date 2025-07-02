@@ -373,7 +373,7 @@
     "iconv-lite": "^0.6.3",
     "jquery": "^3.7.1",
     "node-fetch": "^3.3.2",
-    "prismjs": "^1.27.0",
+    "prismjs": "^1.30.0",
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {

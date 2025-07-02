@@ -98,7 +98,9 @@ $.extend_if_has = function(desc, source, array) {
 jQuery(document).ready(function($) {
 
     $('#tilda').tilda(function(command, terminal) {
-        terminal.echo('you type command "' + command + '"');
+        if (command) {
+            terminal.echo('you type command "' + command + '"');
+        }
     });
 });
 

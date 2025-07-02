@@ -9,7 +9,7 @@
  *
  * This is object enchancment that will add pipe operator and redirects to commands
  *
- * Copyright (c) 2014-2024 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2025 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -330,6 +330,9 @@
         }
         // -------------------------------------------------------------------------------
         function stringify(cmd) {
+            if (!cmd.name) {
+                return '';
+            }
             return cmd.name + ' ' + cmd.args.map(function(arg, i) {
                 if (cmd.args_quotes[i]) {
                     var quote = cmd.args_quotes[i];
@@ -393,10 +396,12 @@
                         name: cmd.name,
                         completion: Object.keys(interpreter[cmd.name])
                     });
-                } else if (is_function(term_settings.onCommandNotFound)) {
-                    term_settings.onCommandNotFound.call(term, command, term);
-                } else {
-                    error(sprintf(strings(term).commandNotFound, cmd.name));
+                } else if (cmd.name) {
+                    if (is_function(term_settings.onCommandNotFound)) {
+                        term_settings.onCommandNotFound.call(term, command, term);
+                    } else {
+                        error(sprintf(strings(term).commandNotFound, cmd.name));
+                    }
                 }
             } else {
                 //term = term.duplicate();

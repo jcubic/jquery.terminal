@@ -9,7 +9,7 @@
  *
  * Wrapper for options that will create autocomplete menu for jQuery Terminal
  *
- * Copyright (c) 2014-2024 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2025 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

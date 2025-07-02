@@ -30,7 +30,7 @@
  * by default only javascript markup and css languages are defined (also file extension
  * for them. To have more languages you need to include appropriate js files.
  *
- * Copyright (c) 2018-2024 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2025 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -83,10 +83,16 @@
         factory(root.jQuery, root.Prism);
     }
 })(function($, Prism) {
-    var Token = Prism.Token;
+    if (!$) {
+        throw new Error('jQuery Not defined');
+    }
+    if (!$.terminal) {
+        throw new Error('$.terminal is not defined');
+    }
     if (typeof Prism === 'undefined') {
         throw new Error('PrismJS not defined');
     }
+    var Token = Prism.Token;
     var _ = $.extend({}, Prism);
 
     _.Token = function() {
@@ -140,12 +146,6 @@
             return '';
         }).join('\n');
     };
-    if (!$) {
-        throw new Error('jQuery Not defined');
-    }
-    if (!$.terminal) {
-        throw new Error('$.terminal is not defined');
-    }
     // we use 0x00 character so we know which one of the formatting came from prism
     // so we can escape the reset because we unescape original values, the values
     // need to be escape in cmd plugin so you can't type in formatting

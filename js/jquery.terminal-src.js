@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2024 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -260,6 +260,63 @@
         };
     }
     // -----------------------------------------------------------------------
+    // :: EventEmitter class, created by ChatGPT (with small refactoring)
+    // -----------------------------------------------------------------------
+    function EventEmitter() {
+        this._events = {};
+    }
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.on = function(event, listener) {
+        if (!this._events[event]) {
+            this._events[event] = [];
+        }
+        this._events[event].push(listener);
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.emit = function(event) {
+        if (this._events[event]) {
+            var args = Array.prototype.slice.call(arguments, 1);
+            this._events[event].forEach(function(listener) {
+                listener.apply(null, args);
+            });
+        }
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.off = function(event, listener) {
+        if (!this._events[event]) {
+            return;
+        }
+
+        if (!listener) {
+            delete this._events[event];
+        } else {
+            this._events[event] = this._events[event].filter(function(l) {
+                return l !== listener;
+            });
+        }
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.once = function(event, listener) {
+        var self = this;
+
+        function wrapper() {
+            self.off(event, wrapper);
+            listener.apply(null, arguments);
+        }
+
+        this.on(event, wrapper);
+    };
+    // -----------------------------------------------------------------------
+    EventEmitter.prototype.wait_for = function(event) {
+        var deferred = new $.Deferred();
+
+        this.once(event, function() {
+            deferred.resolve();
+        });
+
+        return deferred.promise();
+    };
+    // -----------------------------------------------------------------------
     // :: map object to object
     // -----------------------------------------------------------------------
     $.omap = function(o, fn) {
@@ -289,6 +346,9 @@
                     return object;
                 } else {
                     for (var key in object) {
+                        if (!object.hasOwnProperty(key)) {
+                            continue;
+                        }
                         if (Array.isArray(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] === 'object') {
@@ -1144,7 +1204,15 @@
             //       when value is undefined
             //       when moving this line outside if
             //       it breaks all completion unit tests
-            return callback(value);
+            try {
+                return callback(value);
+            } catch (e) {
+                if (is_function(error)) {
+                    error(e);
+                } else {
+                    throw e;
+                }
+            }
         }
     }
     // -----------------------------------------------------------------------
@@ -1210,11 +1278,11 @@
     var format_end_re = /\[\[(?:-?[@!gbiusor])*;[^;]*;[^\]]*\]?$/i;
     var self_closing_re = /^(?:\[\[)?[^;]*@[^;]*;/;
     var color_re = /^(?:#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\([^)]+\)|hsla?\([^)]+\))$/i;
-    var url_re = /(\b(?:file|ftp|https?):\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
+    var url_re = /(\b(?:file|ftp|https?|blog:https?):\/\/(?:[^/\s]+\.[^/\s.]+)(?:\/[^\s]*)?(?:#[^\s]*)?)/gi;
     var url_nf_re = /\b(?![^"\s[\]]*])(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'\\<>\][)])+)/gi;
-    var email_re = /((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
+    var email_re = /((([^<>('")[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))/g;
     var url_full_re = /^(https?:\/\/(?:(?:(?!&[^;]+;)|(?=&amp;))[^\s"'<>\\\][)])+)$/gi;
-    var email_full_re = /^((([^<>('")[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
+    var email_full_re = /^((([^<>('")[\]\\.,;:\s@]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})))$/g;
     var command_re = /((?:"[^"\\]*(?:\\[\S\s][^"\\]*)*"|'[^'\\]*(?:\\[\S\s][^'\\]*)*'|`[^`\\]*(?:\\[\S\s][^`\\]*)*`|\/[^\/\\]*(?:\\[\S\s][^\/\\]*)*\/[gimsuy]*(?=\s|$)|(?:\\\s|\S))+)(?=\s|$)/gi;
     var extended_command_re = /^\s*((terminal|cmd)::([a-z_]+)\(([\s\S]*)\))\s*$/;
     var format_exec_split_re = /(\[\[(?:-?[@!gbiusor])*;[^\]]+\](?:\\[[\]]|[^\]])*\]|\[\[[\s\S]+?\]\])/;
@@ -1477,7 +1545,7 @@
             remove: function(index) {
                 delete data[index];
             },
-            set: function(item) {
+            active: function(item) {
                 for (var i = data.length; i--;) {
                     if (data[i] === item) {
                         pos = i;
@@ -1518,6 +1586,13 @@
                         fn(item, i);
                     }
                 });
+            },
+            set: function(index, value) {
+                if (!data[index]) {
+                    data[index] = value;
+                    return true;
+                }
+                return false;
             },
             append: function(item) {
                 data.push(item);
@@ -1995,6 +2070,35 @@
         this._output_buffer = [];
     };
     // -------------------------------------------------------------------------
+    // :: the buffer needs to be sorted when using import_view and async echo
+    // -------------------------------------------------------------------------
+    FormatBuffer.prototype.sort = function() {
+        var chunk = [];
+        var chunks = [];
+        for (var i = 0; i < this._output_buffer.length; i++) {
+            var item = this._output_buffer[i];
+            chunk.push(item);
+            if (item !== FormatBuffer.NEW_LINE && 'index' in item) {
+                chunks.push(chunk);
+                chunk = [];
+            }
+        }
+
+        // don't sort single chunk
+        if (chunks.length === 1) {
+            return;
+        }
+
+        chunks.sort(function(a, b) {
+            return a[2].index - b[2].index;
+        });
+
+        this._output_buffer = [];
+        chunks.forEach(function(chunk) {
+            this._output_buffer = this._output_buffer.concat(chunk);
+        }, this);
+    };
+    // -------------------------------------------------------------------------
     FormatBuffer.prototype.forEach = function(fn) {
         var i = 0;
         while (i < this._output_buffer.length) {
@@ -2068,7 +2172,7 @@
             clickTimeout: 200,
             holdTimeout: 400,
             holdRepeatTimeout: 200,
-            mobileIngoreAutoSpace: [],
+            mobileIgnoreAutoSpace: [',', '.', ')'],
             repeatTimeoutKeys: [],
             tabindex: 1,
             tabs: 4
@@ -2077,8 +2181,8 @@
     $.fn.cmd = function(options) {
         var settings = $.extend({}, $.cmd.defaults, options);
         function mobile_ignore_key(key) {
-            return settings.mobileIngoreAutoSpace.length &&
-                settings.mobileIngoreAutoSpace.indexOf(key) !== -1 && is_android;
+            return settings.mobileIgnoreAutoSpace.length &&
+                settings.mobileIgnoreAutoSpace.indexOf(key) !== -1 && is_android;
         }
         var self = this;
         var maybe_data = self.data('cmd');
@@ -2108,6 +2212,7 @@
                 var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
                     autocorrect: 'off',
+                    autocomplete: 'new-password',
                     spellcheck: 'false',
                     tabindex: settings.tabindex
                 }).insertAfter(self);
@@ -2638,7 +2743,7 @@
             }
             function set() {
                 clip.val(command);
-                fix_textarea();
+                fix_editable();
             }
             function insert(text) {
                 self.insert(text);
@@ -2913,7 +3018,7 @@
         // will not fire) so we fake text entry, we could just put dummy
         // data but we put real command and position
         // -------------------------------------------------------------------------------
-        function fix_textarea(position_only) {
+        function fix_editable(position_only) {
             if (!self.isenabled()) {
                 return;
             }
@@ -2933,7 +3038,7 @@
                                 clip.$node.caret(pos);
                             }
                         } catch (e) {
-                            // firefox throw NS_ERROR_FAILURE ignore
+                            // firefox throws NS_ERROR_FAILURE - ignore
                         }
                     });
                 }
@@ -3120,7 +3225,7 @@
                     }
                 }
             } else {
-                array = split(prompt_marker + prompt + string, num_chars);
+                array = split(prompt_marker + prompt + string);
                 array[0] = array[0].replace(re, '');
             }
             // fix issue with cursor that was cut off #379
@@ -3728,7 +3833,7 @@
                     command = string;
                 }
                 redraw();
-                fix_textarea();
+                fix_editable();
                 fire_change_command();
                 return removed;
             },
@@ -3740,7 +3845,7 @@
                         self.position(bare_text(command).length);
                     }
                     redraw();
-                    fix_textarea();
+                    fix_editable();
                     if (!silent && command_changed) {
                         fire_change_command();
                     }
@@ -3797,7 +3902,7 @@
                 if (!stay) {
                     self.position(len, true, true);
                 }
-                fix_textarea();
+                fix_editable();
                 redraw();
                 fire_change_command();
                 return self;
@@ -3886,7 +3991,7 @@
                         if (!silent && is_function(settings.onPositionChange)) {
                             settings.onPositionChange(position, formatted_position);
                         }
-                        fix_textarea(true);
+                        fix_editable(true);
                     }
                     return self;
                 } else {
@@ -3896,7 +4001,7 @@
             refresh: function() {
                 draw_prompt();
                 redraw();
-                fix_textarea(true);
+                fix_editable(true);
                 return self;
             },
             // if formatter change length of the strings (like emoji demo) we need to keep
@@ -4017,7 +4122,7 @@
                         draw_prompt();
                     }
                     fix_cursor();
-                    fix_textarea();
+                    fix_editable();
                 }
                 mobile_focus();
                 return self;
@@ -4115,6 +4220,7 @@
             var have_key = typeof e.key !== 'undefined';
             var key = String(e.key).toLowerCase();
             var unidentified_key = key === 'unidentified';
+            var skip_keymap;
             // special keys don't trigger keypress fix #293
             try {
                 if (!e.fake) {
@@ -4152,7 +4258,11 @@
                     if (!result) {
                         skip_insert = true;
                     }
-                    return result;
+                    if (result === true) {
+                        skip_keymap = true;
+                    } else {
+                        return result;
+                    }
                 }
             }
             if (shortcut !== prev_shortcut) {
@@ -4229,6 +4339,10 @@
                 // this will prevent for instance backspace to go back one page
                 //skip_keypress = true;
                 //e.preventDefault();
+            } else if (skip_keymap && is_function(keymap[shortcut])) {
+                // when terminal is disabled/paused we only want to prevent
+                // terminal shortcuts, see: #1005
+                return false;
             }
         }
         function clear_hold() {
@@ -4329,12 +4443,6 @@
                                           !skip_insert &&
                                           (single_key || no_key) && !backspace)) {
                 if (val && val === command) {
-                    if (is_android) {
-                        // ignore autocomplete on GBoard keyboard #693
-                        if (no_keydown) {
-                            event('keydown', 'Enter', 13);
-                        }
-                    }
                     finalize_input_event();
                     return;
                 }
@@ -4742,8 +4850,13 @@
     };
     // -------------------------------------------------------------------------
     function render_entities(str) {
-        return str.replace(/&#(x?)([0-9]+);/g, function(_, hex, code) {
-            code = parseInt(code, hex ? 16 : 10);
+        return str.replace(/&#(?:x([0-9a-f]+)|([0-9]+));/gi, function(_, hex, dec) {
+            var code;
+            if (hex) {
+                code = parseInt(hex, 16);
+            } else {
+                code = parseInt(dec, 10);
+            }
             return String.fromCharCode(code);
         }).replace(/(&[^;]+;)/g, function(_, entity) {
             return entities[entity] || entity;
@@ -5383,6 +5496,7 @@
         Cycle: Cycle,
         History: History,
         Stack: Stack,
+        EventEmitter: EventEmitter,
         // ---------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
@@ -5813,7 +5927,7 @@
             }
             string = start_formatting + string.slice(start, end);
             if (end_formatting) {
-                string = string.replace(/(\[\[^\]]+)?\]$/, '');
+                string = string.replace(/(\[\[[^\]]+)?\]$/, '');
                 string += ']';
             }
             return string;
@@ -6252,10 +6366,7 @@
                 var ret = formatter(input[0], options);
                 if (typeof ret === 'string') {
                     test_lengths(formatter, i - 1, ret, input[0]);
-                    if (typeof ret === 'string') {
-                        return [ret, options.position];
-                    }
-                    return input;
+                    return [ret, options.position];
                 } else if (is_array(ret) && ret.length === 2) {
                     return ret;
                 } else {
@@ -6841,8 +6952,8 @@
                 }
                 var test = fn(url);
                 if (!test) {
-                    warn('Invalid URL ' + url + ' only http(s) ftp and path ' +
-                         'are allowed');
+                    warn('Invalid URL ' + url + ' only http(s), blob, ftp, and ' +
+                         'paths are allowed!');
                 }
                 return test;
             };
@@ -6850,6 +6961,8 @@
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
+        var href_re = /^(((?:blob:)?https?|file|ftp):\/\/|\.{0,2}\/)/;
+        var src_re = /^(https?:|file:|blob:|data:)/;
         $.terminal.format = function format(str, options) {
             var settings = $.extend({}, {
                 linksNoReferrer: false,
@@ -6861,11 +6974,11 @@
             }, options || {});
             // -----------------------------------------------------------------
             var valid_href = with_url_validation(function(url) {
-                return url.match(/^((https?|file|ftp):\/\/|\.{0,2}\/)/) || is_path(url);
+                return url.match(href_re) || is_path(url);
             }, settings);
             // -----------------------------------------------------------------
             var valid_src = with_url_validation(function(url) {
-                return url.match(/^(https?:|file:|blob:|data:)/) || is_path(url);
+                return url.match(src_re) || is_path(url);
             }, settings);
             // -----------------------------------------------------------------
             function filter_attr_names(names) {
@@ -7348,14 +7461,12 @@
                          '></div></div><div class="terminal-pixel"></div></div>')
                 .appendTo('body');
             temp.addClass(term.attr('class')).attr('id', term.attr('id'));
-            if (term) {
-                var style = term.attr('style');
-                if (style) {
-                    style = style.split(/\s*;\s*/).filter(function(s) {
-                        return !s.match(/display\s*:\s*none/i);
-                    }).join(';');
-                    temp.attr('style', style);
-                }
+            var style = term.attr('style');
+            if (style) {
+                style = style.split(/\s*;\s*/).filter(function(s) {
+                    return !s.match(/display\s*:\s*none/i);
+                }).join(';');
+                temp.attr('style', style);
             }
             var node = temp.find('.terminal-line');
             result = {
@@ -7485,20 +7596,28 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2011-2024 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2010-2025 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
-    var name_ver = 'jQuery Terminal Emulator' +
-        (version_set ? version_string : '');
+    function small_string(name) {
+        return '(c) 2010-2025 [[!;;;;https://jcubic.pl/me]' + name + ']';
+    }
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
     // -----------------------------------------------------------------------
     var signatures = [
-        ['jQuery Terminal', '(c) 2011-2024 jcubic'],
-        [name_ver, copyright.replace(/^Copyright | *<.*>/g, '')],
-        [name_ver, copyright.replace(/^Copyright /, '')],
+        ['jQuery Terminal', small_string('jcubic')],
+        [
+            '      __ ____ ________',
+            '     / // _  /__  ___/__ ___ ______',
+            ' __ / // // /  / // _  // _//     /',
+            '/  / // // /  / // ___// / / / / /',
+            '\\___//____ \\ /_//____//_/ /_/ /_/',
+            '          \\/                    '
+                .replace(reg, ' ') + version_string,
+            small_string('Jakub T. Jankiewicz')],
         [
             '      _______                 ________                        __',
             '     / / _  /_ ____________ _/__  ___/______________  _____  / /',
@@ -7595,7 +7714,7 @@
         holdTimeout: 400,
         holdRepeatTimeout: 200,
         repeatTimeoutKeys: [],
-        mobileIngoreAutoSpace: [],
+        mobileIgnoreAutoSpace: [',', '.', ')'],
         request: $.noop,
         response: $.noop,
         describe: 'procs',
@@ -7661,9 +7780,11 @@
             redrawError: 'Internal error, wrong position in cmd redraw',
             invalidStrings: 'Command %s have unclosed strings',
             invalidMask: 'Invalid mask used only string or boolean allowed',
-            defunctTerminal: "You can't call method on terminal that was destroyed",
+            defunctTerminal: "You can't call method '%s' on terminal that was destroyed",
             abortError: 'Abort with CTRL+D',
-            timeoutError: 'Signal timed out'
+            timeoutError: 'Signal timed out',
+            invalidId: 'terminal with this `id` aready exists! You need to destr' +
+                'oy old terminal before you can create terminal with the same `id`'
         }
     };
     // -------------------------------------------------------------------------
@@ -8011,7 +8132,7 @@
                         completion: type === 'object' ? commands : undefined
                     });
                 } else if (is_function(fallback)) {
-                    fallback(user_command, self);
+                    return fallback(user_command, self);
                 } else if (is_function(settings.onCommandNotFound)) {
                     settings.onCommandNotFound.call(self, user_command, self);
                 } else {
@@ -8424,7 +8545,7 @@
             return string;
         }
         // ---------------------------------------------------------------------
-        function process_line(line) {
+        function process_line(line, safe_throw) {
             // prevent exception in display exception
             try {
                 var use_cache = !is_function(line.value);
@@ -8512,6 +8633,10 @@
                 }
                 buffer.append(arg, line.index, line_settings, raw);
             } catch (e) {
+                if (safe_throw) {
+                    // exception from echo function is handled by echo #997
+                    throw e;
+                }
                 buffer.clear();
                 // don't display exception if exception throw in terminal
                 if (is_function(settings.exceptionHandler)) {
@@ -8561,6 +8686,7 @@
         // :: Function limit output lines based on outputLimit option
         // ---------------------------------------------------------------------
         function limit_lines() {
+            var $lines = output.find('> div > div');
             if (settings.outputLimit >= 0) {
                 var limit;
                 if (settings.outputLimit === 0) {
@@ -8568,7 +8694,6 @@
                 } else {
                     limit = settings.outputLimit;
                 }
-                var $lines = output.find('> div > div');
                 if ($lines.length + 1 > limit) {
                     var max = $lines.length - limit + 1;
                     var for_remove = $lines.slice(0, max);
@@ -8586,8 +8711,10 @@
                         }
                     });
                     lines.limit_snapshot(max);
+                    return max;
                 }
             }
+            return $lines.length;
         }
         // ---------------------------------------------------------------------
         // :: Display user greetings or terminal signature
@@ -8746,7 +8873,8 @@
             }
             // -----------------------------------------------------------------
             function show(result, promise) {
-                if (typeof result !== 'undefined') {
+                // don't attempt to return terminal instance #994
+                if (typeof result !== 'undefined' && result !== self) {
                     display_object(result);
                 }
                 after_exec();
@@ -8765,16 +8893,17 @@
                 abort_controllers = [];
             }
             function invoke() {
-                // Call user interpreter function
+                // call user interpreter function
                 var result = interpreter.interpreter.call(self, command, self);
                 before_async_exec();
                 if (result) {
-                    // auto pause/resume when user return promises
                     // it should not pause when user return promise from read()
                     if (!force_awake) {
+                        // typing animations need visible prompt
                         if (is_animation_promise(result)) {
                             paused = true;
                         } else if (is_promise(result)) {
+                            // auto pause/resume when user return a promise
                             self.pause(settings.softPause);
                         }
                     }
@@ -8983,6 +9112,7 @@
                 }
             }
         }
+        // ---------------------------------------------------------------------
         var scroll_to_view = (function() {
             function scroll_to_view(visible) {
                 if (!visible) {
@@ -9288,7 +9418,9 @@
                         }
                         self.resume();
                     }
-                    return false;
+                    // tell cmd keydown to prevent default only terminal shortcuts
+                    // see #1005
+                    return true;
                 }
             }
         }
@@ -9675,6 +9807,11 @@
             return parseInt(style.getPropertyValue(prop), 10) || 0;
         }
         // ---------------------------------------------------------------------
+        function get_scrollbar_width() {
+            var width = filler.outerWidth();
+            return container_width - width;
+        }
+        // ---------------------------------------------------------------------
         function get_padding() {
             var style = window.getComputedStyle(filler[0]);
             function padding(name) {
@@ -9740,6 +9877,14 @@
                 return self;
             },
             // -------------------------------------------------------------
+            // :: Return a promise that is resolved when it's safe to
+            // :: call export_view or flush, it wait for all async echo
+            // :: to finish
+            // -------------------------------------------------------------
+            output_ready: function() {
+                return event_hub.wait_for('async_echo_ready');
+            },
+            // -------------------------------------------------------------
             // :: Return an object that can be used with import_view to
             // :: restore the state
             // -------------------------------------------------------------
@@ -9774,9 +9919,7 @@
                     if (view.focus) {
                         self.focus();
                     }
-                    lines.import(clone(view.lines).filter(function(line) {
-                        return line[0];
-                    }));
+                    lines.import(clone(view.lines));
                     if (view.interpreters instanceof Stack) {
                         interpreters = view.interpreters;
                     }
@@ -9927,6 +10070,8 @@
                             if (valid !== false) {
                                 if (is_function(success)) {
                                     success();
+                                } else {
+                                    self.resume();
                                 }
                             } else {
                                 self.resume();
@@ -10314,6 +10459,7 @@
             // -------------------------------------------------------------
             geometry: function() {
                 var padding = get_padding();
+                var height = old_height + padding.top + padding.bottom;
                 return {
                     terminal: {
                         padding: {
@@ -10322,8 +10468,12 @@
                             top: padding.top,
                             bottom: padding.bottom
                         },
-                        width: old_width + padding.left + padding.right,
-                        height: old_height + padding.top + padding.bottom
+                        content: {
+                            width: old_width + padding.left + padding.right,
+                            height: height
+                        },
+                        width: container_width,
+                        height: height
                     },
                     density: pixel_density,
                     char: char_size,
@@ -10419,7 +10569,7 @@
                                 }
                             }
                         }
-                        terminals.set(self);
+                        terminals.active(self);
                         self.enable(silent);
                     }
                 });
@@ -10517,13 +10667,19 @@
                 var cols = self.cols();
                 for (var i = signatures.length; i--;) {
                     var lengths = signatures[i].map(function(line) {
-                        return line.length;
+                        return $.terminal.length(line);
                     });
                     if (Math.max.apply(null, lengths) <= cols) {
                         return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
                     }
                 }
                 return '';
+            },
+            // -------------------------------------------------------------
+            // :: returns the number of rendered lines
+            // -------------------------------------------------------------
+            lines: function() {
+                return output_line_count;
             },
             // -------------------------------------------------------------
             // :: Return the version number
@@ -10760,6 +10916,7 @@
                         if (!options.update) {
                             partial = self.find('.partial');
                             snapshot = lines.get_partial();
+                            buffer.sort();
                         }
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
@@ -10870,7 +11027,7 @@
                             });
                             command_line.__set_prompt_margin(len);
                         }
-                        limit_lines();
+                        output_line_count = limit_lines();
                         fire_event('onFlush');
                         self.stopTime('flush').oneTime(10, 'flush', function() {
                             var cmd_cursor = self.find('.cmd-cursor');
@@ -10997,16 +11154,24 @@
             echo: function(arg, options, deferred) {
                 var arg_defined = arguments.length > 0;
                 var d = deferred || new $.Deferred();
-                function cont() {
+                function cont(value) {
                     echo_promise = false;
                     var original = echo_delay;
                     echo_delay = [];
                     for (var i = 0; i < original.length; ++i) {
                         self.echo.apply(self, original[i]);
                     }
+                    if (value) {
+                        async_echo = async_echo.filter(function(promise) {
+                            return promise !== value;
+                        });
+                        if (!async_echo.length) {
+                            event_hub.emit('async_echo_ready');
+                        }
+                    }
                 }
-                function error(e) {
-                    cont();
+                function error(e, value) {
+                    cont(value);
                     display_exception(e, 'ECHO', true);
                 }
                 function echo(arg) {
@@ -11136,13 +11301,14 @@
                                 value: value,
                                 options: locals,
                                 index: index
-                            });
+                            }, true);
                             // queue async functions in echo
                             if (is_promise(next)) {
                                 echo_promise = true;
+                                async_echo.push(next);
                             }
-                            lines.push([value, locals]);
                             unpromise(next, function() {
+                                lines.push([value, locals]);
                                 // extended commands should be processed only
                                 // once in echo and not on redraw
                                 var have_partial = self.find('.partial').length;
@@ -11161,15 +11327,17 @@
                                             if (line) {
                                                 self.update(-1, line[0], line[1]);
                                             }
-                                            cont();
+                                            cont(next);
                                         });
                                     }
                                     fire_event('onAfterEcho', [arg]);
                                 }
                                 if (!contination_run) {
-                                    cont();
+                                    cont(next);
                                 }
-                            }, error);
+                            }, function(e) {
+                                error(e, next);
+                            });
                         }, error);
                     } catch (e) {
                         // if echo throw exception we can't use error to
@@ -11356,10 +11524,10 @@
                     pos = scroller.prop('scrollTop');
                     scroller.scrollTop(pos + amount);
                 } else {
-                    if (amount > scroller.prop('scrollTop') && amount > 0) {
-                        scroller.prop('scrollTop', 0);
+                    if (amount > scroller.attr('scrollTop') && amount > 0) {
+                        scroller.attr('scrollTop', 0);
                     }
-                    pos = scroller.prop('scrollTop');
+                    pos = scroller.attr('scrollTop');
                     scroller.scrollTop(pos + amount);
                 }
                 return self;
@@ -11953,9 +12121,11 @@
         var prev_exec_cmd;
         var tab_count = 0; // for tab completion
         var output; // .terminal-output jquery object
-        var terminal_id = terminals.length();
+        var have_custom_id = !!(options && typeof options.id === 'number');
+        var terminal_id = have_custom_id ? options.id : terminals.length();
         var force_awake = false; // flag used to don't pause when user return read() call
         var num_chars; // numer of chars in line
+        var output_line_count = 0;
         var num_rows; // number of lines that fit without scrollbar
         var command; // for tab completion
         var logins = new Stack(); // stack of logins
@@ -11965,12 +12135,14 @@
         var init_queue = new DelayQueue();
         var when_ready = ready(init_queue);
         var cmd_ready = ready(command_queue);
+        var async_echo = [];
+        var event_hub = new EventEmitter();
         var is_bottom_detected;
         var is_bottom_observer;
         var in_login = false;// some Methods should not be called when login
         // TODO: Try to use mutex like counter for pause/resume
         var onPause = $.noop;// used to indicate that user call pause onInit
-        var old_width, old_height, old_pixel_density;
+        var old_width, old_height, old_pixel_density, container_width;
         var delayed_commands = []; // used when exec commands while paused
         var settings = $.extend(
             {},
@@ -12041,6 +12213,11 @@
         self.addClass('terminal');
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
+        css(self[0], {
+            '--char-width': char_size.width,
+            '--char-height': char_size.height,
+            '--terminal-scrollbar': get_scrollbar_width()
+        });
         // this is needed when terminal have selector with --size that is not
         // bare .terminal so fake terminal will not get the proper size #602
         var need_char_size_recalculate = !terminal_ready(self);
@@ -12068,7 +12245,13 @@
             (typeof settings.login === 'string' || settings.login === true)) {
             global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
         }
-        terminals.append(self);
+        if (have_custom_id) {
+            if (!terminals.set(settings.id, self)) {
+                warn(strings().invalidId);
+            }
+        } else {
+            terminals.append(self);
+        }
         function focus_terminal() {
             if (old_enabled) {
                 self.focus();
@@ -12237,7 +12420,7 @@
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
                 mobileDelete: settings.mobileDelete,
-                mobileIngoreAutoSpace: settings.mobileIngoreAutoSpace,
+                mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
                 history: settings.memory ? 'memory' : settings.history,
                 historyFilter: settings.historyFilter,
@@ -12556,9 +12739,18 @@
             });
             function calculate_char_size() {
                 var width = char_size.width;
+                var height = char_size.height;
                 char_size = get_char_size(self);
+                var css_vars = {};
                 if (width !== char_size.width) {
                     command_line.option('charWidth', char_size.width).refresh();
+                    css_vars['--char-width'] = char_size.width;
+                }
+                if (height !== char_size.height) {
+                    css_vars['--char-height'] = char_size.height;
+                }
+                if (Object.keys(css_vars).length) {
+                    css(self[0], css_vars);
                 }
             }
             resize();
@@ -12587,6 +12779,7 @@
                     }
                     old_height = height;
                     old_width = width;
+                    container_width = self.width();
                     old_pixel_density = pixel_density;
                 }
             }
@@ -12700,15 +12893,22 @@
                 // don't make sense
                 observe_visibility();
             }
-            // wait for custom font to load #892
-            if (document.fonts && document.fonts.ready) {
-                document.fonts.ready.then(function() {
+            function fonts_ready() {
+                if (!defunct) {
                     if (have_custom_font(self)) {
                         calculate_char_size();
                         self.resize();
                     }
                     command_queue.resolve();
-                });
+                }
+            }
+            // wait for custom font to load #892
+            if (document.fonts && document.fonts.ready) {
+                if (document.fonts.status === 'loaded') {
+                    fonts_ready();
+                } else {
+                    document.fonts.ready.then(fonts_ready);
+                }
             } else {
                 command_queue.resolve();
             }
