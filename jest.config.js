@@ -6,7 +6,8 @@ module.exports = {
     ],
     testPathIgnorePatterns: [
         "\\/\\.#",
-        "/docs/"
+        "/docs/",
+        "/docusaurus/"
     ],
     testMatch: [
         "<rootDir>/__tests__/*.spec.js"
