@@ -21,6 +21,7 @@
 * fix browser shorcuts when terminal is paused [#1005](https://github.com/jcubic/jquery.terminal/issues/1005)
 * display exception from sync echo function [#997](https://github.com/jcubic/jquery.terminal/issues/997)
 * fix text on hover links when background is transparent [#990](https://github.com/jcubic/jquery.terminal/issues/990)
+* hide clipboard textarea from selection [#1015](https://github.com/jcubic/jquery.terminal/issues/1015)
 
 ## 2.44.1
 ### Bugfix

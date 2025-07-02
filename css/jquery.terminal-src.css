@@ -43,6 +43,9 @@
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * var(--size, 1) * (14px / var(--pixel-density, 1))) !important;
 }
+.cmd .visually-hidden, .cmd .cmd-clipboard {
+    user-select: none;
+}
 .visually-hidden {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);

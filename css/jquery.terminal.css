@@ -12,7 +12,7 @@
  * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 22 Feb 2025 17:18:23 +0000
+ * Date: Wed, 02 Jul 2025 21:10:48 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -42,6 +42,9 @@
     white-space: pre !important;
     text-indent: -9999em !important; /* better cursor hiding for Safari and IE */
     top: calc(var(--cursor-line, 0) * var(--size, 1) * (14px / var(--pixel-density, 1))) !important;
+}
+.cmd .visually-hidden, .cmd .cmd-clipboard {
+    user-select: none;
 }
 .visually-hidden {
     clip: rect(0 0 0 0);
