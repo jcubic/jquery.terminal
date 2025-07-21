@@ -3140,6 +3140,19 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
+        function fix_brave_prompt(html) {
+            var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
+            var m = html.match(attr_re);
+            // escape angle brackets in attributes
+            // BUG: https://community.brave.com/t/634482
+            if (m) {
+                return html.replace(attr_re, function(_, group) {
+                    return 'data-text="' + escape(group) + '"';
+                });
+            }
+            return html;
+        }
+        // ---------------------------------------------------------------------
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
@@ -3147,14 +3160,7 @@
             var html = $prompt.html();
             $prompt.html('<span>&nbsp;</span>');
             var width = $prompt.find('span').get(0).getBoundingClientRect().width;
-            // We escape HTML in data-text attribute becasue of a Brave BUG
-            // https://community.brave.com/t/634482
-            var attr_re = /data-text="([^"]+)"/;
-            var m = html.match(attr_re);
-            if (m && m[1].match(/[<>]/)) {
-                html = html.replace(attr_re, 'data-text="' + escape(m[1]) + '"');
-            }
-            $prompt.html(html);
+            $prompt.html(fix_brave_prompt(html));
             return width;
         }
         // ---------------------------------------------------------------------
