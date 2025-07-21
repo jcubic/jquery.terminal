@@ -20,7 +20,7 @@
     "ui"
   ],
   "bin": {
-    "from-ansi": "./bin/convert.js"
+    "from-ansi": "bin/convert.js"
   },
   "scripts": {
     "test": "make test"
@@ -191,7 +191,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jcubic/jquery.terminal.git"
+    "url": "git+https://github.com/jcubic/jquery.terminal.git"
   },
   "bugs": {
     "url": "https://github.com/jcubic/jquery.terminal/issues"
