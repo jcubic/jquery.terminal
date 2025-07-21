@@ -1,3 +1,7 @@
+## 2.45.1
+### Bugfix
+* fix a broken prompt in Brave [#1018](https://github.com/jcubic/jquery.terminal/issues/1018)
+
 ## 2.45.0
 ### Features
 * add `id` option that allow to create same terminal using hot reload [#978](https://github.com/jcubic/jquery.terminal/issues/978)
