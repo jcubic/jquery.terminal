@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 21 Jul 2025 22:29:07 +0000
+ * Date: Mon, 21 Jul 2025 22:40:37 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -3142,10 +3142,9 @@
         // ---------------------------------------------------------------------
         function fix_brave_prompt(html) {
             var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
-            var m = html.match(attr_re);
             // escape angle brackets in attributes
             // BUG: https://community.brave.com/t/634482
-            if (m) {
+            if (html.match(attr_re)) {
                 return html.replace(attr_re, function(_, group) {
                     return 'data-text="' + escape(group) + '"';
                 });
@@ -5469,7 +5468,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.45.1',
-        date: 'Mon, 21 Jul 2025 22:29:07 +0000',
+        date: 'Mon, 21 Jul 2025 22:40:37 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

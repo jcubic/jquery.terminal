@@ -3142,10 +3142,9 @@
         // ---------------------------------------------------------------------
         function fix_brave_prompt(html) {
             var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
-            var m = html.match(attr_re);
             // escape angle brackets in attributes
             // BUG: https://community.brave.com/t/634482
-            if (m) {
+            if (html.match(attr_re)) {
                 return html.replace(attr_re, function(_, group) {
                     return 'data-text="' + escape(group) + '"';
                 });
