@@ -3148,7 +3148,7 @@
             $prompt.html('<span>&nbsp;</span>');
             var width = $prompt.find('span').get(0).getBoundingClientRect().width;
             // We escape HTML in data-text attribute becasue of a Brave BUG
-            // https://community.brave.com/t/bug-brave-unescapes-angle-brackets-in-attributes/634482
+            // https://community.brave.com/t/634482
             var attr_re = /data-text="([^"]+)"/;
             var m = html.match(attr_re);
             if (m && m[1].match(/[<>]/)) {
