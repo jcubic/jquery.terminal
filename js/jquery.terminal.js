@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.45.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 21 Jul 2025 21:31:44 +0000
+ * Date: Mon, 21 Jul 2025 21:58:48 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -3148,7 +3148,7 @@
             $prompt.html('<span>&nbsp;</span>');
             var width = $prompt.find('span').get(0).getBoundingClientRect().width;
             // We escape HTML in data-text attribute becasue of a Brave BUG
-            // https://community.brave.com/t/bug-brave-unescapes-angle-brackets-in-attributes/634482
+            // https://community.brave.com/t/634482
             var attr_re = /data-text="([^"]+)"/;
             var m = html.match(attr_re);
             if (m && m[1].match(/[<>]/)) {
@@ -5462,8 +5462,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.45.1',
-        date: 'Mon, 21 Jul 2025 21:31:44 +0000',
+        version: 'DEV',
+        date: 'Mon, 21 Jul 2025 21:58:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
