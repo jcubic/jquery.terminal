@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 21 Jul 2025 21:58:48 +0000
+ * Date: Sun, 27 Jul 2025 12:45:55 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -3140,6 +3140,18 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
+        function fix_brave_prompt(html) {
+            var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
+            // escape angle brackets in attributes
+            // BUG: https://community.brave.com/t/634482
+            if (html.match(attr_re)) {
+                return html.replace(attr_re, function(_, group) {
+                    return 'data-text="' + escape(group) + '"';
+                });
+            }
+            return html;
+        }
+        // ---------------------------------------------------------------------
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
@@ -3147,14 +3159,7 @@
             var html = $prompt.html();
             $prompt.html('<span>&nbsp;</span>');
             var width = $prompt.find('span').get(0).getBoundingClientRect().width;
-            // We escape HTML in data-text attribute becasue of a Brave BUG
-            // https://community.brave.com/t/634482
-            var attr_re = /data-text="([^"]+)"/;
-            var m = html.match(attr_re);
-            if (m && m[1].match(/[<>]/)) {
-                html = html.replace(attr_re, 'data-text="' + escape(m[1]) + '"');
-            }
-            $prompt.html(html);
+            $prompt.html(fix_brave_prompt(html));
             return width;
         }
         // ---------------------------------------------------------------------
@@ -5463,7 +5468,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 21 Jul 2025 21:58:48 +0000',
+        date: 'Sun, 27 Jul 2025 12:45:55 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

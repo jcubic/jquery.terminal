@@ -1,4 +1,4 @@
-## 2.45.1
+## 2.45.1/2.45.2
 ### Bugfix
 * fix a broken prompt in Brave [#1018](https://github.com/jcubic/jquery.terminal/issues/1018)
 
