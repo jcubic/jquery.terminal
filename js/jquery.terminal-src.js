@@ -3140,26 +3140,14 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        function fix_brave_prompt(html) {
-            var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
-            // escape angle brackets in attributes
-            // BUG: https://community.brave.com/t/634482
-            if (html.match(attr_re)) {
-                return html.replace(attr_re, function(_, group) {
-                    return 'data-text="' + escape(group) + '"';
-                });
-            }
-            return html;
-        }
-        // ---------------------------------------------------------------------
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
-            var $prompt = self.find('.cmd-prompt');
-            var html = $prompt.html();
-            $prompt.html('<span>&nbsp;</span>');
-            var width = $prompt.find('span').get(0).getBoundingClientRect().width;
-            $prompt.html(fix_brave_prompt(html));
+            var $wrapper = self.find('.cmd-wrapper');
+            var $marker = $('<span>&nbsp;</span>');
+            $wrapper.append($marker);
+            var width = $marker.get(0).getBoundingClientRect().width;
+            $marker.remove();
             return width;
         }
         // ---------------------------------------------------------------------
