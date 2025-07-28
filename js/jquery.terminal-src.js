@@ -2931,6 +2931,7 @@
         function home(line) {
             function home() {
                 self.position(0);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2940,6 +2941,7 @@
                     } else {
                         home();
                     }
+                    return false;
                 };
             } else {
                 return home;
@@ -2949,6 +2951,7 @@
         function end(line) {
             function end() {
                 self.position(text(command).length);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2960,11 +2963,11 @@
                             sum += lines[i].length;
                             if (sum > pos) {
                                 self.position(sum + i);
-                                return;
+                                return false;
                             }
                         }
                     }
-                    end();
+                    return end();
                 };
             } else {
                 return end;

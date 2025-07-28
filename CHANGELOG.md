@@ -1,6 +1,9 @@
 ## 2.46.0
 ### Features
 * terminal::animation callback now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
+### Bugfix
+* fix CTRL+E in Brave [#1016](https://github.com/jcubic/jquery.terminal/issues/1016)
+
 
 ## 2.45.1/2.45.2
 ### Bugfix
