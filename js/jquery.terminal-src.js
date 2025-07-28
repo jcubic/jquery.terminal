@@ -11372,7 +11372,7 @@
                     animating = true;
                     var prompt = self.get_prompt();
                     self.set_prompt('');
-                    return unpromise(callback(), function() {
+                    return unpromise(callback.call(self), function() {
                         self.set_prompt(prompt);
                         animating = false;
                     });
