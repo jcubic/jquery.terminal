@@ -4432,6 +4432,9 @@
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
                   ' || ' + no_key + ') && !' + backspace + ')', e);
             // correct for fake space used for select all context menu hack
+            if (!enabled) {
+                return;
+            }
             var val = clip.val();
             if (!is_mobile) {
                 val = val.replace(/^ /, '');

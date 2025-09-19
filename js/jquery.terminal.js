@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 19 Sep 2025 16:02:08 +0000
+ * Date: Fri, 19 Sep 2025 16:37:29 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -233,8 +233,8 @@
     // -----------------------------------------------------------------------
     /* eslint-disable */
     /* istanbul ignore next */
-    function debug(str) {
-        $.terminal.debug(str);
+    function debug() {
+        $.terminal.debug.apply(null, arguments);
     }
     /* eslint-enable */
     // -----------------------------------------------------------------------
@@ -4212,7 +4212,7 @@
         // function complexicity is 35 when adding this exception
         // eslint-disable-next-line complexity
         function keydown_event(e) {
-            debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
+            debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which, e);
             var result;
             process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             dead_key = no_keypress && single_key && !is_backspace(e);
@@ -4353,7 +4353,7 @@
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
         function keypress_event(e) {
-            debug('keypress "' + e.key + '" ' + e.fake);
+            debug('keypress "' + e.key + '" ' + e.fake, e);
             clear_hold();
             var result;
             if (!e.fake) {
@@ -4427,11 +4427,14 @@
             skip_insert = false;
             no_keydown = true;
         }
-        function input_event() {
+        function input_event(e) {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
-                  ' || ' + no_key + ') && !' + backspace + ')');
+                  ' || ' + no_key + ') && !' + backspace + ')', e);
             // correct for fake space used for select all context menu hack
+            if (!enabled) {
+                return;
+            }
             var val = clip.val();
             if (!is_mobile) {
                 val = val.replace(/^ /, '');
@@ -5456,7 +5459,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Sep 2025 16:02:08 +0000',
+        date: 'Fri, 19 Sep 2025 16:37:29 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6961,7 +6964,7 @@
         // ---------------------------------------------------------------------
         // :: debug logger - default no op
         // ---------------------------------------------------------------------
-        $.terminal.debug = function() { };
+        $.terminal.debug = function() { }; // eslint-disable-line no-empty-function
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
