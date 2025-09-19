@@ -234,10 +234,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (false) {
-            console.log(str);
-            //$.terminal.active().echo(str);
-        }
+        $.terminal.debug(str);
     }
     /* eslint-enable */
     // -----------------------------------------------------------------------
@@ -6961,6 +6958,10 @@
                 return test;
             };
         }
+        // ---------------------------------------------------------------------
+        // :: debug logger - default no op
+        // ---------------------------------------------------------------------
+        $.terminal.debug = function() { };
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
