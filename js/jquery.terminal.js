@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 19 Sep 2025 16:37:29 +0000
+ * Date: Fri, 19 Sep 2025 17:49:26 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5459,7 +5459,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Sep 2025 16:37:29 +0000',
+        date: 'Fri, 19 Sep 2025 17:49:26 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

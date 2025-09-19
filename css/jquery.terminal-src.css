@@ -1186,6 +1186,25 @@ terminal .terminal-output > div {
     border: 0 !important;
 }
 /*
+ * Debug clipboard/content editable element
+ */
+.terminal-debug .cmd-clipboard, .terminal-debug .cmd-editable {
+    color: var(--color, #ccc) !important;
+    outline: 1px solid #ccc !important;
+    width: 100% !important;
+    font-size: var(--terminal-font-size) !important;
+}
+.terminal-debug .cmd-clipboard {
+    position: static !important;
+    text-indent: 0 !important;
+    height: calc(var(--terminal-font-size) * 1px) !important;
+}
+.terminal-debug .cmd-editable {
+    top: calc((var(--cmd-top) * 1px * var(--size)) + var(--cmd-font-size, 1em));
+    opacity: 1;
+    outline-offset: -1px;
+}
+/*
  * Allow to change scrollbar color
  */
 .terminal-wrapper {
