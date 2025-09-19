@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 27 Jul 2025 12:45:55 +0000
+ * Date: Fri, 19 Sep 2025 16:02:08 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -234,10 +234,7 @@
     /* eslint-disable */
     /* istanbul ignore next */
     function debug(str) {
-        if (false) {
-            console.log(str);
-            //$.terminal.active().echo(str);
-        }
+        $.terminal.debug(str);
     }
     /* eslint-enable */
     // -----------------------------------------------------------------------
@@ -2207,7 +2204,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip;
-        if (is_mobile) {
+        if (is_mobile || settings.inputStyle === 'contenteditable') {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
@@ -2931,6 +2928,7 @@
         function home(line) {
             function home() {
                 self.position(0);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2940,6 +2938,7 @@
                     } else {
                         home();
                     }
+                    return false;
                 };
             } else {
                 return home;
@@ -2949,6 +2948,7 @@
         function end(line) {
             function end() {
                 self.position(text(command).length);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2960,11 +2960,11 @@
                             sum += lines[i].length;
                             if (sum > pos) {
                                 self.position(sum + i);
-                                return;
+                                return false;
                             }
                         }
                     }
-                    end();
+                    return end();
                 };
             } else {
                 return end;
@@ -3140,26 +3140,14 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        function fix_brave_prompt(html) {
-            var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
-            // escape angle brackets in attributes
-            // BUG: https://community.brave.com/t/634482
-            if (html.match(attr_re)) {
-                return html.replace(attr_re, function(_, group) {
-                    return 'data-text="' + escape(group) + '"';
-                });
-            }
-            return html;
-        }
-        // ---------------------------------------------------------------------
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
-            var $prompt = self.find('.cmd-prompt');
-            var html = $prompt.html();
-            $prompt.html('<span>&nbsp;</span>');
-            var width = $prompt.find('span').get(0).getBoundingClientRect().width;
-            $prompt.html(fix_brave_prompt(html));
+            var $wrapper = self.find('.cmd-wrapper');
+            var $marker = $('<span>&nbsp;</span>');
+            $wrapper.append($marker);
+            var width = $marker.get(0).getBoundingClientRect().width;
+            $marker.remove();
             return width;
         }
         // ---------------------------------------------------------------------
@@ -5468,7 +5456,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 27 Jul 2025 12:45:55 +0000',
+        date: 'Fri, 19 Sep 2025 16:02:08 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6970,6 +6958,10 @@
                 return test;
             };
         }
+        // ---------------------------------------------------------------------
+        // :: debug logger - default no op
+        // ---------------------------------------------------------------------
+        $.terminal.debug = function() { };
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
@@ -11384,7 +11376,7 @@
                     animating = true;
                     var prompt = self.get_prompt();
                     self.set_prompt('');
-                    return unpromise(callback(), function() {
+                    return unpromise(callback.call(self), function() {
                         self.set_prompt(prompt);
                         animating = false;
                     });
@@ -12431,6 +12423,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                inputStyle: settings.inputStyle,
                 mobileDelete: settings.mobileDelete,
                 mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
