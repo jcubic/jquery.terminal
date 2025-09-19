@@ -2204,7 +2204,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip;
-        if (is_mobile) {
+        if (is_mobile || settings.inputStyle === 'contenteditable') {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
@@ -12423,6 +12423,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                inputStyle: settings.inputStyle,
                 mobileDelete: settings.mobileDelete,
                 mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
