@@ -12,7 +12,7 @@
  * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Fri, 19 Sep 2025 17:49:26 +0000
+ * Date: Sat, 20 Sep 2025 14:38:53 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -1145,7 +1145,7 @@ terminal .terminal-output > div {
 }
 .cmd-editable {
     position: absolute;
-    top: calc(var(--cmd-top) * 1px + var(--cmd-font-size, 1em));
+    top: calc(var(--cmd-top) * 1px);
     bottom: 0;
     right: 0;
     left: 0;
@@ -1154,6 +1154,7 @@ terminal .terminal-output > div {
     background: transparent;
     opacity: 0.01;
     outline: 0px solid transparent;
+    word-break: break-all;
 }
 /* Scrollbar */
 .terminal-scroller::-webkit-scrollbar {
@@ -1191,18 +1192,18 @@ terminal .terminal-output > div {
 .terminal-debug .cmd-clipboard, .terminal-debug .cmd-editable {
     color: var(--color, #ccc) !important;
     outline: 1px solid #ccc !important;
-    width: 100% !important;
     font-size: var(--terminal-font-size) !important;
 }
 .terminal-debug .cmd-clipboard {
     position: static !important;
     text-indent: 0 !important;
+    width: 100% !important;
     height: calc(var(--terminal-font-size) * 1px) !important;
 }
 .terminal-debug .cmd-editable {
-    top: calc((var(--cmd-top) * 1px * var(--size)) + var(--cmd-font-size, 1em));
     opacity: 1;
     outline-offset: -1px;
+    text-shadow: 0 0 2px red;
 }
 /*
  * Allow to change scrollbar color

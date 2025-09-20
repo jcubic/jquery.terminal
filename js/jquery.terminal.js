@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 20 Sep 2025 12:39:48 +0000
+ * Date: Sat, 20 Sep 2025 14:38:52 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5467,7 +5467,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 20 Sep 2025 12:39:48 +0000',
+        date: 'Sat, 20 Sep 2025 14:38:52 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11050,12 +11050,13 @@
                             var self_offset = self.offset();
                             var top = output.height();
                             var height = command_line.height();
+                            var padding = scroller.outerHeight() - scroller.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': scroller.prop('scrollTop'),
-                                '--cmd-top': top,
+                                '--cmd-top': top + padding,
                                 '--cmd-height': height
                             });
                             if (enabled && !is_mobile && !options.update) {

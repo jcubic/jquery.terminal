@@ -11050,12 +11050,13 @@
                             var self_offset = self.offset();
                             var top = output.height();
                             var height = command_line.height();
+                            var padding = scroller.outerHeight() - scroller.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': scroller.prop('scrollTop'),
-                                '--cmd-top': top,
+                                '--cmd-top': top + padding,
                                 '--cmd-height': height
                             });
                             if (enabled && !is_mobile && !options.update) {
