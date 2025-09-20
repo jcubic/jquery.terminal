@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Fri, 19 Sep 2025 17:49:26 +0000
+ * Date: Sat, 20 Sep 2025 12:05:08 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1361,6 +1361,11 @@
         var check = false;
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
+        }
+        // detect touch devices like Meta Horizon OS browser
+        var desktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        if (window.matchMedia && !desktop) {
+            return true;
         }
         // detect iPad 13
         // ref: https://stackoverflow.com/a/57924983/387194s
@@ -5459,7 +5464,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Fri, 19 Sep 2025 17:49:26 +0000',
+        date: 'Sat, 20 Sep 2025 12:05:08 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

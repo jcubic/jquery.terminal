@@ -1362,6 +1362,11 @@
         if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
             check = true;
         }
+        // detect touch devices like Meta Horizon OS browser
+        var desktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        if (window.matchMedia && !desktop) {
+            return true;
+        }
         // detect iPad 13
         // ref: https://stackoverflow.com/a/57924983/387194s
         if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
