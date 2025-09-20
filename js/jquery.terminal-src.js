@@ -1363,7 +1363,10 @@
             check = true;
         }
         // detect touch devices like Meta Horizon OS browser
-        var desktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        if ('ontouchstart' in root) {
+            return true;
+        }
+        var desktop = root.matchMedia && root.matchMedia('(pointer: fine)').matches;
         if (window.matchMedia && !desktop) {
             return true;
         }

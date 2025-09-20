@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sat, 20 Sep 2025 12:05:08 +0000
+ * Date: Sat, 20 Sep 2025 12:39:48 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1363,7 +1363,10 @@
             check = true;
         }
         // detect touch devices like Meta Horizon OS browser
-        var desktop = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        if ('ontouchstart' in root) {
+            return true;
+        }
+        var desktop = root.matchMedia && root.matchMedia('(pointer: fine)').matches;
         if (window.matchMedia && !desktop) {
             return true;
         }
@@ -5464,7 +5467,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sat, 20 Sep 2025 12:05:08 +0000',
+        date: 'Sat, 20 Sep 2025 12:39:48 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
