@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 21 Sep 2025 09:26:43 +0000
+ * Date: Sun, 21 Sep 2025 11:28:42 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2159,7 +2159,8 @@
     }
     // -------------------------------------------------------------------------
     function use_mobile(settings) {
-        return (settings.inputStyle === 'contenteditable' || is_mobile) && settings !== 'textarea';
+        return (settings.inputStyle === 'contenteditable' || is_mobile) &&
+            settings.inputStyle !== 'textarea';
     }
     // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
@@ -4532,7 +4533,7 @@
         doc.bind('input.cmd', input_event);
         (function() {
             if (use_mobile(settings)) {
-                $(clip.$node).on('click touchstart.cmd', function() {
+                $(clip.$node).on('click touchstart', function() {
                     self.display_position(clip.$node.caret());
                 });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
@@ -4592,7 +4593,6 @@
                 was_down = false;
             });
         })();
-        
         self.data('cmd', self);
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             setTimeout(function() {
@@ -5482,7 +5482,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 21 Sep 2025 09:26:43 +0000',
+        date: 'Sun, 21 Sep 2025 11:28:42 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -12003,7 +12003,7 @@
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
-                    if (use_moble(settings)) {
+                    if (use_mobile(settings)) {
                         self.off([
                             'touchstart.terminal',
                             'touchmove.terminal',
