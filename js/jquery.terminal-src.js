@@ -4532,6 +4532,9 @@
         doc.bind('input.cmd', input_event);
         (function() {
             if (use_mobile(settings)) {
+                $(clip.$node).on('click touchstart.cmd', function() {
+                    self.display_position(clip.$node.caret());
+                });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
                         clip.focus();
