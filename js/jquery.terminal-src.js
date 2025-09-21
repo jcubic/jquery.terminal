@@ -2158,6 +2158,10 @@
         return deferred.promise();
     }
     // -------------------------------------------------------------------------
+    function use_mobile(settings) {
+        return (settings.inputStyle === 'contenteditable' || is_mobile) && settings !== 'textarea';
+    }
+    // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
@@ -2212,7 +2216,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip;
-        if (is_mobile || settings.inputStyle === 'contenteditable') {
+        if (use_mobile(settings)) {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
@@ -2499,7 +2503,7 @@
                 }
                 var tmp = command;
                 // fix scroll the page where there is no scrollbar
-                if (!is_mobile) {
+                if (!use_mobile(settings)) {
                     clip.$node.blur();
                 }
                 history.reset();
@@ -2524,7 +2528,7 @@
                         draw_prompt();
                     }
                 }
-                if (!is_mobile) {
+                if (!use_mobile(settings)) {
                     clip.$node.focus();
                 }
                 return false;
@@ -2676,9 +2680,16 @@
             'META+L': return_true // CLD+L jump into Ominbox on Chrome Mac
         };
         // -------------------------------------------------------------------------------
+        function mobile_delete() {
+            if (settings.inputStyle === 'contenteditable') {
+                return true;
+            }
+            return settings.mobileDelete;
+        }
+        // -------------------------------------------------------------------------------
         function delete_forward(options) {
             options = options || {};
-            if (options.hold && !settings.mobileDelete) {
+            if (options.hold && !mobile_delete()) {
                 return function delete_character_forward() {
                     self['delete'](1);
                     return false;
@@ -2706,7 +2717,7 @@
         // -------------------------------------------------------------------------------
         function delete_backward(options) {
             options = options || {};
-            if (options.hold && !settings.mobileDelete) {
+            if (options.hold && !mobile_delete()) {
                 return function delete_character_backward() {
                     self['delete'](-1);
                 };
@@ -3034,13 +3045,13 @@
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
                 // idea taken from CodeMirror
-                if (!is_mobile && clip.val() !== command && !position_only) {
+                if (!use_mobile(settings) && clip.val() !== command && !position_only) {
                     clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            var pos = !is_mobile ? position + 1 : position;
+                            var pos = !use_mobile(settings) ? position + 1 : position;
                             // we check first to improve performance
                             if (clip.$node.caret() !== pos) {
                                 clip.$node.caret(pos);
@@ -4204,7 +4215,7 @@
         // ---------------------------------------------------------------------
         function is_delay_key(key) {
             var specials = ['HOLD+SHIFT+BACKSPACE', 'HOLD+BACKSPACE'];
-            return specials.indexOf(key) !== -1 && settings.mobileDelete ||
+            return specials.indexOf(key) !== -1 && mobile_delete() ||
                 settings.repeatTimeoutKeys.indexOf(key) !== -1;
         }
         // ---------------------------------------------------------------------
@@ -4444,7 +4455,7 @@
                 return;
             }
             var val = clip.val();
-            if (!is_mobile) {
+            if (!use_mobile(settings)) {
                 val = val.replace(/^ /, '');
             }
             // Some Androids don't fire keypress - #39
@@ -4520,7 +4531,7 @@
         doc.bind('keyup.cmd', clear_hold);
         doc.bind('input.cmd', input_event);
         (function() {
-            if (is_mobile) {
+            if (use_mobile(settings)) {
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
                         clip.focus();
@@ -4578,6 +4589,7 @@
                 was_down = false;
             });
         })();
+        
         self.data('cmd', self);
         if (!('KeyboardEvent' in window && 'key' in window.KeyboardEvent.prototype)) {
             setTimeout(function() {
@@ -11059,7 +11071,7 @@
                                 '--cmd-top': top + padding,
                                 '--cmd-height': height
                             });
-                            if (enabled && !is_mobile && !options.update) {
+                            if (enabled && !use_mobile(settings) && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
@@ -11988,7 +12000,7 @@
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
-                    if (is_mobile) {
+                    if (use_moble(settings)) {
                         self.off([
                             'touchstart.terminal',
                             'touchmove.terminal',
@@ -12474,7 +12486,7 @@
                 commands: commands
             });
             function disable(e) {
-                if (is_mobile) {
+                if (use_mobile(settings)) {
                     return;
                 }
                 e = e.originalEvent;
@@ -12501,7 +12513,7 @@
                 self.disable();
             });
             // istanbul ignore next
-            if (is_mobile) {
+            if (use_mobile(settings)) {
                 (function() {
                     self.addClass('terminal-mobile');
                     var start;
@@ -12930,7 +12942,7 @@
                 command_queue.resolve();
             }
             // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_mobile) {
+            if (enabled && self.is(':visible') && !use_mobile(settings)) {
                 self.focus(undefined, true);
             } else {
                 self.disable();
