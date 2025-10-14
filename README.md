@@ -95,6 +95,10 @@ And development version using:
 
 You can use any version you want, everything what [jsDelivr GH API accepts](https://www.jsdelivr.com/?docs=gh).
 
+You can find all interactive examples of jQuery Terminal in one place:
+
+- [CodePen Collection of jQuery Terminal Demos](https://codepen.io/collection/LPjoaW)
+
 ### Installation
 
 Include jQuery library, you can use cdn from https://jquery.com/download/
