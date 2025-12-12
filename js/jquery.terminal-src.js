@@ -2053,6 +2053,7 @@
             finalize: options.finalize,
             index: index,
             raw: options.raw,
+            dynamic: options.dynamic,
             newline: options.newline
         });
     };
@@ -8587,6 +8588,7 @@
                     useCache: use_cache,
                     invokeMethods: false,
                     formatters: true,
+                    dynamic: is_function(line.value),
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string = stringify_value(line.value);
@@ -10972,6 +10974,14 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
+                            function skip() {
+                                // don't re-render html and jQuery/DOM nodes #759
+                                // but update HTML that came from function #1029
+                                if (options.update && data.raw === true && data.newline) {
+                                    return !data.dynamic;
+                                }
+                                return false;
+                            }
                             if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
@@ -10982,8 +10992,7 @@
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
-                                if (options.update && data.raw === true && data.newline) {
-                                    // don't re-render html and jQuery/DOM nodes #759
+                                if (skip()) {
                                     return;
                                 }
                                 if (scroll) {
