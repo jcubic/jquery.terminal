@@ -2,8 +2,12 @@
 ### Features
 * terminal::animation callback now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
 * add option to use `raw` in prompt
+* Terminal::animation now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
+* Improve the library on Meta Quest Browser[#1023](https://github.com/jcubic/jquery.terminal/issues/1023)
 ### Bugfix
 * fix CTRL+E in Brave [#1016](https://github.com/jcubic/jquery.terminal/issues/1016)
+* fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
+* fix updating echo functions that return HTML (with `raw: true`) [#1029](https://github.com/jcubic/jquery.terminal/issues/1029)
 
 ## 2.45.1/2.45.2
 ### Bugfix
