@@ -2172,6 +2172,7 @@
             caseSensitiveSearch: true,
             historySize: 60,
             prompt: '> ',
+            raw: false,
             enabled: true,
             history: true,
             onPositionChange: $.noop,
@@ -3707,14 +3708,14 @@
                 }).concat([last_line]).join('\n');
             }
             function set(prompt, options) {
-                if (prompt) {
+                if (prompt && !settings.raw) {
                     if (options && options.formatters || !options) {
                         prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                         prompt = $.terminal.normalize(prompt);
                     }
                     prompt = crlf(prompt);
                 }
-                var formatted = format_prompt(prompt);
+                var formatted = settings.raw ? prompt : format_prompt(prompt);
                 last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
@@ -7693,7 +7694,7 @@
         maskChar: '*',
         wrap: true,
         checkArity: true,
-        raw: false,
+        raw: false, // { prompt, echo }
         tabindex: 1,
         invokeMethods: false,
         exceptionHandler: null,
@@ -8812,7 +8813,12 @@
                 }
             };
             command = $.terminal.apply_formatters(command, {command: true});
-            self.echo(prompt + command, options);
+            if (raw('prompt') && !raw('echo')) {
+                command = $.terminal.format(command);
+                self.echo(prompt + command, $.extend(options, {raw: true}));
+            } else {
+                self.echo(prompt + command, options);
+            }
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
@@ -9683,6 +9689,16 @@
                 }
                 return self;
             };
+        }
+        // ---------------------------------------------------------------------
+        // :: helper that checks raw option
+        // :: it can be boolean or { echo: boolean, prompt: boolean }
+        // ---------------------------------------------------------------------
+        function raw(type) {
+            if ($.isPlainObject(settings.raw)) {
+                return settings.raw[type];
+            }
+            return settings.raw;
         }
         // ---------------------------------------------------------------------
         // :: this even can be used to valid if user and password is valid
@@ -11210,7 +11226,7 @@
                         var locals = $.extend({
                             flush: true,
                             exec: true,
-                            raw: settings.raw,
+                            raw: raw('echo'),
                             finalize: $.noop,
                             unmount: $.noop,
                             delay: settings.execAnimationDelay,
@@ -12450,6 +12466,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                raw: raw('prompt'),
                 inputStyle: settings.inputStyle,
                 mobileDelete: settings.mobileDelete,
                 mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
