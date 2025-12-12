@@ -8441,6 +8441,21 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: return default jQuery Terminal signature (with ASCII Art)
+        // ---------------------------------------------------------------------
+        function signature() {
+            var cols = self.cols();
+            for (var i = signatures.length; i--;) {
+                var lengths = signatures[i].map(function(line) {
+                    return $.terminal.length(line);
+                });
+                if (Math.max.apply(null, lengths) <= cols) {
+                    return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
+                }
+            }
+            return '';
+        }
+        // ---------------------------------------------------------------------
         // :: Create JSON-RPC authentication function
         // ---------------------------------------------------------------------
         function make_json_rpc_login(url, login) {
@@ -10717,16 +10732,14 @@
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
             signature: function() {
-                var cols = self.cols();
-                for (var i = signatures.length; i--;) {
-                    var lengths = signatures[i].map(function(line) {
-                        return $.terminal.length(line);
-                    });
-                    if (Math.max.apply(null, lengths) <= cols) {
-                        return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
-                    }
+                var result = signature();
+                if (raw('echo')) {
+                    result = result.split('\n').map(function(line) {
+                        return $.terminal.format(links(line));
+                    }).join('\n');
+                    return '<pre class="terminal-signature">' + result + '</pre>';
                 }
-                return '';
+                return result;
             },
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
