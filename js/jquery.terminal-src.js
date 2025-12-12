@@ -9695,10 +9695,15 @@
         // :: it can be boolean or { echo: boolean, prompt: boolean }
         // ---------------------------------------------------------------------
         function raw(type) {
+            // new API
             if ($.isPlainObject(settings.raw)) {
                 return settings.raw[type];
             }
-            return settings.raw;
+            // boolean only impacts echo
+            if (type === 'echo') {
+                return settings.raw;
+            }
+            return false;
         }
         // ---------------------------------------------------------------------
         // :: this even can be used to valid if user and password is valid
