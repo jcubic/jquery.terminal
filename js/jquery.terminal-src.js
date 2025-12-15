@@ -2203,6 +2203,9 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
+        if (settings.raw) {
+            self.addClass('raw');
+        }
         var wrapper = $('<div class="cmd-wrapper"/>').appendTo(self);
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +

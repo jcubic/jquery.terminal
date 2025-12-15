@@ -302,11 +302,15 @@ body.full-screen-terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output > div:not(.raw) div::before,
+.terminal-output > div div::before,
 .cmd .cmd-line::before {
     content: '\0200B';
     width: 0;
     display: inline-block;
+}
+.cmd.raw .cmd-prompt {
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 .cmd .cmd-line {
     white-space: nowrap;
