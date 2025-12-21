@@ -1048,13 +1048,15 @@
             }, options);
             var $this = $(this);
             var resizer;
+            var timer;
             var first = true;
             if ($this.is('body')) {
                 $(window).on('resize.resizer', handler);
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        setTimeout(handler, 0);
+                        clearTimeout(timer);
+                        timer = setTimeout(handler, 0);
                     }
                     first = false;
                 });
@@ -11126,7 +11128,7 @@
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
                                 cmd_cursor.hide();
-                                setTimeout(function() {
+                                cmd_cursor.stopTime().oneTime(1, function() {
                                     cmd_cursor.show();
                                 });
                             }
