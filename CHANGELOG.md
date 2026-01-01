@@ -1,3 +1,7 @@
+## 2.46.1
+### Bugfix
+* fix `--terminal-scrollbar` CSS variable
+
 ## 2.46.0
 ### Features
 * terminal::animation callback now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)

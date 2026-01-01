@@ -12294,6 +12294,7 @@
         self.addClass('terminal');
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
+        container_width = self.width();
         css(self[0], {
             '--char-width': char_size.width,
             '--char-height': char_size.height,
