@@ -12336,13 +12336,7 @@
                 }
             }
         }
-        var global_login_fn;
-        if (is_function(settings.login)) {
-            global_login_fn = settings.login;
-        } else if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login === true)) {
-            global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
-        }
+        var global_login_fn = make_global_login();
         if (have_custom_id) {
             if (!terminals.set(settings.id, self)) {
                 warn(strings().invalidId);
@@ -12354,6 +12348,15 @@
             if (old_enabled) {
                 self.focus();
                 self.scroll_to_bottom();
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function make_global_login() {
+            if (is_function(settings.login)) {
+                return settings.login;
+            } else if (base_interpreter &&
+                       (typeof settings.login === 'string' || settings.login === true)) {
+                return make_json_rpc_login(base_interpreter, settings.login);
             }
         }
         // -------------------------------------------------------------------------------
