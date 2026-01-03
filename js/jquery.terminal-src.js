@@ -7539,8 +7539,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var filler = terminal.find('.terminal-fill');
-        var height = filler.height();
+        var size_filler = terminal.find('.terminal-fill');
+        var height = size_filler.height();
         return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -8846,7 +8846,7 @@
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            return filler.outerWidth() !== self.outerWidth();
+            return size_filler.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -9177,12 +9177,16 @@
             function scroll_to_view(visible) {
                 if (!visible) {
                     // try catch for Node.js unit tests
-                    try {
-                        self.scroll_to(self.find('.cmd-cursor-line'));
-                        return true;
-                    } catch (e) {
-                        return true;
-                    }
+                    self.stopTime('scroll_to');
+                    self.oneTime(1, 'scroll_to', function() {
+                        try {
+                            self.scroll_to(self.find('.cmd-cursor-line'));
+                            return true;
+                        } catch (e) {
+                            return true;
+                        }
+                    });
+                    return true;
                 }
             }
             // we don't want debounce in Unit Tests
@@ -9190,8 +9194,8 @@
                 return scroll_to_view;
             }
             return debounce(scroll_to_view, 100, {
-                leading: true,
-                trailing: false
+                leading: false,
+                trailing: true
             });
         })();
         // ---------------------------------------------------------------------
@@ -9529,16 +9533,20 @@
                     }
                     var bottom = self.is_bottom();
                     var line = 0;
+                    var chars = $.terminal.partition(formatted, {wrap: false});
+                    if (raw('prompt')) {
+                        chars = chars.map(function(str) {
+                            return $.terminal.format(str);
+                        });
+                    }
                     if (optimized) {
                         var anim_lines = formatted_lines.map(function(formatted) {
                             return {
                                 formatted: formatted,
-                                chars: $.terminal.partition(formatted, {wrap: false}),
+                                chars: chars,
                                 len: $.terminal.length(formatted)
                             };
                         });
-                    } else {
-                        var chars = $.terminal.partition(formatted, {wrap: false});
                     }
                     var stop;
                     var interval = setInterval(function() {
@@ -9883,12 +9891,12 @@
         }
         // ---------------------------------------------------------------------
         function get_scrollbar_width() {
-            var width = filler.outerWidth();
+            var width = size_filler.outerWidth();
             return container_width - width;
         }
         // ---------------------------------------------------------------------
         function get_padding() {
-            var style = window.getComputedStyle(filler[0]);
+            var style = window.getComputedStyle(size_filler[0]);
             function padding(name) {
                 return get_prop_number(style, 'padding-' + name);
             }
@@ -11118,6 +11126,7 @@
                             var padding = scroller.outerHeight() - scroller.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
+                                '--terminal-line-count': output_line_count,
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': scroller.prop('scrollTop'),
@@ -11127,9 +11136,9 @@
                             if (enabled && !use_mobile(settings) && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
-                                cmd_cursor.hide();
+                                //cmd_cursor.hide();
                                 cmd_cursor.stopTime().oneTime(1, function() {
-                                    cmd_cursor.show();
+                                    //cmd_cursor.show();
                                 });
                             }
                         });
@@ -12273,6 +12282,7 @@
         var interpreters;
         var command_line;
         var old_enabled;
+        var virtual_filler;
         var visibility_observer;
         var mutation_observer;
         // backward compatibility
@@ -12288,7 +12298,11 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        var size_filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        if (settings.virtualOutput) {
+            virtual_filler = $('<div>').addClass('terminal-virtual-filler')
+                .appendTo(wrapper);
+        }
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
@@ -12531,7 +12545,7 @@
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
                     //  and scrollbar appear
-                    if (old_width !== filler.width()) {
+                    if (old_width !== size_filler.width()) {
                         // resizer handler will update old_width
                         self.resizer();
                     }
@@ -12669,7 +12683,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, filler, pixel_density)) {
+                        if (!scrollbar_event(e, size_filler, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -12737,7 +12751,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = filler.outerWidth() * pixel_density;
+                            var content_width = size_filler.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -12840,8 +12854,9 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = filler.width();
-                    var height = filler.height();
+                    // TODO: use getBoundingClientRect
+                    var width = size_filler.width();
+                    var height = size_filler.height();
                     pixel_density = get_pixel_size();
                     if (old_pixel_density !== pixel_density) {
                         css(self[0], {
