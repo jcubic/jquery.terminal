@@ -11,6 +11,7 @@
 * fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
 * fix updating echo functions that return HTML (with `raw: true`) [#1029](https://github.com/jcubic/jquery.terminal/issues/1029)
 * fix `--terminal-scrollbar` CSS variable
+* fix refresh of echo command when formatters change [#1013](https://github.com/jcubic/jquery.terminal/issues/1013)
 
 ## 2.45.1/2.45.2
 ### Bugfix

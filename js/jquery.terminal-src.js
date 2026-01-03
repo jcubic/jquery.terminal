@@ -8836,13 +8836,15 @@
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            command = $.terminal.apply_formatters(command, {command: true});
-            if (raw('prompt') && !raw('echo')) {
-                command = $.terminal.format(command);
-                self.echo(prompt + command, $.extend(options, {raw: true}));
-            } else {
-                self.echo(prompt + command, options);
-            }
+            var is_raw = raw('prompt') && !raw('echo');
+            // we use function so apply_formatters is called when formatters change #1013
+            self.echo(function() {
+                var cmd = $.terminal.apply_formatters(command, {command: true});
+                if (is_raw) {
+                    cmd = $.terminal.format(command);
+                }
+                return prompt + cmd;
+            }, is_raw ? $.extend(options, {raw: true}) : options);
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
