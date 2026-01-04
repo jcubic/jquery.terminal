@@ -464,23 +464,31 @@
                 });
                 return promise.then(function() {
                     $.extend(term, orig);
-                    term.echo = function(arg, options) {
-                        var settings = options;
-                        if (tty.options.length) {
-                            var onClear = function() {
-                                if (settings && settings.onClear) {
-                                    settings.onClear();
-                                }
-                                tty.options.forEach(function(options) {
-                                    if (options && options.onClear) {
-                                        options.onClear();
+                    var orig_echo = orig.echo;
+                    term.echo = function(arg, options, deferred) {
+                        try {
+                            var settings = options;
+                            if (tty.options && tty.options.length) {
+                                var onClear = function() {
+                                    if (settings && settings.onClear) {
+                                        settings.onClear();
                                     }
-                                });
-                            };
-                            options = $.extend({onClear: onClear}, options);
+                                    tty.options.forEach(function(options) {
+                                        if (options && options.onClear) {
+                                            options.onClear();
+                                        }
+                                    });
+                                };
+                                options = $.extend({ onClear: onClear }, options);
+                            }
+                            var ret = orig.echo(arg, options, deferred);
+                            term.echo = orig_echo;
+                            return ret;
+                        } catch(e) {
+                            console.error(e.message);
+                            console.error(e.stack);
+                            return term;
                         }
-                        orig.echo(arg, options);
-                        term.echo = orig.echo;
                     };
                 });
             }

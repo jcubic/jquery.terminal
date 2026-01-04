@@ -1,4 +1,6 @@
 ## 2.46.0
+### Breaking
+* echo command now echo a function, and they will appear in export_view
 ### Features
 * terminal::animation callback now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
 * add option to use `raw` in prompt
