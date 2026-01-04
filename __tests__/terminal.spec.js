@@ -5275,8 +5275,8 @@ describe('Terminal plugin', function() {
                     expect(exported_view.mask).toEqual(mask);
                     expect(exported_view.command).toEqual(command);
                     expect(exported_view.lines[0][0]).toEqual('Hello World!');
-                    expect(exported_view.lines[1][0]).toEqual('> foo');
-                    expect(exported_view.lines[2][0]).toEqual('> bar');
+                    expect(exported_view.lines[1][0]()).toEqual('> foo');
+                    expect(exported_view.lines[2][0]()).toEqual('> bar');
                     expect(exported_view.interpreters.size()).toEqual(1);
                     var top = exported_view.interpreters.top();
                     expect(top.interpreter).toEqual($.noop);

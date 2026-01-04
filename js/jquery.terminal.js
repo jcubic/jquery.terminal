@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 15:13:05 +0000
+ * Date: Sun, 04 Jan 2026 17:49:14 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1856,7 +1856,7 @@
                             return acc + arg;
                         });
                     }
-                    return arg;
+                    return acc + arg;
                 });
             };
         } else if (args.some(is_promise)) {
@@ -5497,7 +5497,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 15:13:05 +0000',
+        date: 'Sun, 04 Jan 2026 17:49:14 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7000,9 +7000,9 @@
             };
         }
         // ---------------------------------------------------------------------
-        // :: debug logger - default no op
+        // :: debug logger
         // ---------------------------------------------------------------------
-        $.terminal.debug = function() { }; // eslint-disable-line no-empty-function
+        $.terminal.debug = $.noop;
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------

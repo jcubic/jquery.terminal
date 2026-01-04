@@ -479,14 +479,16 @@
                                         }
                                     });
                                 };
-                                options = $.extend({ onClear: onClear }, options);
+                                options = $.extend({onClear: onClear}, options);
                             }
                             var ret = orig.echo(arg, options, deferred);
                             term.echo = orig_echo;
                             return ret;
-                        } catch(e) {
+                        } catch (e) {
+                            /* eslint-disable no-console */
                             console.error(e.message);
                             console.error(e.stack);
+                            /* eslint-enable no-console */
                             return term;
                         }
                     };

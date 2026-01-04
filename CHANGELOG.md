@@ -14,6 +14,7 @@
 * fix updating echo functions that return HTML (with `raw: true`) [#1029](https://github.com/jcubic/jquery.terminal/issues/1029)
 * fix `--terminal-scrollbar` CSS variable
 * fix refresh of echo command when formatters change [#1013](https://github.com/jcubic/jquery.terminal/issues/1013)
+* fix swallowing echo `newline: false` with a function [#1037](https://github.com/jcubic/jquery.terminal/issues/1037)
 
 ## 2.45.1/2.45.2
 ### Bugfix

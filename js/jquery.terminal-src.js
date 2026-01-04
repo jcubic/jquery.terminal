@@ -1856,7 +1856,7 @@
                             return acc + arg;
                         });
                     }
-                    return arg;
+                    return acc + arg;
                 });
             };
         } else if (args.some(is_promise)) {
@@ -7000,9 +7000,9 @@
             };
         }
         // ---------------------------------------------------------------------
-        // :: debug logger - default no op
+        // :: debug logger
         // ---------------------------------------------------------------------
-        $.terminal.debug = function() { }; // eslint-disable-line no-empty-function
+        $.terminal.debug = $.noop;
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
