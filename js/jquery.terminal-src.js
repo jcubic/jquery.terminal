@@ -6415,7 +6415,7 @@
                 input = [string, 0];
             }
             try {
-                var result = formatters.reduce(function(input, formatter, index) {
+                var result = formatters.reduce(function(input, formatter) {
                     i++;
                     // __meta__ is for safe formatter that can handle formatters
                     // inside formatters. for other usage we use format_split so one
