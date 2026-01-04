@@ -340,7 +340,11 @@
             return cmd.name + ' ' + cmd.args.map(function(arg, i) {
                 if (cmd.args_quotes[i]) {
                     var quote = cmd.args_quotes[i];
-                    return quote + unparse(arg) + quote;
+                    var result = unparse(arg);
+                    if (quote === '"' && result.match(/\\'/)) {
+                        result = result.replace(/\\'/g, "'");
+                    }
+                    return quote + result + quote;
                 }
                 if (typeof arg === 'string') {
                     return arg.replace(/ /g, '\\ ');
@@ -392,7 +396,7 @@
             if (single_command(commands)) {
                 var cmd = commands[0];
                 if (is_function(interpreter)) {
-                    return interpreter.call(term, stringify(cmd), term);
+                    return interpreter.call(term, command, term);
                 } else if (is_function(interpreter[cmd.name])) {
                     return interpreter[cmd.name].apply(term, cmd.args);
                 } else if ($.isPlainObject(interpreter[cmd.name])) {
