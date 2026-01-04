@@ -450,6 +450,24 @@
                 });
                 return promise.then(function() {
                     $.extend(term, orig);
+                    term.echo = function(arg, options) {
+                        var settings = options;
+                        if (tty.options.length) {
+                            var onClear = function() {
+                                if (settings && settings.onClear) {
+                                    settings.onClear();
+                                }
+                                tty.options.forEach(function(options) {
+                                    if (options && options.onClear) {
+                                        options.onClear();
+                                    }
+                                });
+                            };
+                            options = $.extend({ onClear: onClear }, options);
+                        }
+                        orig.echo(arg, options);
+                        term.echo = orig.echo;
+                    };
                 });
             }
         };
