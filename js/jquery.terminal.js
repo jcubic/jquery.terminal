@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 21 Sep 2025 11:28:42 +0000
+ * Date: Sun, 04 Jan 2026 10:39:33 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1048,13 +1048,15 @@
             }, options);
             var $this = $(this);
             var resizer;
+            var timer;
             var first = true;
             if ($this.is('body')) {
                 $(window).on('resize.resizer', handler);
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        setTimeout(handler, 0);
+                        clearTimeout(timer);
+                        timer = setTimeout(handler, 0);
                     }
                     first = false;
                 });
@@ -2053,6 +2055,7 @@
             finalize: options.finalize,
             index: index,
             raw: options.raw,
+            dynamic: options.dynamic,
             newline: options.newline
         });
     };
@@ -2172,6 +2175,7 @@
             caseSensitiveSearch: true,
             historySize: 60,
             prompt: '> ',
+            raw: false,
             enabled: true,
             history: true,
             onPositionChange: $.noop,
@@ -2201,6 +2205,9 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
+        if (settings.raw) {
+            self.addClass('raw');
+        }
         var wrapper = $('<div class="cmd-wrapper"/>').appendTo(self);
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +
@@ -2856,6 +2863,7 @@
                 var is_splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(command);
                 prev = lines[line - 1];
+                // line don't exist, line fit the width and cursor at 0 #1026
                 var left_over = lines[line].substring(col).length;
                 var diff;
                 if (left_over > 0) {
@@ -2868,6 +2876,7 @@
                         ++diff;
                     }
                 } else {
+                    // we move to the end of the previous line
                     diff = col + 1;
                 }
                 self.position(-diff, true);
@@ -3707,14 +3716,14 @@
                 }).concat([last_line]).join('\n');
             }
             function set(prompt, options) {
-                if (prompt) {
+                if (prompt && !settings.raw) {
                     if (options && options.formatters || !options) {
                         prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                         prompt = $.terminal.normalize(prompt);
                     }
                     prompt = crlf(prompt);
                 }
-                var formatted = format_prompt(prompt);
+                var formatted = settings.raw ? prompt : format_prompt(prompt);
                 last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
@@ -5482,7 +5491,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 21 Sep 2025 11:28:42 +0000',
+        date: 'Sun, 04 Jan 2026 10:39:33 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6672,6 +6681,9 @@
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }
+                        if (quote === '"') {
+                            string = string.replace(/\\'/g, "'");
+                        }
                     }
                     string = '"' + string + '"';
                     // use build in function to parse rest of escaped characters
@@ -7530,8 +7542,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var filler = terminal.find('.terminal-fill');
-        var height = filler.height();
+        var size_filler = terminal.find('.terminal-fill');
+        var height = size_filler.height();
         return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -7693,7 +7705,7 @@
         maskChar: '*',
         wrap: true,
         checkArity: true,
-        raw: false,
+        raw: false, // { prompt, echo }
         tabindex: 1,
         invokeMethods: false,
         exceptionHandler: null,
@@ -8439,6 +8451,21 @@
             }
         }
         // ---------------------------------------------------------------------
+        // :: return default jQuery Terminal signature (with ASCII Art)
+        // ---------------------------------------------------------------------
+        function signature() {
+            var cols = self.cols();
+            for (var i = signatures.length; i--;) {
+                var lengths = signatures[i].map(function(line) {
+                    return $.terminal.length(line);
+                });
+                if (Math.max.apply(null, lengths) <= cols) {
+                    return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
+                }
+            }
+            return '';
+        }
+        // ---------------------------------------------------------------------
         // :: Create JSON-RPC authentication function
         // ---------------------------------------------------------------------
         function make_json_rpc_login(url, login) {
@@ -8586,6 +8613,7 @@
                     useCache: use_cache,
                     invokeMethods: false,
                     formatters: true,
+                    dynamic: is_function(line.value),
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string = stringify_value(line.value);
@@ -8811,12 +8839,19 @@
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            command = $.terminal.apply_formatters(command, {command: true});
-            self.echo(prompt + command, options);
+            var is_raw = raw('prompt') && !raw('echo');
+            // we use function so apply_formatters is called when formatters change #1013
+            self.echo(function() {
+                var cmd = $.terminal.apply_formatters(command, {command: true});
+                if (is_raw) {
+                    cmd = $.terminal.format(command);
+                }
+                return prompt + cmd;
+            }, is_raw ? $.extend(options, {raw: true}) : options);
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            return filler.outerWidth() !== self.outerWidth();
+            return size_filler.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -9147,12 +9182,16 @@
             function scroll_to_view(visible) {
                 if (!visible) {
                     // try catch for Node.js unit tests
-                    try {
-                        self.scroll_to(self.find('.cmd-cursor-line'));
-                        return true;
-                    } catch (e) {
-                        return true;
-                    }
+                    self.stopTime('scroll_to');
+                    self.oneTime(1, 'scroll_to', function() {
+                        try {
+                            self.scroll_to(self.find('.cmd-cursor-line'));
+                            return true;
+                        } catch (e) {
+                            return true;
+                        }
+                    });
+                    return true;
                 }
             }
             // we don't want debounce in Unit Tests
@@ -9160,8 +9199,8 @@
                 return scroll_to_view;
             }
             return debounce(scroll_to_view, 100, {
-                leading: true,
-                trailing: false
+                leading: false,
+                trailing: true
             });
         })();
         // ---------------------------------------------------------------------
@@ -9499,16 +9538,20 @@
                     }
                     var bottom = self.is_bottom();
                     var line = 0;
+                    var chars = $.terminal.partition(formatted, {wrap: false});
+                    if (raw('prompt')) {
+                        chars = chars.map(function(str) {
+                            return $.terminal.format(str);
+                        });
+                    }
                     if (optimized) {
                         var anim_lines = formatted_lines.map(function(formatted) {
                             return {
                                 formatted: formatted,
-                                chars: $.terminal.partition(formatted, {wrap: false}),
+                                chars: chars,
                                 len: $.terminal.length(formatted)
                             };
                         });
-                    } else {
-                        var chars = $.terminal.partition(formatted, {wrap: false});
                     }
                     var stop;
                     var interval = setInterval(function() {
@@ -9685,6 +9728,21 @@
             };
         }
         // ---------------------------------------------------------------------
+        // :: helper that checks raw option
+        // :: it can be boolean or { echo: boolean, prompt: boolean }
+        // ---------------------------------------------------------------------
+        function raw(type) {
+            // new API
+            if ($.isPlainObject(settings.raw)) {
+                return settings.raw[type];
+            }
+            // boolean only impacts echo
+            if (type === 'echo') {
+                return settings.raw;
+            }
+            return false;
+        }
+        // ---------------------------------------------------------------------
         // :: this even can be used to valid if user and password is valid
         // :: this is additional protection when using automatic authentication
         // ---------------------------------------------------------------------
@@ -9838,12 +9896,12 @@
         }
         // ---------------------------------------------------------------------
         function get_scrollbar_width() {
-            var width = filler.outerWidth();
+            var width = size_filler.outerWidth();
             return container_width - width;
         }
         // ---------------------------------------------------------------------
         function get_padding() {
-            var style = window.getComputedStyle(filler[0]);
+            var style = window.getComputedStyle(size_filler[0]);
             function padding(name) {
                 return get_prop_number(style, 'padding-' + name);
             }
@@ -10694,16 +10752,14 @@
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
             signature: function() {
-                var cols = self.cols();
-                for (var i = signatures.length; i--;) {
-                    var lengths = signatures[i].map(function(line) {
-                        return $.terminal.length(line);
-                    });
-                    if (Math.max.apply(null, lengths) <= cols) {
-                        return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
-                    }
+                var result = signature();
+                if (raw('echo')) {
+                    result = result.split('\n').map(function(line) {
+                        return $.terminal.format(links(line));
+                    }).join('\n');
+                    return '<pre class="terminal-signature">' + result + '</pre>';
                 }
-                return '';
+                return result;
             },
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
@@ -10951,6 +11007,14 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
+                            function skip() {
+                                // don't re-render html and jQuery/DOM nodes #759
+                                // but update HTML that came from function #1029
+                                if (options.update && data.raw === true && data.newline) {
+                                    return !data.dynamic;
+                                }
+                                return false;
+                            }
                             if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
@@ -10961,8 +11025,7 @@
                                     wrapper = partial;
                                 }
                             } else if (is_function(data.finalize)) {
-                                if (options.update && data.raw === true && data.newline) {
-                                    // don't re-render html and jQuery/DOM nodes #759
+                                if (skip()) {
                                     return;
                                 }
                                 if (scroll) {
@@ -11068,6 +11131,7 @@
                             var padding = scroller.outerHeight() - scroller.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
+                                '--terminal-line-count': output_line_count,
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': scroller.prop('scrollTop'),
@@ -11077,9 +11141,9 @@
                             if (enabled && !use_mobile(settings) && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
-                                cmd_cursor.hide();
-                                setTimeout(function() {
-                                    cmd_cursor.show();
+                                //cmd_cursor.hide();
+                                cmd_cursor.stopTime().oneTime(1, function() {
+                                    //cmd_cursor.show();
                                 });
                             }
                         });
@@ -11210,7 +11274,7 @@
                         var locals = $.extend({
                             flush: true,
                             exec: true,
-                            raw: settings.raw,
+                            raw: raw('echo'),
                             finalize: $.noop,
                             unmount: $.noop,
                             delay: settings.execAnimationDelay,
@@ -12223,6 +12287,7 @@
         var interpreters;
         var command_line;
         var old_enabled;
+        var virtual_filler;
         var visibility_observer;
         var mutation_observer;
         // backward compatibility
@@ -12238,12 +12303,18 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        var size_filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        if (settings.virtualOutput) {
+            virtual_filler = $('<div>').addClass('terminal-virtual-filler')
+                .appendTo(wrapper);
+            virtual_filler.is(':visible');
+        }
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
+        container_width = self.width();
         css(self[0], {
             '--char-width': char_size.width,
             '--char-height': char_size.height,
@@ -12269,13 +12340,7 @@
                 }
             }
         }
-        var global_login_fn;
-        if (is_function(settings.login)) {
-            global_login_fn = settings.login;
-        } else if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login === true)) {
-            global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
-        }
+        var global_login_fn = make_global_login();
         if (have_custom_id) {
             if (!terminals.set(settings.id, self)) {
                 warn(strings().invalidId);
@@ -12287,6 +12352,15 @@
             if (old_enabled) {
                 self.focus();
                 self.scroll_to_bottom();
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function make_global_login() {
+            if (is_function(settings.login)) {
+                return settings.login;
+            } else if (base_interpreter &&
+                       (typeof settings.login === 'string' || settings.login === true)) {
+                return make_json_rpc_login(base_interpreter, settings.login);
             }
         }
         // -------------------------------------------------------------------------------
@@ -12450,6 +12524,7 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                raw: raw('prompt'),
                 inputStyle: settings.inputStyle,
                 mobileDelete: settings.mobileDelete,
                 mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
@@ -12479,7 +12554,7 @@
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
                     //  and scrollbar appear
-                    if (old_width !== filler.width()) {
+                    if (old_width !== size_filler.width()) {
                         // resizer handler will update old_width
                         self.resizer();
                     }
@@ -12617,7 +12692,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, filler, pixel_density)) {
+                        if (!scrollbar_event(e, size_filler, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -12685,7 +12760,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = filler.outerWidth() * pixel_density;
+                            var content_width = size_filler.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -12788,8 +12863,9 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = filler.width();
-                    var height = filler.height();
+                    // TODO: use getBoundingClientRect
+                    var width = size_filler.width();
+                    var height = size_filler.height();
                     pixel_density = get_pixel_size();
                     if (old_pixel_density !== pixel_density) {
                         css(self[0], {

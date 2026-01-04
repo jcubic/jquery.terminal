@@ -12,7 +12,7 @@
  * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sat, 20 Sep 2025 14:38:53 +0000
+ * Date: Sun, 04 Jan 2026 10:39:33 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -114,6 +114,10 @@ body.full-screen-terminal {
     min-height: 100%;
     height: 100%;
 }
+.terminal .terminal-virtual-filler {
+    height: calc(var(--terminal-line-count) * var(--terminal-line));
+    z-index: -1;
+}
 .terminal > .terminal-pixel {
     position: absolute;
     display: inline;
@@ -157,6 +161,7 @@ body.full-screen-terminal {
     color: #000 !important;
 }
 .terminal .terminal-output > :not(.raw) a[href],
+.terminal .raw pre.terminal-signature a[href],
 .cmd a[href],
 .terminal.external a[href] {
     color: #3377FF;
@@ -165,6 +170,7 @@ body.full-screen-terminal {
 }
 .cmd a[href]:not(.terminal-inverted),
 .terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted),
+.terminal .raw pre.terminal-signature a[href]:not(.terminal-inverted),
 .terminal.external a[href]:not(.terminal-inverted) {
     --color: var(--link-color, #3377FF);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
@@ -172,6 +178,7 @@ body.full-screen-terminal {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) a[href].terminal-inverted,
+.terminal .raw pre.terminal-signature a[href].terminal-inverted,
 .terminal.external a[href].terminal-inverted {
     background: var(--color, #ccc);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
@@ -179,6 +186,7 @@ body.full-screen-terminal {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--background, #000);
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover,
+.terminal .raw pre.terminal-signature a[href]:hover,
 .cmd a[href]:hover,
 .terminal.external a[href]:hover {
     background-color: #3377FF;
@@ -192,12 +200,14 @@ body.full-screen-terminal {
  */
 @container style(--background: transparent) {
   .terminal .terminal-output > :not(.raw) a[href]:hover,
+  .terminal .raw pre.terminal-signature a[href]:hover,
   .cmd a[href]:hover,
   .terminal.external a[href]:hover {
     --base-background: black;
   }
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
+.terminal .raw pre.terminal-signature a[href] span,
 .cmd a[href] span,
 .terminal.external a[href] span {
     /*
@@ -210,6 +220,7 @@ body.full-screen-terminal {
     text-decoration: underline;
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover span,
+.terminal .raw pre.terminal-signature a[href]:hover span,
 .cmd a[href]:hover span,
 .terminal.external a[href]:hover span {
     background-color: #3377FF !important;
@@ -295,11 +306,15 @@ body.full-screen-terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output > div:not(.raw) div::before,
+.terminal-output > div div::before,
 .cmd .cmd-line::before {
     content: '\0200B';
     width: 0;
     display: inline-block;
+}
+.cmd.raw .cmd-prompt {
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 .cmd .cmd-line {
     white-space: nowrap;
@@ -828,7 +843,8 @@ terminal .terminal-output > div {
     --color: var(--error-color, red);
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
-.terminal .terminal-output > :not(.raw) a[href] {
+.terminal .terminal-output > :not(.raw) a[href],
+.terminal .raw pre.terminal-signature a[href] {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
@@ -1105,6 +1121,7 @@ terminal .terminal-output > div {
 .terminal-glow a[data-text],
 .terminal-glow [data-text] span,
 .terminal-glow .terminal-output > div span,
+.terminal-glow .raw pre.terminal-signature a[href],
 .terminal-glow .terminal-output > div a[href] {
     text-shadow: 1px 1px 5px #ccc;
     text-shadow: 1px 1px 5px var(--color, #ccc);
