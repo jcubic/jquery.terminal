@@ -8,6 +8,7 @@
 * Improve the library on Meta Quest Browser[#1023](https://github.com/jcubic/jquery.terminal/issues/1023)
 * allow to change inputStyle to contenteditable for debugging mobile on desktop
 * add `$.terminal.debug` hook and `terminal-debug` class for internal debugging of cmd
+* add `--ansi-line-base` CSS variable to control line height of ANSI Art [#837](https://github.com/jcubic/jquery.terminal/issues/837)
 ### Bugfix
 * fix CTRL+E in Brave [#1016](https://github.com/jcubic/jquery.terminal/issues/1016)
 * fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)

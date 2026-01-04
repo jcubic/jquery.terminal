@@ -12,7 +12,7 @@
  * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
- * Date: Sun, 04 Jan 2026 10:39:33 +0000
+ * Date: Sun, 04 Jan 2026 19:30:00 +0000
  */
 .terminal .terminal-output .format, .cmd .format,
 .cmd-prompt, .cmd-prompt div {
@@ -333,7 +333,8 @@ body.full-screen-terminal {
 }
 .terminal .ansi > div {
     line-height: 13px !important;
-    line-height: calc(var(--size, 1) * (13px / var(--pixel-density, 1))) !important;
+    line-height: var(--ansi-line-base, 13px) !important;
+    line-height: calc(var(--size, 1) * (var(--ansi-line-base, 13px) / var(--pixel-density, 1))) !important;
 }
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
     --background: transparent;
@@ -1023,6 +1024,11 @@ terminal .terminal-output > div {
     syntax: '<number> | auto';
     inherits: true;
     initial-value: auto;
+}
+@property --ansi-line-base {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 13px;
 }
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
