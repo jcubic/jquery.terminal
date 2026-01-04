@@ -260,13 +260,14 @@
         // -------------------------------------------------------------------------------
         function make_tty() {
             var tty = {
+                buffer: [],
                 read: function(message, callback) {
                     // in case we return read() call from interpreter
                     // we can't access force_awake flag in term (it's invoked later)
                     if (term.paused()) {
                         term.resume();
                     }
-                    if ((command_index === 0 && !tty.buffer) || process_redirect) {
+                    if ((command_index === 0 && !tty.buffer.length) || process_redirect) {
                         term.push = orig.push;
                         term.echo = orig.echo;
                         var ret = orig.read.apply(term, arguments);
@@ -277,9 +278,9 @@
                         });
                     } else {
                         var text;
-                        if (tty.buffer) {
-                            text = tty.buffer.replace(/\n$/, '');
-                            delete tty.buffer;
+                        if (tty.buffer.length) {
+                            text = tty.buffer.join('\n');
+                            tty.buffer.length = 0;
                         }
                         var d = new $.Deferred();
                         if (is_function(callback)) {
@@ -292,11 +293,14 @@
                 echo: function(string, options) {
                     if (overwrite_buffer) {
                         overwrite_buffer = false;
-                        tty.buffer = '';
+                        tty.buffer.length = 0;
                     }
                     tty.options = tty.options || [];
                     tty.options.push(options);
-                    tty.buffer = (tty.buffer || '') + string + '\n';
+                    tty.buffer.push(string);
+                },
+                last_index: function() {
+                    return orig.last_index() + tty.buffer.length;
                 },
                 push: function() {
                     this.error(strings(this).pipeNestedInterpreterError);
@@ -353,7 +357,8 @@
                 orig = {
                     echo: term.echo,
                     read: term.read,
-                    push: term.push
+                    push: term.push,
+                    last_index: term.last_index
                 };
             }
             var tty = make_tty();
