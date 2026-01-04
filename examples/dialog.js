@@ -7,7 +7,6 @@
  *
  * Linceses under MIT license
  */
-/* global jQuery setTimeout  */
 (function($) {
     $.dialog = {
         defaults: {
@@ -23,7 +22,7 @@
         }
     };
     function get_char_size() {
-        var temp = $('<div class="dialog temp"><div class="box"><span>'+
+        var temp = $('<div class="dialog temp"><div class="box"><span>' +
                      '&nbsp;</span></div></div>').appendTo('body');
         var rect = temp.find('span')[0].getBoundingClientRect();
         var result = {
@@ -39,7 +38,7 @@
         }
         var num_chunks = Math.ceil(str.length / length);
         var result = [];
-        for(var i = 0, o = 0; i < num_chunks; ++i, o += length) {
+        for (var i = 0, o = 0; i < num_chunks; ++i, o += length) {
             result.push(str.substr(o, length));
         }
         return result;
@@ -101,8 +100,8 @@
 
         var width;
 
-        var title = $('<div class="title"><span>' + settings.title +
-                      '</span></div>').appendTo(box);
+        $('<div class="title"><span>' + settings.title +
+          '</span></div>').appendTo(box);
 
         if (settings.message) {
             var header = $('<div class="header"/>').appendTo(box);
@@ -121,12 +120,12 @@
         var input = $('<div class="input"/>').appendTo(box);
 
         var input_line = $('<div class="line"/>').appendTo(input);
-        var input_left = $('<div class="left light">' + chars.ver +
-                           '&nbsp;</div>').appendTo(input_line);
+        $('<div class="left light">' + chars.ver +
+          '&nbsp;</div>').appendTo(input_line);
         var input_top = $('<div class="top"/>').appendTo(input_line);
-        line(input_top, chars.nw, chars.ne, {length: cols-4, reverse: true});
-        var input_right = $('<div class="right dark">&nbsp;' + chars.ver +
-                            '</div>').appendTo(input_line);
+        line(input_top, chars.nw, chars.ne, {length: cols - 4, reverse: true});
+        $('<div class="right dark">&nbsp;' + chars.ver +
+          '</div>').appendTo(input_line);
 
         input_line = $('<div class="line"/>').appendTo(input);
         $('<div class="left light">' + chars.ver + '&nbsp;</div>')
@@ -166,7 +165,7 @@
             .appendTo(input_line);
         var input_bottom = $('<div class="bottom"/>').appendTo(input_line);
         line(input_bottom, chars.sw, chars.se, {
-            length: cols-4,
+            length: cols - 4,
             reverse: true,
             bottom: true
         });
@@ -207,14 +206,14 @@
             setTimeout(function() {
                 cmd.disable();
             }, 0);
-            var active = buttons.find('.cancel').addClass('selected active')
+            buttons.find('.cancel').addClass('selected active')
                 .prev().removeClass('selected active');
         }
         function down() {
             setTimeout(function() {
                 cmd.disable();
             }, 0);
-            var active = buttons.find('.ok').addClass('selected active')
+            buttons.find('.ok').addClass('selected active')
                 .next().removeClass('selected active');
         }
         function keydown(e) {

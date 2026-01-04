@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 10:39:33 +0000
+ * Date: Sun, 04 Jan 2026 11:12:05 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -468,7 +468,7 @@
             return delete localStorage[n];
         }
         function dc(n) {
-            return wc(n, '', -1);
+            return wc(n, '');
         }
         /**
          * Public API
@@ -5491,7 +5491,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 10:39:33 +0000',
+        date: 'Sun, 04 Jan 2026 11:12:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

@@ -63,12 +63,17 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var DEBUG = true;
+    var DEBUG = false;
     /* eslint-disable */
     /* istanbul ignore next */
     function warn(str) {
         if ('warn' in console) {
             console.warn(str);
+        }
+    }
+    function log(str) {
+        if (DEBUG) {
+            consoel.log(str);
         }
     }
     // node-ansiparser
@@ -590,7 +595,7 @@
                             string: match[1],
                             overtyping: partial.match(overtyping_re)
                         });
-                        correct_position(start, match[0], '', 1);
+                        correct_position(start, match[0], '');
                     }
                     if (char_count < 0) {
                         char_count = 0;
@@ -611,7 +616,7 @@
                         chars.reverse().forEach(function(char) {
                             if (i > char.index) {
                                 if (--char_count <= 0) {
-                                    correct_position(char.index, '', char.string, 2);
+                                    correct_position(char.index, '', char.string);
                                     result += char.string;
                                 }
                             } else {

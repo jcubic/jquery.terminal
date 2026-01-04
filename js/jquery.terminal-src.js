@@ -468,7 +468,7 @@
             return delete localStorage[n];
         }
         function dc(n) {
-            return wc(n, '', -1);
+            return wc(n, '');
         }
         /**
          * Public API
