@@ -12304,6 +12304,7 @@
         if (settings.virtualOutput) {
             virtual_filler = $('<div>').addClass('terminal-virtual-filler')
                 .appendTo(wrapper);
+            virtual_filler.is(':visible');
         }
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);

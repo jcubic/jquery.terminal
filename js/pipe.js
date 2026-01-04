@@ -463,7 +463,7 @@
                                     }
                                 });
                             };
-                            options = $.extend({ onClear: onClear }, options);
+                            options = $.extend({onClear: onClear}, options);
                         }
                         orig.echo(arg, options);
                         term.echo = orig.echo;
