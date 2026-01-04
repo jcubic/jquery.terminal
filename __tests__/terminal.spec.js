@@ -420,10 +420,8 @@ function timer(callback, timeout) {
     });
 }
 
-
 var support_animations = (function() {
     var animation = false,
-    animationstring = 'animation',
     keyframeprefix = '',
     domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
     pfx  = '',
@@ -436,7 +434,6 @@ var support_animations = (function() {
             var name = domPrefixes[i] + 'AnimationName';
             if (typeof elm.style[name] !== 'undefined') {
                 pfx = domPrefixes[i];
-                animationstring = pfx + 'Animation';
                 keyframeprefix = '-' + pfx.toLowerCase() + '-';
                 animation = true;
                 break;

@@ -61,7 +61,6 @@
         };
         var settings = $.extend({}, $.dialog.defaults, options || {});
         var cols = settings.cols > 20 ? settings.cols : 20;
-        var rows = settings.rows > 8 ? settings.rows : 8;
         function line(container, left, right, options) {
             var settings = $.extend({
                 bottom: false,

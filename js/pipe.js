@@ -59,6 +59,13 @@
         factory(root.jQuery);
     }
 })(function($) {
+    var DEBUG = false;
+    function log(str) {
+        if (DEBUG) {
+            // eslint-disable-next-line
+            console.log(str);
+        }
+    }
     // -----------------------------------------------------------------------------------
     // :: split over array - returns array of arrays
     // -----------------------------------------------------------------------------------
@@ -239,7 +246,10 @@
             return defer.promise();
         }
         // -------------------------------------------------------------------------------
-        function continuation(promise, callback) {
+        function continuation(promise, callback, debug_log) {
+            if (debug_log) {
+                log(debug_log);
+            }
             if (promise && promise.then) {
                 promise.then(callback);
                 return promise;

@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import https from 'https';
 import path from 'path';
 import fs from 'fs';
 import fetch from 'node-fetch';
