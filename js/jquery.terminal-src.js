@@ -2864,6 +2864,7 @@
                 var lines = simple_split_command_line(command);
                 prev = lines[line - 1];
                 // line don't exist, line fit the width and cursor at 0 #1026
+                var left_over;
                 if (line === lines.length) {
                     left_over = 0;
                 } else {

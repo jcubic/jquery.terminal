@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 15:12:04 +0000
+ * Date: Sun, 04 Jan 2026 15:13:05 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2864,6 +2864,7 @@
                 var lines = simple_split_command_line(command);
                 prev = lines[line - 1];
                 // line don't exist, line fit the width and cursor at 0 #1026
+                var left_over;
                 if (line === lines.length) {
                     left_over = 0;
                 } else {
@@ -5496,7 +5497,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 15:12:04 +0000',
+        date: 'Sun, 04 Jan 2026 15:13:05 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
