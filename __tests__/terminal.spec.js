@@ -432,7 +432,6 @@ var support_animations = (function() {
         for (var i = 0; i < domPrefixes.length; i++) {
             var name = domPrefixes[i] + 'AnimationName';
             if (typeof elm.style[name] !== 'undefined') {
-                pfx = domPrefixes[i];
                 animation = true;
                 break;
             }
