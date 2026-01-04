@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 14:36:18 +0000
+ * Date: Sun, 04 Jan 2026 15:12:04 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -3689,6 +3689,7 @@
                 lines = lines.map(function(line) {
                     return line.replace(/^\uFFFF+/, '');
                 });
+                var last_line_raw = $.terminal.strip(lines[lines.length - 1]);
                 lines = lines.map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
@@ -3708,7 +3709,7 @@
                     tabs: settings.tabs
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
-                just_prompt_len = strlen(text(encoded_last_line));
+                just_prompt_len = strlen(text(last_line_raw));
                 prompt_len = just_prompt_len + prompt_offset;
                 return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
@@ -5495,7 +5496,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 14:36:18 +0000',
+        date: 'Sun, 04 Jan 2026 15:12:04 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
