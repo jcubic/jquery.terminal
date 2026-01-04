@@ -422,7 +422,6 @@ function timer(callback, timeout) {
 
 var support_animations = (function() {
     var animation = false,
-    keyframeprefix = '',
     domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
     pfx  = '',
     elm = document.createElement('div');
@@ -434,7 +433,6 @@ var support_animations = (function() {
             var name = domPrefixes[i] + 'AnimationName';
             if (typeof elm.style[name] !== 'undefined') {
                 pfx = domPrefixes[i];
-                keyframeprefix = '-' + pfx.toLowerCase() + '-';
                 animation = true;
                 break;
             }
@@ -3265,7 +3263,7 @@ describe('sub plugins', function() {
                     ['aaa:emoji:aaa:emoji:1', ['aaa*aaa*1', 20, 8]],
                     ['aaa:emoji:1aaa:emoji:aaa', ['aaa*1aaa*aaa', 10, 4]]
                 ];
-                for (var i in specs) {
+                for (var i = 0; i < specs.length; ++i) {
                     var spec = specs[i];
                     cmd.set(spec[0]);
                     var output = cmd.find('.cmd-wrapper div [data-text]:not(.end)').text();

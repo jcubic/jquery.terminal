@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 11:12:05 +0000
+ * Date: Sun, 04 Jan 2026 11:30:06 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5491,7 +5491,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 11:12:05 +0000',
+        date: 'Sun, 04 Jan 2026 11:30:06 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -6415,7 +6415,7 @@
                 input = [string, 0];
             }
             try {
-                var result = formatters.reduce(function(input, formatter) {
+                var result = formatters.reduce(function(input, formatter, index) {
                     i++;
                     // __meta__ is for safe formatter that can handle formatters
                     // inside formatters. for other usage we use format_split so one
@@ -6488,9 +6488,6 @@
                                     // to partial and we need global for whole string
                                     if (result[1] !== -1) {
                                         result[1] += length_before;
-                                    }
-                                    var after_len = text(result[0]).length;
-                                    if (after_len !== this_len) {
                                     }
                                     return result;
                                 }

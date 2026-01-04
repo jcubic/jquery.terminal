@@ -1425,7 +1425,7 @@
             if (input !== output) {
                 return output;
             }
-            if (typeof options !== 'undefined' && typeof options.position === 'number') {
+            if (typeof options.position === 'number') {
                 return [input, options.position];
             }
             return input;
