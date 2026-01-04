@@ -6681,6 +6681,9 @@
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
                         }
+                        if (quote === '"') {
+                            string = string.replace(/\\'/g, "'");
+                        }
                     }
                     string = '"' + string + '"';
                     // use build in function to parse rest of escaped characters
