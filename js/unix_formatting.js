@@ -125,7 +125,7 @@
         var EXECUTABLES = r(0x00, 0x18);
         EXECUTABLES.push(0x19);
         EXECUTABLES.push(0x1E);
-        EXECUTABLES.concat(r(0x1c, 0x20));
+        EXECUTABLES = EXECUTABLES.concat(r(0x1c, 0x20));
 
         /* meaning of state and action indices
            var STATES = [
