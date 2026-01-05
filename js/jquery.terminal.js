@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Jan 2026 17:49:14 +0000
+ * Date: Mon, 05 Jan 2026 11:15:40 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5497,7 +5497,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Jan 2026 17:49:14 +0000',
+        date: 'Mon, 05 Jan 2026 11:15:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8781,9 +8781,22 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
+            // raw option needs to be the same as when echo is called
+            // so change of the setting doesn't affect the signature
+            var raw_echo = raw('echo');
+            function render_signature() {
+                var result = self.signature();
+                if (raw_echo) {
+                    result = result.split('\n').map(function(line) {
+                        return $.terminal.format(links(line));
+                    }).join('\n');
+                    return '<pre class="terminal-signature">' + result + '</pre>';
+                }
+                return result;
+            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
+                self.echo(render_signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 if (is_string(settings.greetings)) {
                     self.echo(settings.greetings);
@@ -10754,15 +10767,8 @@
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
-            signature: function() {
-                var result = signature();
-                if (raw('echo')) {
-                    result = result.split('\n').map(function(line) {
-                        return $.terminal.format(links(line));
-                    }).join('\n');
-                    return '<pre class="terminal-signature">' + result + '</pre>';
-                }
-                return result;
+            signature: function(raw) {
+                return signature();
             },
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
