@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 05 Jan 2026 11:15:40 +0000
+ * Date: Mon, 05 Jan 2026 19:25:57 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5497,7 +5497,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 05 Jan 2026 11:15:40 +0000',
+        date: 'Mon, 05 Jan 2026 19:25:57 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -10767,9 +10767,7 @@
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
-            signature: function(raw) {
-                return signature();
-            },
+            signature: signature,
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
             // -------------------------------------------------------------

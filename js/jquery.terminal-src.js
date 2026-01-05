@@ -10767,9 +10767,7 @@
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
-            signature: function(raw) {
-                return signature();
-            },
+            signature: signature,
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
             // -------------------------------------------------------------
