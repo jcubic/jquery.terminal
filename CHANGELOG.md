@@ -1,10 +1,9 @@
 ## 2.46.0
 ### Breaking
-* echo command now echo a function, and they will appear in export_view
+* echo command now echoes a function, and it will appear in export_view
 ### Features
-* terminal::animation callback now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
+* terminal::animation callback now has terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
 * add option to use `raw` in prompt
-* Terminal::animation now have terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
 * Improve the library on Meta Quest Browser[#1023](https://github.com/jcubic/jquery.terminal/issues/1023)
 * allow to change inputStyle to contenteditable for debugging mobile on desktop
 * add `$.terminal.debug` hook and `terminal-debug` class for internal debugging of cmd

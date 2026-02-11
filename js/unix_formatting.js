@@ -80,7 +80,7 @@
     // The MIT License (MIT)
     // Copyright (c) 2014 Joerg Breitbart
     /* istanbul ignore next */
-    var AnsiParser = (function () {
+    var AnsiParser = (function() {
         'use strict';
 
         /**
