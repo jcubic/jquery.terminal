@@ -24,7 +24,7 @@ users. It can also be used to debug your application.
 
 You can use this JavaScript library to create a web based terminal on any website.
 
-Because with this library you need to code all the commands yourself, you can call it fake terminal emulator. In contrast to library that will give you access to real terminal like online SSH. To have real online SSH I suggest to use [xterm.js](https://github.com/xtermjs/xterm.js) library.
+Because with this library you need to code all the commands yourself, you can call it fake terminal emulator. In contrast to a library that will give you access to real terminal like online SSH. To have real online SSH I suggest to use [xterm.js](https://github.com/xtermjs/xterm.js) library.
 
 ### Features:
 
@@ -392,7 +392,7 @@ Other code used inside the project or inspired by:
 * [wheel event detection](https://web.archive.org/web/20180523065743/https://developer.mozilla.org/en-US/docs/Web/Events/wheel) by MDN
 * [CodeMirror](https://codemirror.net/) by Marijn Haverbeke, was inspiration for some clipboard handling solutions.
 
-ASNSI Art used by this project
+### ANSI Art used by this project
 * [Dennis Ritchie by SanderFocus](https://sanderfocus.nl/)
 * [Regina Pacis by burps](https://16colo.rs/pack/fuel27/bs-pacis.ans)
 * [marble by Necrofiliac](https://16colo.rs/pack/fuel27/nf-marble.ans)
