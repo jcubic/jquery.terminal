@@ -266,7 +266,7 @@
 * fix selection overlap previous line
 * fix scroll to bottom while animating [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix rendering of sixel images [#824](https://github.com/jcubic/jquery.terminal/issues/824)
-* fix handling promises in randerHandler
+* fix handling promises in renderHandler
 * fix scroll to bottom during animation [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix `terminal::is_bottom` when using intersection observer
 * fix processing \r in Linux output of unix_formatting
@@ -420,7 +420,7 @@
 * fix echo newline when one of the values is promise or function
 * fix invalid css when partial output is no longer partial
 * add padding to terminal size i `term::geometry()` [#686](https://github.com/jcubic/jquery.terminal/issues/686)
-* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/7690)
+* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/690)
 
 ## 2.29.1
 ### Bugfix
@@ -813,7 +813,7 @@
 * fix links from formatters in cmd
 * fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
 * fix less [#522](https://github.com/jcubic/jquery.terminal/issues/522)
-* fix recursive error when echo finalize throwed exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
+* fix recursive error when echo finalize threw exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
 * fix prism - xml nested formatting and weird wrapping [#523](https://github.com/jcubic/jquery.terminal/issues/523), [#410](https://github.com/jcubic/jquery.terminal/issues/410)
 * limit number of characters in click on exception line [#525](https://github.com/jcubic/jquery.terminal/issues/525)
 * fix less search clear on resize [#528](https://github.com/jcubic/jquery.terminal/issues/528)
