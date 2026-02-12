@@ -18,7 +18,7 @@
  *
  */
 /* global define */
-(function(factory) {
+(function (factory) {
     var root;
     if (typeof window !== 'undefined') {
         root = window;
@@ -35,7 +35,7 @@
         define(['jquery', 'jquery.terminal'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
-        module.exports = function(root, jQuery) {
+        module.exports = function (root, jQuery) {
             if (jQuery === undefined) {
                 // require('jQuery') returns a factory that requires window to
                 // build a jQuery instance, we normalize how we use modules
@@ -62,7 +62,7 @@
         // istanbul ignore next
         factory(root.jQuery);
     }
-})(function($) {
+})(function ($) {
     var DEBUG = false;
     /* eslint-disable */
     /* istanbul ignore next */
@@ -80,7 +80,7 @@
     // The MIT License (MIT)
     // Copyright (c) 2014 Joerg Breitbart
     /* istanbul ignore next */
-    var AnsiParser = (function() {
+    var AnsiParser = (function () {
         'use strict';
 
         /**
@@ -108,7 +108,7 @@
          * @param {number=} next - next state
          */
         function add(table, inp, state, action, next) {
-            table[state<<8|inp] = ((action | 0) << 4) | ((next === undefined) ? state : next);
+            table[state << 8 | inp] = ((action | 0) << 4) | ((next === undefined) ? state : next);
         }
 
         /**
@@ -121,7 +121,7 @@
          * @param {number=} next - next state
          */
         function add_list(table, inps, state, action, next) {
-            for (var i=0; i<inps.length; i++)
+            for (var i = 0; i < inps.length; i++)
                 add(table, inps[i], state, action, next);
         }
 
@@ -178,13 +178,13 @@
          *     - actions are indices of ACTIONS (0 to 14)
          *     - any higher character than 159 is handled by the 'error' action
          */
-        var TRANSITION_TABLE = (function() {
+        var TRANSITION_TABLE = (function () {
             var t = new Uint8Array(4095);
 
             // table with default transition [any] --> [error, GROUND]
-            for (var state=0; state<14; ++state) {
-                for (var code=0; code<160; ++code) {
-                    t[state<<8|code] = 16;
+            for (var state = 0; state < 14; ++state) {
+                for (var code = 0; code < 160; ++code) {
+                    t[state << 8 | code] = 16;
                 }
             }
 
@@ -192,7 +192,7 @@
             // printables
             add_list(t, PRINTABLES, 0, 2);
             // global anywhere rules
-            for (state=0; state<14; ++state) {
+            for (state = 0; state < 14; ++state) {
                 add_list(t, [0x18, 0x1a, 0x99, 0x9a], state, 3, 0);
                 add_list(t, r(0x80, 0x90), state, 3, 0);
                 add_list(t, r(0x90, 0x98), state, 3, 0);
@@ -299,7 +299,7 @@
          */
         function AnsiParser(terminal) {
             this.initial_state = 0;  // 'GROUND' is default
-            this.current_state = this.initial_state|0;
+            this.current_state = this.initial_state | 0;
 
             // clone global transition table
             this.transitions = new Uint8Array(4095);
@@ -313,17 +313,17 @@
             // back reference to terminal
             this.term = terminal || {};
             var instructions = ['inst_p', 'inst_o', 'inst_x', 'inst_c',
-                                'inst_e', 'inst_H', 'inst_P', 'inst_U', 'inst_E'];
-            for (var i=0; i<instructions.length; ++i)
+                'inst_e', 'inst_H', 'inst_P', 'inst_U', 'inst_E'];
+            for (var i = 0; i < instructions.length; ++i)
                 if (!(instructions[i] in this.term))
-                    this.term[instructions[i]] = function() {};
+                    this.term[instructions[i]] = function () { };
         }
 
         /**
          * Reset the parser.
          */
-        AnsiParser.prototype.reset = function() {
-            this.current_state = this.initial_state|0;
+        AnsiParser.prototype.reset = function () {
+            this.current_state = this.initial_state | 0;
             this.osc = '';
             this.params = [0];
             this.collected = '';
@@ -333,11 +333,11 @@
          * Parse string s.
          * @param {string} s
          */
-        AnsiParser.prototype.parse = function(s) {
+        AnsiParser.prototype.parse = function (s) {
             var code = 0,
                 transition = 0,
                 error = false,
-                current_state = this.current_state|0;
+                current_state = this.current_state | 0;
 
             // local buffers
             var printed = -1;
@@ -347,17 +347,17 @@
             var params = this.params;
 
             // process input string
-            for (var i=0, l=s.length|0; i<l; ++i) {
-                code = s.charCodeAt(i)|0;
+            for (var i = 0, l = s.length | 0; i < l; ++i) {
+                code = s.charCodeAt(i) | 0;
                 // shortcut for most chars (print action)
-                if (current_state===0 && code>0x1f && code<0x80) {
-                    printed = (printed + 1) ? printed|0: i|0;
+                if (current_state === 0 && code > 0x1f && code < 0x80) {
+                    printed = (printed + 1) ? printed | 0 : i | 0;
                     continue;
                 }
-                transition = ((code < 0xa0) ? (this.transitions[(current_state<<8|code)|0])|0 : 16)|0;
-                switch ((transition >> 4)|0) {
+                transition = ((code < 0xa0) ? (this.transitions[(current_state << 8 | code) | 0]) | 0 : 16) | 0;
+                switch ((transition >> 4) | 0) {
                     case 2: // print
-                        printed = (printed + 1) ? printed|0: i|0;
+                        printed = (printed + 1) ? printed | 0 : i | 0;
                         break;
                     case 3: // execute
                         if (printed + 1) {
@@ -381,22 +381,22 @@
                         if (code > 0x9f) {
                             switch (current_state) {
                                 case 0: // GROUND -> add char to print string
-                                    printed = (!(printed+1)) ? i|0 : printed|0;
+                                    printed = (!(printed + 1)) ? i | 0 : printed | 0;
                                     break;
                                 case 8: // OSC_STRING -> add char to osc string
                                     osc += String.fromCharCode(code);
-                                    transition = (transition | 8)|0;
+                                    transition = (transition | 8) | 0;
                                     break;
                                 case 6: // CSI_IGNORE -> ignore char
-                                    transition = (transition | 6)|0;
+                                    transition = (transition | 6) | 0;
                                     break;
                                 case 11: // DCS_IGNORE -> ignore char
-                                    transition = (transition | 11)|0;
+                                    transition = (transition | 11) | 0;
                                     break;
                                 case 13: // DCS_PASSTHROUGH -> add char to dcs
                                     if (!(dcs + 1))
-                                        dcs = i|0;
-                                    transition = (transition | 13)|0;
+                                        dcs = i | 0;
+                                    transition = (transition | 13) | 0;
                                     break;
                                 default: // real error
                                     error = true;
@@ -428,7 +428,7 @@
                         if (code === 0x3b)
                             params.push(0);
                         else
-                            params[params.length-1] = (params[params.length-1] * 10 + code - 48)|0;
+                            params[params.length - 1] = (params[params.length - 1] * 10 + code - 48) | 0;
                         break;
                     case 9: // collect
                         collected += String.fromCharCode(code);
@@ -451,7 +451,7 @@
                         break;
                     case 13: // dcs_put
                         if (!(dcs + 1))
-                            dcs = i|0;
+                            dcs = i | 0;
                         break;
                     case 14: // dcs_unhook
                         if (dcs + 1) {
@@ -459,7 +459,7 @@
                         }
                         this.term.inst_U();
                         if (code === 0x1b)
-                            transition = (transition | 1)|0;
+                            transition = (transition | 1) | 0;
                         osc = '';
                         params = [0];
                         collected = '';
@@ -479,20 +479,20 @@
                         if (osc && code !== 0x18 && code !== 0x1a)
                             this.term.inst_o(osc);
                         if (code === 0x1b)
-                            transition = (transition | 1)|0;
+                            transition = (transition | 1) | 0;
                         osc = '';
                         params = [0];
                         collected = '';
                         dcs = -1;
                         break;
                 }
-                current_state = (transition & 15)|0;
+                current_state = (transition & 15) | 0;
             }
 
             // push leftover pushable buffers to terminal
             if (!current_state && (printed + 1)) {
                 this.term.inst_p(s.substring(printed));
-            } else if (current_state===13 && (dcs + 1)) {
+            } else if (current_state === 13 && (dcs + 1)) {
                 this.term.inst_P(s.substring(dcs));
             }
 
@@ -502,7 +502,7 @@
             this.params = params;
 
             // save state
-            this.current_state = current_state|0;
+            this.current_state = current_state | 0;
         };
         return AnsiParser;
     })();
@@ -516,7 +516,7 @@
     var chr = '[^\\x08]|[\\r\\n]{2}|&[^;]+;';
     var backspace_re = new RegExp('^(' + chr + ')?\\x08');
     var overtyping_re = new RegExp('^(?:(' + chr + ')?\\x08(_|\\1)|' +
-                                   '(_)\\x08(' + chr + '))');
+        '(_)\\x08(' + chr + '))');
     var new_line_re = /^(\r\n|\n\r|\r|\n)/;
     var clear_line_re = /[^\r\n]+\r\x1B\[K/g;
     // ---------------------------------------------------------------------
@@ -600,7 +600,7 @@
                     if (char_count < 0) {
                         char_count = 0;
                     }
-                    backspaces = backspaces.map(function(b) {
+                    backspaces = backspaces.map(function (b) {
                         return b - 1;
                     });
                     backspaces.push(start);
@@ -613,7 +613,7 @@
                     if (removed_chars.length) {
                         var chars = removed_chars;
                         removed_chars = [];
-                        chars.reverse().forEach(function(char) {
+                        chars.reverse().forEach(function (char) {
                             if (i > char.index) {
                                 if (--char_count <= 0) {
                                     correct_position(char.index, '', char.string);
@@ -655,7 +655,7 @@
                                 result += string[i] + '\uFFF1';
                                 continue;
                             } else if (removed_char.string === '_' ||
-                                       string[i] === '_') {
+                                string[i] === '_') {
                                 var chr;
                                 if (removed_char.string === '_') {
                                     chr = string[i];
@@ -694,7 +694,7 @@
         }
         function format(string, chr, style) {
             var re = new RegExp('((:?.' + chr + ')+)', 'g');
-            return string.replace(re, function(_, string) {
+            return string.replace(re, function (_, string) {
                 var re = new RegExp(chr, 'g');
                 return '[[' + style + ']' + string.replace(re, '') + ']';
             });
@@ -1022,7 +1022,7 @@
     // ---------------------------------------------------------------------
     // :: Replace ANSI formatting with terminal formatting
     // ---------------------------------------------------------------------
-    $.terminal.from_ansi = (function() {
+    $.terminal.from_ansi = (function () {
         var color_list = {
             30: 'black',
             31: 'red',
@@ -1060,7 +1060,7 @@
             function set_styles(num) {
                 switch (num) {
                     case 0:
-                        Object.keys(state).forEach(function(key) {
+                        Object.keys(state).forEach(function (key) {
                             delete state[key];
                         });
                         state.blink = false;
@@ -1138,7 +1138,7 @@
             // -----------------------------------------------------------------
             function should__process_8bit() {
                 return _process_8bit && ((_ex_background && !output_background) ||
-                                        (_ex_color && !output_color));
+                    (_ex_color && !output_color));
             }
             // -----------------------------------------------------------------
             function process_8bit() {
@@ -1232,7 +1232,7 @@
                     s = $.terminal.escape_formatting(s);
                 }
                 if (charset) {
-                    s = s.split('').map(function(chr) {
+                    s = s.split('').map(function (chr) {
                         return charset[chr] || chr;
                     }).join('');
                 }
@@ -1301,11 +1301,11 @@
             var characters = 'qwertyuiopasdfghjklzxcvbnm';
             var prev_code;
             var parser_events = {
-                cursor: {x: 0, y: 0},
+                cursor: { x: 0, y: 0 },
                 result: [],
                 state: {},
                 inst_p: print,
-                inst_x: function(flag) {
+                inst_x: function (flag) {
                     var code = flag.charCodeAt(0);
                     if (code === 13) {
                         this.cursor.x = 0;
@@ -1318,13 +1318,13 @@
                         print.call(this, '\t');
                     } else if (ansi_art && code in cp_437_control) {
                         // eslint-disable-next-line no-console
-                        console.log({code: '0x' + code.toString(16)});
+                        console.log({ code: '0x' + code.toString(16) });
                         print.call(this, cp_437_control[code]);
                     } else if (DEBUG) {
                         var mod = code % characters.length;
                         var char = characters[mod];
                         // eslint-disable-next-line no-console
-                        console.log({code: code, char: char});
+                        console.log({ code: code, char: char });
                         print.call(this, char);
                     }
                     if (!this.result[this.cursor.y]) {
@@ -1332,19 +1332,19 @@
                     }
                     prev_code = code;
                 },
-                inst_e: function(collected, flag) {
+                inst_e: function (collected, flag) {
                     if (collected === '(') {
                         if (flag in CHARSETS) {
                             charset = CHARSETS[flag];
                         }
                     }
                 },
-                inst_E: function(data) {
+                inst_E: function (data) {
                     /* eslint-disable no-console */
                     console.log(data);
                     /* eslint-enable no-console */
                 },
-                inst_c: function(collected, params, flag) {
+                inst_c: function (collected, params, flag) {
                     var value = params[0] === 0 ? 1 : params[0];
                     switch (flag) {
                         case 's':
@@ -1405,15 +1405,15 @@
                 }
             };
             // extra parser options not used by unix_formatting
-            Object.keys(settings.ansiParser).forEach(function(name) {
+            Object.keys(settings.ansiParser).forEach(function (name) {
                 var original = parser_events[name];
                 var fn = settings.ansiParser[name];
                 if (typeof fn === 'function') {
-                    parser_events[name] = original ? function() {
+                    parser_events[name] = original ? function () {
                         if (fn.apply(parser_events, arguments) !== false) {
                             return original.apply(parser_events, arguments);
                         }
-                    } : function() {
+                    } : function () {
                         return fn.apply(parser_events, arguments);
                     };
                     settings.ansiParser[name] = parser_events[name];
