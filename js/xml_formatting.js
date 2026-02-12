@@ -14,7 +14,7 @@
  *
  */
 /* global define */
-(function(factory) {
+(function (factory) {
     var root;
     /* istanbul ignore next */
     if (typeof window !== 'undefined') {
@@ -33,7 +33,7 @@
         define(['jquery', 'jquery.terminal'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
-        module.exports = function(root, jQuery) {
+        module.exports = function (root, jQuery) {
             if (jQuery === undefined) {
                 // require('jQuery') returns a factory that requires window to
                 // build a jQuery instance, we normalize how we use modules
@@ -60,7 +60,7 @@
         // istanbul ignore next
         factory(root.jQuery);
     }
-})(function($) {
+})(function ($) {
     /* istanbul ignore next */
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
@@ -69,7 +69,7 @@
     // <red>hello <navy>blue</navy> world</red>
     // it allso support special tags e.g. link, img or bold
     var tags = {
-        font: function(attrs) {
+        font: function (attrs) {
             var styles = [];
             if ('size' in attrs) {
                 styles.push('--size:' + attrs.size);
@@ -82,7 +82,7 @@
             var style = styles.length ? '{"style": "' + styles.join(';') + '"}' : '';
             return '[[;' + color + ';' + background + ';;;' + style + ']';
         },
-        img: function(attrs) {
+        img: function (attrs) {
             var cls = attrs.class || '';
             var alt = attrs.alt || '';
             var src = attrs.src || '';
@@ -99,13 +99,13 @@
         glow: style('g'),
         italic: style('i'),
         reverse: style('r'),
-        span: function(attrs) {
+        span: function (attrs) {
             var cls = attrs.class || '';
             delete attrs.class;
             var formatting = ['', '', '', cls, '', JSON.stringify(attrs)];
             return '[[' + formatting.join(';') + ']';
         },
-        link: function(attrs) {
+        link: function (attrs) {
             var cls = attrs.class || '';
             var href = attrs.href || '';
             delete attrs.class;
@@ -115,7 +115,7 @@
         }
     };
     function style(value) {
-        return function(attrs) {
+        return function (attrs) {
             var cls = attrs.class || '';
             delete attrs.class;
             var formatting = [value, '', '', cls, '', JSON.stringify(attrs)];
@@ -150,7 +150,7 @@
         if (!should_render(options)) {
             return string;
         }
-        return string.split(tag_re).map(function(string) {
+        return string.split(tag_re).map(function (string) {
             if (string.match(tag_re)) {
                 if (string[1] === '/') {
                     return ']';
@@ -188,7 +188,7 @@
     xml_formatter.tags = tags;
 
     var targets = ['echo', 'prompt', 'animation', 'command'];
-    targets.forEach(function(target) {
+    targets.forEach(function (target) {
         xml_formatter[target] = true;
     });
 
