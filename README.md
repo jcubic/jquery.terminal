@@ -392,7 +392,7 @@ Other code used inside the project or inspired by:
 * [wheel event detection](https://web.archive.org/web/20180523065743/https://developer.mozilla.org/en-US/docs/Web/Events/wheel) by MDN
 * [CodeMirror](https://codemirror.net/) by Marijn Haverbeke, was inspiration for some clipboard handling solutions.
 
-### ANSI Art used by this project
+#### ANSI Art used by this project
 * [Dennis Ritchie by SanderFocus](https://sanderfocus.nl/)
 * [Regina Pacis by burps](https://16colo.rs/pack/fuel27/bs-pacis.ans)
 * [marble by Necrofiliac](https://16colo.rs/pack/fuel27/nf-marble.ans)
