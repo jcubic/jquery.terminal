@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Feb 2026 20:34:00 +0000
+ * Date: Sun, 15 Feb 2026 22:36:57 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1359,23 +1359,26 @@
         }
     })();
     // -------------------------------------------------------------------------
-    var is_mobile = (function(a) {
-        var check = false;
-        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
-            check = true;
+    var is_mobile = (function(agent) {
+        if ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0) {
+            return true;
         }
         // detect touch devices like Meta Horizon OS browser
         if ('ontouchstart' in root) {
             return true;
         }
         var desktop = root.matchMedia && root.matchMedia('(pointer: fine)').matches;
-        if (window.matchMedia && !desktop) {
+        if (root.matchMedia && !desktop) {
             return true;
         }
         // detect iPad 13
         // ref: https://stackoverflow.com/a/57924983/387194s
         if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
             return true;
+        }
+        var check = false;
+        if (mobile_re.test(agent) || tablet_re.test(agent.substr(0, 4))) {
+            check = true;
         }
         return check;
     })(navigator.userAgent || navigator.vendor || root.opera);
@@ -5505,7 +5508,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 15 Feb 2026 20:34:00 +0000',
+        date: 'Sun, 15 Feb 2026 22:36:57 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

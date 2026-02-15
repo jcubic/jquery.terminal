@@ -1359,23 +1359,25 @@
         }
     })();
     // -------------------------------------------------------------------------
-    var is_mobile = (function(a) {
-        var check = false;
-        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
-            check = true;
+    var is_mobile = (function(agent) {
+        if ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0) {
+            return true;
         }
         // detect touch devices like Meta Horizon OS browser
         if ('ontouchstart' in root) {
             return true;
         }
-        var desktop = root.matchMedia && root.matchMedia('(pointer: fine)').matches;
-        if (window.matchMedia && !desktop) {
+        if (root.matchMedia && !root.matchMedia('(pointer: fine)').matches) {
             return true;
         }
         // detect iPad 13
         // ref: https://stackoverflow.com/a/57924983/387194s
         if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
             return true;
+        }
+        var check = false;
+        if (mobile_re.test(agent) || tablet_re.test(agent.substr(0, 4))) {
+            check = true;
         }
         return check;
     })(navigator.userAgent || navigator.vendor || root.opera);
