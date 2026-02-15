@@ -2064,7 +2064,7 @@
             this._output_buffer.push(this.format(arg, false, raw));
         }
         this._output_buffer.push($.extend({}, options, {
-            index: index,
+            index: index
         }));
     };
     // -------------------------------------------------------------------------
@@ -7955,7 +7955,7 @@
                 }
                 var settings = $.extend({}, options, {
                     raw: true,
-                    finalize: finalize,
+                    finalize: finalize
                 });
                 return ['<div class="terminal-render-item"/>', settings];
             }
@@ -11326,7 +11326,6 @@
                             delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
-                            externalPause: true,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
@@ -11349,10 +11348,11 @@
                             });
                         }
                         if (options) {
+                            var finalize = locals.finalize;
                             if (is_function(options.finalize)) {
-                                locals.finalize.push(options.finalize);
+                                finalize.push(options.finalize);
                             } else if (is_array(options.finalize)) {
-                                locals.finalize = locals.finalize.concat(options.finalize);
+                                locals.finalize = finalize.concat(options.finalize);
                             }
                         }
                         if (locals.flush) {

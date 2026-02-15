@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 15 Feb 2026 20:18:37 +0000
+ * Date: Sun, 15 Feb 2026 20:34:00 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -2064,7 +2064,7 @@
             this._output_buffer.push(this.format(arg, false, raw));
         }
         this._output_buffer.push($.extend({}, options, {
-            index: index,
+            index: index
         }));
     };
     // -------------------------------------------------------------------------
@@ -5505,7 +5505,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 15 Feb 2026 20:18:37 +0000',
+        date: 'Sun, 15 Feb 2026 20:34:00 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7955,7 +7955,7 @@
                 }
                 var settings = $.extend({}, options, {
                     raw: true,
-                    finalize: finalize,
+                    finalize: finalize
                 });
                 return ['<div class="terminal-render-item"/>', settings];
             }
@@ -11326,7 +11326,6 @@
                             delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
-                            externalPause: true,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
@@ -11349,10 +11348,11 @@
                             });
                         }
                         if (options) {
+                            var finalize = locals.finalize;
                             if (is_function(options.finalize)) {
-                                locals.finalize.push(options.finalize);
+                                finalize.push(options.finalize);
                             } else if (is_array(options.finalize)) {
-                                locals.finalize = locals.finalize.concat(options.finalize);
+                                locals.finalize = finalize.concat(options.finalize);
                             }
                         }
                         if (locals.flush) {
