@@ -337,7 +337,7 @@
         clone_object: function(object) {
             var tmp = {};
             if (typeof object === 'object') {
-                if (Array.isArray(object)) {
+                if (is_array(object)) {
                     return this.clone_array(object);
                 } else if (object === null) {
                     return object;
@@ -346,7 +346,7 @@
                         if (!object.hasOwnProperty(key)) {
                             continue;
                         }
-                        if (Array.isArray(object[key])) {
+                        if (is_array(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] === 'object') {
                             tmp[key] = this.clone_object(object[key]);
@@ -1874,14 +1874,17 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.push = function(data) {
-        var value = data[0];
-        var options = data[1];
         if (this.has_newline()) {
             this._lines.push(data);
         } else {
+            var value = data[0];
+            var options = data[1];
             var last_line = this.last_line();
             last_line[0] = this.join(last_line[0], value);
             last_line[1].newline = options.newline;
+            if (options.finalize.length > 1 && is_function(options.finalize[1])) {
+                last_line[1].finalize.push(options.finalize[1]);
+            }
         }
     };
     // -------------------------------------------------------------------------
@@ -1934,11 +1937,20 @@
             delete this._lines[index];
             delete this._snapshot[index];
         } else {
-            this._lines[index][0] = value;
+            var line = this._lines[index];
+            line[0] = value;
             if (options) {
-                this._lines[index][1] = $.extend(this._lines[index][1], options);
+                var finalize = line[1].finalize;
+                if (is_array(options.finalize)) {
+                    line[1].finalize = options.finalize;
+                } else if (is_function(options.finalize)) {
+                    finalize[1] = options.finalize;
+                }
+                line[1] = $.extend(this._lines[index][1], options, {
+                    finalize: finalize
+                });
             }
-            return this._lines[index][1];
+            return line[1];
         }
     };
     // -------------------------------------------------------------------------
@@ -2051,13 +2063,9 @@
         } else {
             this._output_buffer.push(this.format(arg, false, raw));
         }
-        this._output_buffer.push({
-            finalize: options.finalize,
+        this._output_buffer.push($.extend({}, options, {
             index: index,
-            raw: options.raw,
-            dynamic: options.dynamic,
-            newline: options.newline
-        });
+        }));
     };
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear_cache = function() {
@@ -7626,7 +7634,7 @@
         if (object === null) {
             return object + '';
         }
-        if (Array.isArray(object)) {
+        if (is_array(object)) {
             return 'array';
         }
         if (object instanceof String) {
@@ -7939,14 +7947,15 @@
         // ---------------------------------------------------------------------
         function prepare_render(value, options) {
             if (is_node(value)) {
+                var finalize = [function(div) {
+                    div.find('.terminal-render-item').replaceWith(value);
+                }];
+                if (options && is_function(options.finalize)) {
+                    finalize.push(options.finalize);
+                }
                 var settings = $.extend({}, options, {
                     raw: true,
-                    finalize: function(div) {
-                        div.find('.terminal-render-item').replaceWith(value);
-                        if (options && is_function(options.finalize)) {
-                            options.finalize(div, self);
-                        }
-                    }
+                    finalize: finalize,
                 });
                 return ['<div class="terminal-render-item"/>', settings];
             }
@@ -8407,7 +8416,7 @@
                     object = {
                         interpreter: make_basic_json_rpc(user_intrp, login)
                     };
-                    if (Array.isArray(settings.completion)) {
+                    if (is_array(settings.completion)) {
                         object.completion = settings.completion;
                     }
                     finalize(object);
@@ -8612,7 +8621,6 @@
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
-                    finalize: $.noop,
                     useCache: use_cache,
                     invokeMethods: false,
                     formatters: true,
@@ -10045,7 +10053,7 @@
                 } else {
                     save_state.push(self.export_view());
                 }
-                if (!Array.isArray(hash_commands)) {
+                if (!is_array(hash_commands)) {
                     hash_commands = [];
                 }
                 if (command !== undefined && !ignore_hash) {
@@ -10105,7 +10113,7 @@
                 }
                 var d = exec_settings.deferred;
                 cmd_ready(function ready() {
-                    if (Array.isArray(command)) {
+                    if (is_array(command)) {
                         (function recur() {
                             var cmd = command.shift();
                             if (cmd) {
@@ -11029,7 +11037,7 @@
                                     appending_to_partial = true;
                                     wrapper = partial;
                                 }
-                            } else if (is_function(data.finalize)) {
+                            } else if (is_array(data.finalize)) {
                                 if (skip()) {
                                     return;
                                 }
@@ -11054,9 +11062,28 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
-                                finalizations.push({
-                                    node: wrapper,
-                                    finalize: data.finalize
+                                finalizations.push($.extend({}, data, {
+                                    node: wrapper
+                                }));
+                                var should_pause = data.externalPause;
+                                // pause when loading images
+                                wrapper.on_load({
+                                    error: function(element) {
+                                        element.replaceWith(use_broken_image);
+                                        if (should_pause) {
+                                            self.resume();
+                                        }
+                                    },
+                                    done: function(has_elements) {
+                                        if (has_elements && should_pause) {
+                                            self.resume();
+                                        }
+                                    },
+                                    load: function(has_elements) {
+                                        if (has_elements && should_pause) {
+                                            self.pause();
+                                        }
+                                    }
                                 });
                                 if (appending_to_partial) {
                                     partial = wrapper;
@@ -11094,7 +11121,22 @@
                         var len = $.terminal.length(snapshot[snapshot.length - 1]);
                         len %= self.cols();
                         finalizations.forEach(function(data) {
-                            data.finalize(data.node);
+                            try {
+                                if (is_array(data.finalize)) {
+                                    data.finalize.forEach(function(fn) {
+                                        if (!is_function(fn)) {
+                                            // TODO: created by import_view
+                                            // should be fixed by function serialization
+                                        } else {
+                                            fn.call(self, data.node, data);
+                                        }
+                                    });
+                                } else {
+                                    data.finalize.call(self, data.node, data);
+                                }
+                            } catch (e) {
+                                display_exception(e, 'USER:echo(finalize)');
+                            }
                         });
                         var last_row;
                         if (partial.length === 0) {
@@ -11280,7 +11322,6 @@
                             flush: true,
                             exec: true,
                             raw: raw('echo'),
-                            finalize: $.noop,
                             unmount: $.noop,
                             delay: settings.execAnimationDelay,
                             ansi: false,
@@ -11290,51 +11331,30 @@
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
                             formatters: true,
+                            externalPause: settings.externalPause,
                             allowedAttributes: settings.allowedAttributes,
                             newline: true
                         }, options || {});
-                        var should_pause = settings.externalPause && locals.externalPause;
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
-                        (function(finalize) {
-                            if (is_node(arg)) {
-                                return;
-                            }
-                            locals.finalize = function(node) {
-                                if (locals.raw) {
+                        locals.finalize = [];
+                        if (!is_node(arg)) {
+                            locals.finalize.push(function(node, options) {
+                                if (options.raw) {
                                     node.addClass('raw');
                                 }
-                                if (locals.ansi) {
+                                if (options.ansi) {
                                     node.addClass('ansi');
                                 }
-                                try {
-                                    if (is_function(finalize)) {
-                                        finalize.call(self, node);
-                                    }
-                                    node.on_load({
-                                        error: function(element) {
-                                            element.replaceWith(use_broken_image);
-                                            if (should_pause) {
-                                                self.resume();
-                                            }
-                                        },
-                                        done: function(has_elements) {
-                                            if (has_elements && should_pause) {
-                                                self.resume();
-                                            }
-                                        },
-                                        load: function(has_elements) {
-                                            if (has_elements && should_pause) {
-                                                self.pause();
-                                            }
-                                        }
-                                    });
-                                } catch (e) {
-                                    display_exception(e, 'USER:echo(finalize)');
-                                    finalize = null;
-                                }
-                            };
-                        })(locals.finalize);
+                            });
+                        }
+                        if (options) {
+                            if (is_function(options.finalize)) {
+                                locals.finalize.push(options.finalize);
+                            } else if (is_array(options.finalize)) {
+                                locals.finalize = locals.finalize.concat(options.finalize);
+                            }
+                        }
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (!buffer.empty()) {
@@ -11828,7 +11848,7 @@
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if (push_settings.completion === true) {
-                            if (Array.isArray(ret.completion)) {
+                            if (is_array(ret.completion)) {
                                 interpreters.top().completion = ret.completion;
                             } else if (!ret.completion) {
                                 interpreters.top().completion = false;
@@ -12150,7 +12170,7 @@
                 var append = false;
                 buffer.forEach(function(data) {
                     if (data) {
-                        if (is_function(data.finalize)) {
+                        if (is_array(data.finalize)) {
                             append = !data.newline;
                         } else {
                             var output;
