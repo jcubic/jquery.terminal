@@ -3007,6 +3007,40 @@ describe('extensions', function() {
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
             expect(term.find('.cmd').attr('style')).toMatchSnapshot();
         });
+        it('should invoke all finalize', () => {
+            term.echo('top ', {
+                finalize(div) {
+                    div.addClass('top');
+                },
+                newline: false
+            });
+
+            term.echo('right ', {
+                finalize(div) {
+                    div.addClass('right');
+                },
+                newline: false
+            });
+
+            term.echo('bottom ', {
+                finalize(div) {
+                    div.addClass('bottom');
+                },
+                newline: false
+            });
+
+            term.echo('left', {
+                finalize(div) {
+                    div.addClass('left');
+                }
+            });
+
+            term.refresh();
+            expect(term.get_output()).toEqual('top right bottom left');
+            ['top', 'right', 'bottom', 'left'].forEach((cls) => {
+                expect(term.find('.terminal-output .' + cls).length).toBe(1);
+            });
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
