@@ -8855,15 +8855,13 @@
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            var is_raw = raw('prompt') && !raw('echo');
-            // we use function so apply_formatters is called when formatters change #1013
-            self.echo(function() {
-                var cmd = $.terminal.apply_formatters(command, {command: true});
-                if (is_raw) {
-                    cmd = $.terminal.format(command);
-                }
-                return prompt + cmd;
-            }, is_raw ? $.extend(options, {raw: true}) : options);
+            self.echo(prompt, $.extend({
+                newline: false,
+                raw: raw('prompt')
+            }, options));
+            self.echo(command, $.extend({
+                raw: raw('command')
+            }, options));
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {

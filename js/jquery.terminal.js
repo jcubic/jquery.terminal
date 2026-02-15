@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 05 Jan 2026 19:25:57 +0000
+ * Date: Sun, 15 Feb 2026 13:50:40 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5497,7 +5497,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 05 Jan 2026 19:25:57 +0000',
+        date: 'Sun, 15 Feb 2026 13:50:40 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8855,15 +8855,13 @@
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            var is_raw = raw('prompt') && !raw('echo');
-            // we use function so apply_formatters is called when formatters change #1013
-            self.echo(function() {
-                var cmd = $.terminal.apply_formatters(command, {command: true});
-                if (is_raw) {
-                    cmd = $.terminal.format(command);
-                }
-                return prompt + cmd;
-            }, is_raw ? $.extend(options, {raw: true}) : options);
+            self.echo(prompt, $.extend({
+                newline: false,
+                raw: raw('prompt')
+            }, options));
+            self.echo(command, $.extend({
+                raw: raw('command')
+            }, options));
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {

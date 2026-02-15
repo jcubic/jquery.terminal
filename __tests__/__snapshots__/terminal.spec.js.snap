@@ -60,7 +60,7 @@ exports[`Terminal plugin cmd plugin should move cursor 2`] = `
 ]
 `;
 
-exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=">&nbsp;foo">&gt;&nbsp;foo</span>"`;
+exports[`Terminal plugin events enter text text should appear and interpreter function should be called 1`] = `"<span data-text=">&nbsp;">&gt;&nbsp;</span><span data-text="foo">foo</span>"`;
 
 exports[`Terminal plugin interprer return should render array 1`] = `
 "> cmd

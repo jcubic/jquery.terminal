@@ -5,7 +5,7 @@
 * terminal::animation callback now has terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
 * add option to use `raw` in prompt
 * Improve the library on Meta Quest Browser[#1023](https://github.com/jcubic/jquery.terminal/issues/1023)
-* allow to change inputStyle to contenteditable for debugging mobile on desktop
+* allow to change `inputStyle` to contenteditable for debugging mobile on desktop
 * add `$.terminal.debug` hook and `terminal-debug` class for internal debugging of cmd
 * add `--ansi-line-base` CSS variable to control line height of ANSI Art [#837](https://github.com/jcubic/jquery.terminal/issues/837)
 ### Bugfix
