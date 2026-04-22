@@ -211,7 +211,7 @@ regex with regexes and process escape characters in double quoted strings.
 ```javascript
 $('body').terminal({
     cat: function(width = 200, height = 300) {
-        return $(`<img src="https://placekitten.com/${width}/${height}">`);
+        return $(`<img src="https://cataas.com/cat?width=${width}&height=${height}">`);
     },
     title: function() {
         return fetch('https://terminal.jcubic.pl')
