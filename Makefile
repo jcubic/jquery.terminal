@@ -1,4 +1,4 @@
-VERSION=2.45.2
+VERSION=2.46.0
 SED=sed
 CD=cd
 NPM=npm
