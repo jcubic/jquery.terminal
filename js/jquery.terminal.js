@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Tue, 05 May 2026 12:35:06 +0000
+ * Date: Tue, 05 May 2026 12:39:39 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5507,7 +5507,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.46.0',
-        date: 'Tue, 05 May 2026 12:35:06 +0000',
+        date: 'Tue, 05 May 2026 12:39:39 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
