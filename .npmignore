@@ -5,6 +5,7 @@
 tmp
 scripts
 tsconfig.json
+jest.config.js
 www
 bower.*
 package.in
@@ -27,8 +28,12 @@ js/jquery-1.7.1.min.js
 js/terminal.widget.in
 version
 CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+CHANGELOG.md
 methods
 options
 files
 templates
 mkemoji
+contributors-www.json
+contributors.json
