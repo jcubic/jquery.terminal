@@ -17,7 +17,7 @@
  *        // or
  *        term.echo(ascii_table(arr, true)); // this will render first row as header
  *
- * Copyright (c) 2018-2025 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2026 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
