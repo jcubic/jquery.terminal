@@ -7,7 +7,7 @@
  *           \/              /____/                              version {{VER}}
  *
  * This file is part of jQuery Terminal. http://terminal.jcubic.pl
- * Copyright (c) 2010-2025 Jakub T. Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2010-2026 Jakub T. Jankiewicz <http://jcubic.pl/me>
  * Released under the MIT license
  *
  * Image Credit: Author Peter Hamer, source Wikipedia
@@ -420,11 +420,8 @@ function timer(callback, timeout) {
     });
 }
 
-
 var support_animations = (function() {
     var animation = false,
-    animationstring = 'animation',
-    keyframeprefix = '',
     domPrefixes = 'Webkit Moz O ms Khtml'.split(' '),
     pfx  = '',
     elm = document.createElement('div');
@@ -435,9 +432,6 @@ var support_animations = (function() {
         for (var i = 0; i < domPrefixes.length; i++) {
             var name = domPrefixes[i] + 'AnimationName';
             if (typeof elm.style[name] !== 'undefined') {
-                pfx = domPrefixes[i];
-                animationstring = pfx + 'Animation';
-                keyframeprefix = '-' + pfx.toLowerCase() + '-';
                 animation = true;
                 break;
             }
@@ -3013,6 +3007,40 @@ describe('extensions', function() {
             expect(term.find('.terminal-output').html()).toMatchSnapshot();
             expect(term.find('.cmd').attr('style')).toMatchSnapshot();
         });
+        it('should invoke all finalize', () => {
+            term.echo('top ', {
+                finalize(div) {
+                    div.addClass('top');
+                },
+                newline: false
+            });
+
+            term.echo('right ', {
+                finalize(div) {
+                    div.addClass('right');
+                },
+                newline: false
+            });
+
+            term.echo('bottom ', {
+                finalize(div) {
+                    div.addClass('bottom');
+                },
+                newline: false
+            });
+
+            term.echo('left', {
+                finalize(div) {
+                    div.addClass('left');
+                }
+            });
+
+            term.refresh();
+            expect(term.get_output()).toEqual('top right bottom left');
+            ['top', 'right', 'bottom', 'left'].forEach((cls) => {
+                expect(term.find('.terminal-output .' + cls).length).toBe(1);
+            });
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
@@ -3268,7 +3296,7 @@ describe('sub plugins', function() {
                     ['aaa:emoji:aaa:emoji:1', ['aaa*aaa*1', 20, 8]],
                     ['aaa:emoji:1aaa:emoji:aaa', ['aaa*1aaa*aaa', 10, 4]]
                 ];
-                for (var i in specs) {
+                for (var i = 0; i < specs.length; ++i) {
                     var spec = specs[i];
                     cmd.set(spec[0]);
                     var output = cmd.find('.cmd-wrapper div [data-text]:not(.end)').text();
@@ -5262,10 +5290,13 @@ describe('Terminal plugin', function() {
                 expect(decodeURIComponent(location.hash)).toEqual(hash);
             });
             describe('import/export view', function() {
-                var term = $('<div/>').appendTo('body').terminal($.noop, {
-                    name: terminal_name,
-                    greetings: greetings,
-                    completion: completion
+                var term;
+                beforeEach(() => {
+                    term = $('<div/>').appendTo('body').terminal($.noop, {
+                        name: terminal_name,
+                        greetings: greetings,
+                        completion: completion
+                    });
                 });
                 it('should export view', function() {
                     enter(term, 'foo');
@@ -5291,7 +5322,7 @@ describe('Terminal plugin', function() {
                     expect(top.greetings).toEqual(greetings);
                     expect(top.completion).toEqual('settings');
                 });
-                it('it should export/import async echo', function(done) {
+                it('should export/import async echo', async function() {
                     term.clear();
                     term.echo(async () => {
                         await term.delay(100);
@@ -5301,15 +5332,12 @@ describe('Terminal plugin', function() {
                         await term.delay(50);
                         return 'world';
                     });
-                    term.output_ready().then(() => {
-                        const view = term.export_view();
-                        term.clear();
-                        term.import_view(view);
-                        setTimeout(() => {
-                            expect(term.get_output()).toEqual('hello\nworld');
-                            done();
-                        }, 200);
-                    });
+                    await term.output_ready();
+                    const view = term.export_view();
+                    term.clear();
+                    term.import_view(view);
+                    await term.delay(400);
+                    expect(term.get_output()).toEqual('hello\nworld');
                 });
                 it('should import view', function() {
                     term.clear().push($.noop).set_prompt('# ')
@@ -5323,6 +5351,28 @@ describe('Terminal plugin', function() {
                     expect(term.get_prompt()).toEqual(prompt);
                     expect(cmd.position()).toEqual(position);
                     expect(term.find('.terminal-output').html()).toMatchSnapshot();
+                });
+                it('should restore stringified view', async function() {
+                    term.push($.noop, {
+                        prompt: '> '
+                    }).clear().set_mask(false);
+                    for (let i=0; i < 10; ++i) {
+                        await term.exec(`hello ${i}`);
+                    }
+                    const view = JSON.stringify(term.export_view());
+                    term.import_view(JSON.parse(view));
+                    expect(term.get_output().split('\n')).toEqual([
+                        '> hello 0',
+                        '> hello 1',
+                        '> hello 2',
+                        '> hello 3',
+                        '> hello 4',
+                        '> hello 5',
+                        '> hello 6',
+                        '> hello 7',
+                        '> hello 8',
+                        '> hello 9'
+                    ]);
                 });
             });
         });

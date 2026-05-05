@@ -7,9 +7,9 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * This is example of how to create custom formatter for jQuery Terminal
+ * This is an example of how to create custom formatter for jQuery Terminal
  *
- * Copyright (c) 2014-2025 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2026 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Includes: node-ansiparser, MIT license, Copyright (c) 2014 Joerg Breitbart
@@ -63,12 +63,17 @@
         factory(root.jQuery);
     }
 })(function($) {
-    var DEBUG = true;
+    var DEBUG = false;
     /* eslint-disable */
     /* istanbul ignore next */
     function warn(str) {
         if ('warn' in console) {
             console.warn(str);
+        }
+    }
+    function log(str) {
+        if (DEBUG) {
+            consoel.log(str);
         }
     }
     // node-ansiparser
@@ -125,7 +130,7 @@
         var EXECUTABLES = r(0x00, 0x18);
         EXECUTABLES.push(0x19);
         EXECUTABLES.push(0x1E);
-        EXECUTABLES.concat(r(0x1c, 0x20));
+        EXECUTABLES = EXECUTABLES.concat(r(0x1c, 0x20));
 
         /* meaning of state and action indices
            var STATES = [
@@ -590,7 +595,7 @@
                             string: match[1],
                             overtyping: partial.match(overtyping_re)
                         });
-                        correct_position(start, match[0], '', 1);
+                        correct_position(start, match[0], '');
                     }
                     if (char_count < 0) {
                         char_count = 0;
@@ -611,7 +616,7 @@
                         chars.reverse().forEach(function(char) {
                             if (i > char.index) {
                                 if (--char_count <= 0) {
-                                    correct_position(char.index, '', char.string, 2);
+                                    correct_position(char.index, '', char.string);
                                     result += char.string;
                                 }
                             } else {
@@ -1420,7 +1425,7 @@
             if (input !== output) {
                 return output;
             }
-            if (typeof options !== 'undefined' && typeof options.position === 'number') {
+            if (typeof options.position === 'number') {
                 return [input, options.position];
             }
             return input;

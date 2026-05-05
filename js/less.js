@@ -7,10 +7,10 @@
  *           \/              /____/
  * http://terminal.jcubic.pl
  *
- * This is example of how to create less like command for jQuery Terminal
+ * This is an example of how to create less like command for jQuery Terminal
  * the code is based on the one from leash shell and written as jQuery plugin
  *
- * Copyright (c) 2018-2025 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2018-2026 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */

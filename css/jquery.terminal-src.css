@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal.
  *
- * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2026 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Date: {{DATE}}
@@ -114,6 +114,10 @@ body.full-screen-terminal {
     min-height: 100%;
     height: 100%;
 }
+.terminal .terminal-virtual-filler {
+    height: calc(var(--terminal-line-count) * var(--terminal-line));
+    z-index: -1;
+}
 .terminal > .terminal-pixel {
     position: absolute;
     display: inline;
@@ -157,6 +161,7 @@ body.full-screen-terminal {
     color: #000 !important;
 }
 .terminal .terminal-output > :not(.raw) a[href],
+.terminal .raw pre.terminal-signature a[href],
 .cmd a[href],
 .terminal.external a[href] {
     color: #3377FF;
@@ -165,6 +170,7 @@ body.full-screen-terminal {
 }
 .cmd a[href]:not(.terminal-inverted),
 .terminal .terminal-output > :not(.raw) a[href]:not(.terminal-inverted),
+.terminal .raw pre.terminal-signature a[href]:not(.terminal-inverted),
 .terminal.external a[href]:not(.terminal-inverted) {
     --color: var(--link-color, #3377FF);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
@@ -172,6 +178,7 @@ body.full-screen-terminal {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color, #ccc);
 }
 .terminal .terminal-output > :not(.raw) a[href].terminal-inverted,
+.terminal .raw pre.terminal-signature a[href].terminal-inverted,
 .terminal.external a[href].terminal-inverted {
     background: var(--color, #ccc);
     /* conditionals: https://www.kizu.ru/conditions-for-css-variables/ */
@@ -179,6 +186,7 @@ body.full-screen-terminal {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--background, #000);
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover,
+.terminal .raw pre.terminal-signature a[href]:hover,
 .cmd a[href]:hover,
 .terminal.external a[href]:hover {
     background-color: #3377FF;
@@ -192,12 +200,14 @@ body.full-screen-terminal {
  */
 @container style(--background: transparent) {
   .terminal .terminal-output > :not(.raw) a[href]:hover,
+  .terminal .raw pre.terminal-signature a[href]:hover,
   .cmd a[href]:hover,
   .terminal.external a[href]:hover {
     --base-background: black;
   }
 }
 .terminal .terminal-output > :not(.raw) a[href] span,
+.terminal .raw pre.terminal-signature a[href] span,
 .cmd a[href] span,
 .terminal.external a[href] span {
     /*
@@ -210,6 +220,7 @@ body.full-screen-terminal {
     text-decoration: underline;
 }
 .terminal .terminal-output > :not(.raw) a[href]:hover span,
+.terminal .raw pre.terminal-signature a[href]:hover span,
 .cmd a[href]:hover span,
 .terminal.external a[href]:hover span {
     background-color: #3377FF !important;
@@ -295,11 +306,15 @@ body.full-screen-terminal {
 .cmd {
     font-size: 12px;
 }
-.terminal-output > div:not(.raw) div::before,
+.terminal-output > div div::before,
 .cmd .cmd-line::before {
     content: '\0200B';
     width: 0;
     display: inline-block;
+}
+.cmd.raw .cmd-prompt {
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 .cmd .cmd-line {
     white-space: nowrap;
@@ -318,7 +333,8 @@ body.full-screen-terminal {
 }
 .terminal .ansi > div {
     line-height: 13px !important;
-    line-height: calc(var(--size, 1) * (13px / var(--pixel-density, 1))) !important;
+    line-height: var(--ansi-line-base, 13px) !important;
+    line-height: calc(var(--size, 1) * (var(--ansi-line-base, 13px) / var(--pixel-density, 1))) !important;
 }
 .cmd span.cmd-prompt, .cmd .cmd-prompt span {
     --background: transparent;
@@ -828,7 +844,8 @@ terminal .terminal-output > div {
     --color: var(--error-color, red);
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
-.terminal .terminal-output > :not(.raw) a[href] {
+.terminal .terminal-output > :not(.raw) a[href],
+.terminal .raw pre.terminal-signature a[href] {
     text-shadow: 0 0 calc(var(--glow) * 5px) var(--color);
 }
 .terminal .cmd {
@@ -1008,6 +1025,11 @@ terminal .terminal-output > div {
     inherits: true;
     initial-value: auto;
 }
+@property --ansi-line-base {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 13px;
+}
 @supports (-ms-ime-align:auto) {
     .terminal h1::selection,
     .terminal h2::selection,
@@ -1105,6 +1127,7 @@ terminal .terminal-output > div {
 .terminal-glow a[data-text],
 .terminal-glow [data-text] span,
 .terminal-glow .terminal-output > div span,
+.terminal-glow .raw pre.terminal-signature a[href],
 .terminal-glow .terminal-output > div a[href] {
     text-shadow: 1px 1px 5px #ccc;
     text-shadow: 1px 1px 5px var(--color, #ccc);
@@ -1145,7 +1168,7 @@ terminal .terminal-output > div {
 }
 .cmd-editable {
     position: absolute;
-    top: calc(var(--cmd-top) * 1px + var(--cmd-font-size, 1em));
+    top: calc(var(--cmd-top) * 1px);
     bottom: 0;
     right: 0;
     left: 0;
@@ -1154,6 +1177,7 @@ terminal .terminal-output > div {
     background: transparent;
     opacity: 0.01;
     outline: 0px solid transparent;
+    word-break: break-all;
 }
 /* Scrollbar */
 .terminal-scroller::-webkit-scrollbar {
@@ -1184,6 +1208,25 @@ terminal .terminal-output > div {
     clip: rect(0,0,0,0) !important;
     white-space: nowrap !important;
     border: 0 !important;
+}
+/*
+ * Debug clipboard/content editable element
+ */
+.terminal-debug .cmd-clipboard, .terminal-debug .cmd-editable {
+    color: var(--color, #ccc) !important;
+    outline: 1px solid #ccc !important;
+    font-size: var(--terminal-font-size) !important;
+}
+.terminal-debug .cmd-clipboard {
+    position: static !important;
+    text-indent: 0 !important;
+    width: 100% !important;
+    height: calc(var(--terminal-font-size) * 1px) !important;
+}
+.terminal-debug .cmd-editable {
+    opacity: 1;
+    outline-offset: -1px;
+    text-shadow: 0 0 2px red;
 }
 /*
  * Allow to change scrollbar color

@@ -21,9 +21,9 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
-UPDATE_CONTRIBUTORS=0
+UPDATE_CONTRIBUTORS=1
 
-.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-guthub emoji
+.PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-github emoji
 
 ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map  css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
@@ -118,7 +118,7 @@ publish:
 	test -e npm || $(GIT) clone $(URL) --depth 1 npm
 	$(CD) npm && $(NPM) publish && $(CD) .. && $(RM) -rf npm
 
-publish-guthub: .github.token
+publish-github: .github.token
 	$(SED) "s/{{TOKEN}}/`$(TOKEN)`/" templates/npmrc.tmpl > .npmrc
 	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/package.git > package.json
 

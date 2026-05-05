@@ -1,3 +1,23 @@
+## 2.46.0
+### Breaking
+* echo command now echoes a function, and it will appear in export_view
+### Features
+* terminal::animation callback now has terminal as context [#1020](https://github.com/jcubic/jquery.terminal/issues/1020)
+* add option to use `raw` in prompt
+* Improve the library on Meta Quest Browser[#1023](https://github.com/jcubic/jquery.terminal/issues/1023)
+* allow to change `inputStyle` to contenteditable for debugging mobile on desktop
+* add `$.terminal.debug` hook and `terminal-debug` class for internal debugging of cmd
+* add `--ansi-line-base` CSS variable to control line height of ANSI Art [#837](https://github.com/jcubic/jquery.terminal/issues/837)
+### Bugfix
+* fix CTRL+E in Brave [#1016](https://github.com/jcubic/jquery.terminal/issues/1016)
+* fix processing images in less [#970](https://github.com/jcubic/jquery.terminal/issues/970)
+* fix updating echo functions that return HTML (with `raw: true`) [#1029](https://github.com/jcubic/jquery.terminal/issues/1029)
+* fix `--terminal-scrollbar` CSS variable
+* fix refresh of echo command when formatters change [#1013](https://github.com/jcubic/jquery.terminal/issues/1013)
+* fix swallowing echo `newline: false` with a function [#1037](https://github.com/jcubic/jquery.terminal/issues/1037)
+* fix swallowing of finalize in echo without newline [#769](https://github.com/jcubic/jquery.terminal/issues/769)
+* fix rounding issues in `animation.js` rendering
+
 ## 2.45.1/2.45.2
 ### Bugfix
 * fix a broken prompt in Brave [#1018](https://github.com/jcubic/jquery.terminal/issues/1018)
@@ -247,7 +267,7 @@
 * fix selection overlap previous line
 * fix scroll to bottom while animating [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix rendering of sixel images [#824](https://github.com/jcubic/jquery.terminal/issues/824)
-* fix handling promises in randerHandler
+* fix handling promises in renderHandler
 * fix scroll to bottom during animation [#791](https://github.com/jcubic/jquery.terminal/issues/791)
 * fix `terminal::is_bottom` when using intersection observer
 * fix processing \r in Linux output of unix_formatting
@@ -401,7 +421,7 @@
 * fix echo newline when one of the values is promise or function
 * fix invalid css when partial output is no longer partial
 * add padding to terminal size i `term::geometry()` [#686](https://github.com/jcubic/jquery.terminal/issues/686)
-* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/7690)
+* clear extended commands from view when calling `import_view` [#690](https://github.com/jcubic/jquery.terminal/issues/690)
 
 ## 2.29.1
 ### Bugfix
@@ -794,7 +814,7 @@
 * fix links from formatters in cmd
 * fix images from formatters in cmd [#519](https://github.com/jcubic/jquery.terminal/issues/519)
 * fix less [#522](https://github.com/jcubic/jquery.terminal/issues/522)
-* fix recursive error when echo finalize throwed exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
+* fix recursive error when echo finalize threw exception [#524](https://github.com/jcubic/jquery.terminal/issues/524)
 * fix prism - xml nested formatting and weird wrapping [#523](https://github.com/jcubic/jquery.terminal/issues/523), [#410](https://github.com/jcubic/jquery.terminal/issues/410)
 * limit number of characters in click on exception line [#525](https://github.com/jcubic/jquery.terminal/issues/525)
 * fix less search clear on resize [#528](https://github.com/jcubic/jquery.terminal/issues/528)

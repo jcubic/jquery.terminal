@@ -8,7 +8,7 @@
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
- * Copyright (c) 2010-2025 Jakub T. Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2010-2026 Jakub T. Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  * Contains:
@@ -233,11 +233,8 @@
     // -----------------------------------------------------------------------
     /* eslint-disable */
     /* istanbul ignore next */
-    function debug(str) {
-        if (false) {
-            console.log(str);
-            //$.terminal.active().echo(str);
-        }
+    function debug() {
+        $.terminal.debug.apply(null, arguments);
     }
     /* eslint-enable */
     // -----------------------------------------------------------------------
@@ -340,7 +337,7 @@
         clone_object: function(object) {
             var tmp = {};
             if (typeof object === 'object') {
-                if (Array.isArray(object)) {
+                if (is_array(object)) {
                     return this.clone_array(object);
                 } else if (object === null) {
                     return object;
@@ -349,7 +346,7 @@
                         if (!object.hasOwnProperty(key)) {
                             continue;
                         }
-                        if (Array.isArray(object[key])) {
+                        if (is_array(object[key])) {
                             tmp[key] = this.clone_array(object[key]);
                         } else if (typeof object[key] === 'object') {
                             tmp[key] = this.clone_object(object[key]);
@@ -471,7 +468,7 @@
             return delete localStorage[n];
         }
         function dc(n) {
-            return wc(n, '', -1);
+            return wc(n, '');
         }
         /**
          * Public API
@@ -1051,13 +1048,15 @@
             }, options);
             var $this = $(this);
             var resizer;
+            var timer;
             var first = true;
             if ($this.is('body')) {
                 $(window).on('resize.resizer', handler);
             } else if (window.ResizeObserver) {
                 resizer = new ResizeObserver(function() {
                     if (!first) {
-                        setTimeout(handler, 0);
+                        clearTimeout(timer);
+                        timer = setTimeout(handler, 0);
                     }
                     first = false;
                 });
@@ -1360,15 +1359,25 @@
         }
     })();
     // -------------------------------------------------------------------------
-    var is_mobile = (function(a) {
-        var check = false;
-        if (mobile_re.test(a) || tablet_re.test(a.substr(0, 4))) {
-            check = true;
+    var is_mobile = (function(agent) {
+        if ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0) {
+            return true;
+        }
+        // detect touch devices like Meta Horizon OS browser
+        if ('ontouchstart' in root) {
+            return true;
+        }
+        if (root.matchMedia && !root.matchMedia('(pointer: fine)').matches) {
+            return true;
         }
         // detect iPad 13
         // ref: https://stackoverflow.com/a/57924983/387194s
         if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
             return true;
+        }
+        var check = false;
+        if (mobile_re.test(agent) || tablet_re.test(agent.substr(0, 4))) {
+            check = true;
         }
         return check;
     })(navigator.userAgent || navigator.vendor || root.opera);
@@ -1849,7 +1858,7 @@
                             return acc + arg;
                         });
                     }
-                    return arg;
+                    return acc + arg;
                 });
             };
         } else if (args.some(is_promise)) {
@@ -1867,14 +1876,17 @@
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.push = function(data) {
-        var value = data[0];
-        var options = data[1];
         if (this.has_newline()) {
             this._lines.push(data);
         } else {
+            var value = data[0];
+            var options = data[1];
             var last_line = this.last_line();
             last_line[0] = this.join(last_line[0], value);
             last_line[1].newline = options.newline;
+            if (options.finalize.length > 1 && is_function(options.finalize[1])) {
+                last_line[1].finalize.push(options.finalize[1]);
+            }
         }
     };
     // -------------------------------------------------------------------------
@@ -1927,11 +1939,20 @@
             delete this._lines[index];
             delete this._snapshot[index];
         } else {
-            this._lines[index][0] = value;
+            var line = this._lines[index];
+            line[0] = value;
             if (options) {
-                this._lines[index][1] = $.extend(this._lines[index][1], options);
+                var finalize = line[1].finalize;
+                if (is_array(options.finalize)) {
+                    line[1].finalize = options.finalize;
+                } else if (is_function(options.finalize)) {
+                    finalize[1] = options.finalize;
+                }
+                line[1] = $.extend(this._lines[index][1], options, {
+                    finalize: finalize
+                });
             }
-            return this._lines[index][1];
+            return line[1];
         }
     };
     // -------------------------------------------------------------------------
@@ -2044,12 +2065,9 @@
         } else {
             this._output_buffer.push(this.format(arg, false, raw));
         }
-        this._output_buffer.push({
-            finalize: options.finalize,
-            index: index,
-            raw: options.raw,
-            newline: options.newline
-        });
+        this._output_buffer.push($.extend({}, options, {
+            index: index
+        }));
     };
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear_cache = function() {
@@ -2153,6 +2171,11 @@
         return deferred.promise();
     }
     // -------------------------------------------------------------------------
+    function use_mobile(settings) {
+        return (settings.inputStyle === 'contenteditable' || is_mobile) &&
+            settings.inputStyle !== 'textarea';
+    }
+    // -------------------------------------------------------------------------
     // :: COMMAND LINE PLUGIN
     // -------------------------------------------------------------------------
     var cmd_index = 0;
@@ -2162,6 +2185,7 @@
             caseSensitiveSearch: true,
             historySize: 60,
             prompt: '> ',
+            raw: false,
             enabled: true,
             history: true,
             onPositionChange: $.noop,
@@ -2191,6 +2215,9 @@
         }
         var id = cmd_index++;
         self.addClass('cmd');
+        if (settings.raw) {
+            self.addClass('raw');
+        }
         var wrapper = $('<div class="cmd-wrapper"/>').appendTo(self);
         wrapper.append('<span class="cmd-prompt"></span>');
         wrapper.append('<div class="cmd-cursor-line">' +
@@ -2207,7 +2234,7 @@
         // textarea show up after focus
         //self.append('<span class="mask"></mask>');
         var clip;
-        if (is_mobile) {
+        if (use_mobile(settings)) {
             clip = (function() {
                 var $node = $('<div class="cmd-editable" contenteditable/>').attr({
                     autocapitalize: 'off',
@@ -2494,7 +2521,7 @@
                 }
                 var tmp = command;
                 // fix scroll the page where there is no scrollbar
-                if (!is_mobile) {
+                if (!use_mobile(settings)) {
                     clip.$node.blur();
                 }
                 history.reset();
@@ -2519,7 +2546,7 @@
                         draw_prompt();
                     }
                 }
-                if (!is_mobile) {
+                if (!use_mobile(settings)) {
                     clip.$node.focus();
                 }
                 return false;
@@ -2671,9 +2698,16 @@
             'META+L': return_true // CLD+L jump into Ominbox on Chrome Mac
         };
         // -------------------------------------------------------------------------------
+        function mobile_delete() {
+            if (settings.inputStyle === 'contenteditable') {
+                return true;
+            }
+            return settings.mobileDelete;
+        }
+        // -------------------------------------------------------------------------------
         function delete_forward(options) {
             options = options || {};
-            if (options.hold && !settings.mobileDelete) {
+            if (options.hold && !mobile_delete()) {
                 return function delete_character_forward() {
                     self['delete'](1);
                     return false;
@@ -2701,7 +2735,7 @@
         // -------------------------------------------------------------------------------
         function delete_backward(options) {
             options = options || {};
-            if (options.hold && !settings.mobileDelete) {
+            if (options.hold && !mobile_delete()) {
                 return function delete_character_backward() {
                     self['delete'](-1);
                 };
@@ -2839,7 +2873,13 @@
                 var is_splitted = prev.is('.cmd-end-line');
                 var lines = simple_split_command_line(command);
                 prev = lines[line - 1];
-                var left_over = lines[line].substring(col).length;
+                // line don't exist, line fit the width and cursor at 0 #1026
+                var left_over;
+                if (line === lines.length) {
+                    left_over = 0;
+                } else {
+                    left_over = lines[line].substring(col).length;
+                }
                 var diff;
                 if (left_over > 0) {
                     diff = col;
@@ -2851,6 +2891,7 @@
                         ++diff;
                     }
                 } else {
+                    // we move to the end of the previous line
                     diff = col + 1;
                 }
                 self.position(-diff, true);
@@ -2931,6 +2972,7 @@
         function home(line) {
             function home() {
                 self.position(0);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2940,6 +2982,7 @@
                     } else {
                         home();
                     }
+                    return false;
                 };
             } else {
                 return home;
@@ -2949,6 +2992,7 @@
         function end(line) {
             function end() {
                 self.position(text(command).length);
+                return false;
             }
             if (line) {
                 return function() {
@@ -2960,11 +3004,11 @@
                             sum += lines[i].length;
                             if (sum > pos) {
                                 self.position(sum + i);
-                                return;
+                                return false;
                             }
                         }
                     }
-                    end();
+                    return end();
                 };
             } else {
                 return end;
@@ -3026,13 +3070,13 @@
             self.oneTime(10, function() {
                 // we use space before command to show select all context menu
                 // idea taken from CodeMirror
-                if (!is_mobile && clip.val() !== command && !position_only) {
+                if (!use_mobile(settings) && clip.val() !== command && !position_only) {
                     clip.val(' ' + command);
                 }
                 if (enabled) {
                     self.oneTime(10, function() {
                         try {
-                            var pos = !is_mobile ? position + 1 : position;
+                            var pos = !use_mobile(settings) ? position + 1 : position;
                             // we check first to improve performance
                             if (clip.$node.caret() !== pos) {
                                 clip.$node.caret(pos);
@@ -3140,26 +3184,14 @@
             rev_search_str = ''; // clear if not found any
         }
         // ---------------------------------------------------------------------
-        function fix_brave_prompt(html) {
-            var attr_re = /data-text="([^"]*[<>][^"]*)"/g;
-            // escape angle brackets in attributes
-            // BUG: https://community.brave.com/t/634482
-            if (html.match(attr_re)) {
-                return html.replace(attr_re, function(_, group) {
-                    return 'data-text="' + escape(group) + '"';
-                });
-            }
-            return html;
-        }
-        // ---------------------------------------------------------------------
         // :: calculate width of hte character
         // ---------------------------------------------------------------------
         function get_char_width() {
-            var $prompt = self.find('.cmd-prompt');
-            var html = $prompt.html();
-            $prompt.html('<span>&nbsp;</span>');
-            var width = $prompt.find('span').get(0).getBoundingClientRect().width;
-            $prompt.html(fix_brave_prompt(html));
+            var $wrapper = self.find('.cmd-wrapper');
+            var $marker = $('<span>&nbsp;</span>');
+            $wrapper.append($marker);
+            var width = $marker.get(0).getBoundingClientRect().width;
+            $marker.remove();
             return width;
         }
         // ---------------------------------------------------------------------
@@ -3668,6 +3700,7 @@
                 lines = lines.map(function(line) {
                     return line.replace(/^\uFFFF+/, '');
                 });
+                var last_line_raw = $.terminal.strip(lines[lines.length - 1]);
                 lines = lines.map(function(line) {
                     if (!$.terminal.have_formatting(line)) {
                         return '[[;;]' + $.terminal.escape_brackets(line) + ']';
@@ -3687,7 +3720,7 @@
                     tabs: settings.tabs
                 });
                 var last_line = $.terminal.format(encoded_last_line, options);
-                just_prompt_len = strlen(text(encoded_last_line));
+                just_prompt_len = strlen(text(last_line_raw));
                 prompt_len = just_prompt_len + prompt_offset;
                 return lines.slice(0, -1).map(function(line) {
                     line = $.terminal.encode(line, {
@@ -3699,14 +3732,14 @@
                 }).concat([last_line]).join('\n');
             }
             function set(prompt, options) {
-                if (prompt) {
+                if (prompt && !settings.raw) {
                     if (options && options.formatters || !options) {
                         prompt = $.terminal.apply_formatters(prompt, {prompt: true});
                         prompt = $.terminal.normalize(prompt);
                     }
                     prompt = crlf(prompt);
                 }
-                var formatted = format_prompt(prompt);
+                var formatted = settings.raw ? prompt : format_prompt(prompt);
                 last_rendered_prompt = prompt;
                 // zero width space to make sure prompt margin takes up space,
                 // so that echo with newline: false works when prompt is empty
@@ -4208,7 +4241,7 @@
         // ---------------------------------------------------------------------
         function is_delay_key(key) {
             var specials = ['HOLD+SHIFT+BACKSPACE', 'HOLD+BACKSPACE'];
-            return specials.indexOf(key) !== -1 && settings.mobileDelete ||
+            return specials.indexOf(key) !== -1 && mobile_delete() ||
                 settings.repeatTimeoutKeys.indexOf(key) !== -1;
         }
         // ---------------------------------------------------------------------
@@ -4224,7 +4257,7 @@
         // function complexicity is 35 when adding this exception
         // eslint-disable-next-line complexity
         function keydown_event(e) {
-            debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which);
+            debug('keydown "' + e.key + '" ' + e.fake + ' ' + e.which, e);
             var result;
             process = (e.key || '').toLowerCase() === 'process' || e.which === 0;
             dead_key = no_keypress && single_key && !is_backspace(e);
@@ -4365,7 +4398,7 @@
         var doc = $(document.documentElement || window);
         self.keymap(settings.keymap || {});
         function keypress_event(e) {
-            debug('keypress "' + e.key + '" ' + e.fake);
+            debug('keypress "' + e.key + '" ' + e.fake, e);
             clear_hold();
             var result;
             if (!e.fake) {
@@ -4439,13 +4472,16 @@
             skip_insert = false;
             no_keydown = true;
         }
-        function input_event() {
+        function input_event(e) {
             debug('input ' + no_keydown + ' || ' + process + ' ((' + no_keypress +
                   ' || ' + dead_key + ') && !' + skip_insert + ' && (' + single_key +
-                  ' || ' + no_key + ') && !' + backspace + ')');
+                  ' || ' + no_key + ') && !' + backspace + ')', e);
             // correct for fake space used for select all context menu hack
+            if (!enabled) {
+                return;
+            }
             var val = clip.val();
-            if (!is_mobile) {
+            if (!use_mobile(settings)) {
                 val = val.replace(/^ /, '');
             }
             // Some Androids don't fire keypress - #39
@@ -4521,7 +4557,10 @@
         doc.bind('keyup.cmd', clear_hold);
         doc.bind('input.cmd', input_event);
         (function() {
-            if (is_mobile) {
+            if (use_mobile(settings)) {
+                $(clip.$node).on('click touchstart', function() {
+                    self.display_position(clip.$node.caret());
+                });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
                         clip.focus();
@@ -6466,9 +6505,6 @@
                                     if (result[1] !== -1) {
                                         result[1] += length_before;
                                     }
-                                    var after_len = text(result[0]).length;
-                                    if (after_len !== this_len) {
-                                    }
                                     return result;
                                 }
                                 return [string, -1];
@@ -6657,6 +6693,9 @@
                         string = string.replace(re, '$1').replace(/^[`'"]|[`'"]$/g, '');
                         if (quote === "'") {
                             string = string.replace(/"/g, '\\"');
+                        }
+                        if (quote === '"') {
+                            string = string.replace(/\\'/g, "'");
                         }
                     }
                     string = '"' + string + '"';
@@ -6970,6 +7009,10 @@
                 return test;
             };
         }
+        // ---------------------------------------------------------------------
+        // :: debug logger
+        // ---------------------------------------------------------------------
+        $.terminal.debug = $.noop;
         // ---------------------------------------------------------------------
         // :: Replace terminal formatting with html
         // ---------------------------------------------------------------------
@@ -7512,8 +7555,8 @@
     // :: Calculate number of lines that fit without scroll
     // -----------------------------------------------------------------------
     function get_num_rows(terminal, char_size) {
-        var filler = terminal.find('.terminal-fill');
-        var height = filler.height();
+        var size_filler = terminal.find('.terminal-fill');
+        var height = size_filler.height();
         return aproximation(height / char_size.height);
     }
     // -----------------------------------------------------------------------
@@ -7593,7 +7636,7 @@
         if (object === null) {
             return object + '';
         }
-        if (Array.isArray(object)) {
+        if (is_array(object)) {
             return 'array';
         }
         if (object instanceof String) {
@@ -7608,13 +7651,13 @@
     // :: TERMINAL PLUGIN CODE
     // -----------------------------------------------------------------------
     var version_set = !$.terminal.version.match(/^\{\{/);
-    var copyright = 'Copyright (c) 2010-2025 Jakub T. Jankiewicz ' +
+    var copyright = 'Copyright (c) 2010-2026 Jakub T. Jankiewicz ' +
         '<https://jcubic.pl/me>';
     var version_string = version_set ? ' v. ' + $.terminal.version : ' ';
     // regex is for placing version string aligned to the right
     var reg = new RegExp(' {' + version_string.length + '}$');
     function small_string(name) {
-        return '(c) 2010-2025 [[!;;;;https://jcubic.pl/me]' + name + ']';
+        return '(c) 2010-2026 [[!;;;;https://jcubic.pl/me]' + name + ']';
     }
     // -----------------------------------------------------------------------
     // :: Terminal Signatures
@@ -7675,7 +7718,7 @@
         maskChar: '*',
         wrap: true,
         checkArity: true,
-        raw: false,
+        raw: false, // { prompt, echo }
         tabindex: 1,
         invokeMethods: false,
         exceptionHandler: null,
@@ -7906,14 +7949,15 @@
         // ---------------------------------------------------------------------
         function prepare_render(value, options) {
             if (is_node(value)) {
+                var finalize = [function(div) {
+                    div.find('.terminal-render-item').replaceWith(value);
+                }];
+                if (options && is_function(options.finalize)) {
+                    finalize.push(options.finalize);
+                }
                 var settings = $.extend({}, options, {
                     raw: true,
-                    finalize: function(div) {
-                        div.find('.terminal-render-item').replaceWith(value);
-                        if (options && is_function(options.finalize)) {
-                            options.finalize(div, self);
-                        }
-                    }
+                    finalize: finalize
                 });
                 return ['<div class="terminal-render-item"/>', settings];
             }
@@ -8374,7 +8418,7 @@
                     object = {
                         interpreter: make_basic_json_rpc(user_intrp, login)
                     };
-                    if (Array.isArray(settings.completion)) {
+                    if (is_array(settings.completion)) {
                         object.completion = settings.completion;
                     }
                     finalize(object);
@@ -8419,6 +8463,21 @@
                     completion: settings.completion
                 });
             }
+        }
+        // ---------------------------------------------------------------------
+        // :: return default jQuery Terminal signature (with ASCII Art)
+        // ---------------------------------------------------------------------
+        function signature() {
+            var cols = self.cols();
+            for (var i = signatures.length; i--;) {
+                var lengths = signatures[i].map(function(line) {
+                    return $.terminal.length(line);
+                });
+                if (Math.max.apply(null, lengths) <= cols) {
+                    return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
+                }
+            }
+            return '';
         }
         // ---------------------------------------------------------------------
         // :: Create JSON-RPC authentication function
@@ -8564,10 +8623,10 @@
                 var line_settings = $.extend({
                     exec: true,
                     raw: false,
-                    finalize: $.noop,
                     useCache: use_cache,
                     invokeMethods: false,
                     formatters: true,
+                    dynamic: is_function(line.value),
                     convertLinks: settings.convertLinks
                 }, line.options || {});
                 var string = stringify_value(line.value);
@@ -8732,9 +8791,22 @@
         // :: Display user greetings or terminal signature
         // ---------------------------------------------------------------------
         function show_greetings() {
+            // raw option needs to be the same as when echo is called
+            // so change of the setting doesn't affect the signature
+            var raw_echo = raw('echo');
+            function render_signature() {
+                var result = self.signature();
+                if (raw_echo) {
+                    result = result.split('\n').map(function(line) {
+                        return $.terminal.format(links(line));
+                    }).join('\n');
+                    return '<pre class="terminal-signature">' + result + '</pre>';
+                }
+                return result;
+            }
             if (settings.greetings === undefined) {
                 // signature have ascii art so it's not suite for screen readers
-                self.echo(self.signature, {finalize: a11y_hide, formatters: false});
+                self.echo(render_signature, {finalize: a11y_hide, formatters: false});
             } else if (settings.greetings) {
                 if (is_string(settings.greetings)) {
                     self.echo(settings.greetings);
@@ -8793,12 +8865,17 @@
                     fire_event('onEchoCommand', [div, command]);
                 }
             };
-            command = $.terminal.apply_formatters(command, {command: true});
-            self.echo(prompt + command, options);
+            self.echo(prompt, $.extend({
+                newline: false,
+                raw: raw('prompt')
+            }, options));
+            self.echo(command, $.extend({
+                raw: raw('command')
+            }, options));
         }
         // ---------------------------------------------------------------------
         function have_scrollbar() {
-            return filler.outerWidth() !== self.outerWidth();
+            return size_filler.outerWidth() !== self.outerWidth();
         }
         // ---------------------------------------------------------------------
         // :: Helper function that restore state. Call import_view or exec
@@ -9129,12 +9206,16 @@
             function scroll_to_view(visible) {
                 if (!visible) {
                     // try catch for Node.js unit tests
-                    try {
-                        self.scroll_to(self.find('.cmd-cursor-line'));
-                        return true;
-                    } catch (e) {
-                        return true;
-                    }
+                    self.stopTime('scroll_to');
+                    self.oneTime(1, 'scroll_to', function() {
+                        try {
+                            self.scroll_to(self.find('.cmd-cursor-line'));
+                            return true;
+                        } catch (e) {
+                            return true;
+                        }
+                    });
+                    return true;
                 }
             }
             // we don't want debounce in Unit Tests
@@ -9142,8 +9223,8 @@
                 return scroll_to_view;
             }
             return debounce(scroll_to_view, 100, {
-                leading: true,
-                trailing: false
+                leading: false,
+                trailing: true
             });
         })();
         // ---------------------------------------------------------------------
@@ -9481,16 +9562,20 @@
                     }
                     var bottom = self.is_bottom();
                     var line = 0;
+                    var chars = $.terminal.partition(formatted, {wrap: false});
+                    if (raw('prompt')) {
+                        chars = chars.map(function(str) {
+                            return $.terminal.format(str);
+                        });
+                    }
                     if (optimized) {
                         var anim_lines = formatted_lines.map(function(formatted) {
                             return {
                                 formatted: formatted,
-                                chars: $.terminal.partition(formatted, {wrap: false}),
+                                chars: chars,
                                 len: $.terminal.length(formatted)
                             };
                         });
-                    } else {
-                        var chars = $.terminal.partition(formatted, {wrap: false});
                     }
                     var stop;
                     var interval = setInterval(function() {
@@ -9667,6 +9752,21 @@
             };
         }
         // ---------------------------------------------------------------------
+        // :: helper that checks raw option
+        // :: it can be boolean or { echo: boolean, prompt: boolean }
+        // ---------------------------------------------------------------------
+        function raw(type) {
+            // new API
+            if ($.isPlainObject(settings.raw)) {
+                return settings.raw[type];
+            }
+            // boolean only impacts echo
+            if (type === 'echo') {
+                return settings.raw;
+            }
+            return false;
+        }
+        // ---------------------------------------------------------------------
         // :: this even can be used to valid if user and password is valid
         // :: this is additional protection when using automatic authentication
         // ---------------------------------------------------------------------
@@ -9820,12 +9920,12 @@
         }
         // ---------------------------------------------------------------------
         function get_scrollbar_width() {
-            var width = filler.outerWidth();
+            var width = size_filler.outerWidth();
             return container_width - width;
         }
         // ---------------------------------------------------------------------
         function get_padding() {
-            var style = window.getComputedStyle(filler[0]);
+            var style = window.getComputedStyle(size_filler[0]);
             function padding(name) {
                 return get_prop_number(style, 'padding-' + name);
             }
@@ -9955,7 +10055,7 @@
                 } else {
                     save_state.push(self.export_view());
                 }
-                if (!Array.isArray(hash_commands)) {
+                if (!is_array(hash_commands)) {
                     hash_commands = [];
                 }
                 if (command !== undefined && !ignore_hash) {
@@ -10015,7 +10115,7 @@
                 }
                 var d = exec_settings.deferred;
                 cmd_ready(function ready() {
-                    if (Array.isArray(command)) {
+                    if (is_array(command)) {
                         (function recur() {
                             var cmd = command.shift();
                             if (cmd) {
@@ -10675,18 +10775,7 @@
             // -------------------------------------------------------------
             // :: Return the terminal signature depending on the size of the terminal
             // -------------------------------------------------------------
-            signature: function() {
-                var cols = self.cols();
-                for (var i = signatures.length; i--;) {
-                    var lengths = signatures[i].map(function(line) {
-                        return $.terminal.length(line);
-                    });
-                    if (Math.max.apply(null, lengths) <= cols) {
-                        return signatures[i].join('\n').replace(/\s+$/m, '') + '\n';
-                    }
-                }
-                return '';
-            },
+            signature: signature,
             // -------------------------------------------------------------
             // :: returns the number of rendered lines
             // -------------------------------------------------------------
@@ -10933,6 +11022,14 @@
                         // TODO: refactor buffer.flush(), there is way
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
+                            function skip() {
+                                // don't re-render html and jQuery/DOM nodes #759
+                                // but update HTML that came from function #1029
+                                if (options.update && data.raw === true && data.newline) {
+                                    return !data.dynamic;
+                                }
+                                return false;
+                            }
                             if (!data) {
                                 if (!partial.length) {
                                     wrapper = $('<div/>');
@@ -10942,9 +11039,8 @@
                                     appending_to_partial = true;
                                     wrapper = partial;
                                 }
-                            } else if (is_function(data.finalize)) {
-                                if (options.update && data.raw === true && data.newline) {
-                                    // don't re-render html and jQuery/DOM nodes #759
+                            } else if (is_array(data.finalize)) {
+                                if (skip()) {
                                     return;
                                 }
                                 if (scroll) {
@@ -10968,9 +11064,28 @@
                                 wrapper.attr('data-index', data.index);
                                 appending_to_partial = !data.newline;
                                 wrapper.toggleClass('partial', appending_to_partial);
-                                finalizations.push({
-                                    node: wrapper,
-                                    finalize: data.finalize
+                                finalizations.push($.extend({}, data, {
+                                    node: wrapper
+                                }));
+                                var should_pause = data.externalPause;
+                                // pause when loading images
+                                wrapper.on_load({
+                                    error: function(element) {
+                                        element.replaceWith(use_broken_image);
+                                        if (should_pause) {
+                                            self.resume();
+                                        }
+                                    },
+                                    done: function(has_elements) {
+                                        if (has_elements && should_pause) {
+                                            self.resume();
+                                        }
+                                    },
+                                    load: function(has_elements) {
+                                        if (has_elements && should_pause) {
+                                            self.pause();
+                                        }
+                                    }
                                 });
                                 if (appending_to_partial) {
                                     partial = wrapper;
@@ -11008,7 +11123,22 @@
                         var len = $.terminal.length(snapshot[snapshot.length - 1]);
                         len %= self.cols();
                         finalizations.forEach(function(data) {
-                            data.finalize(data.node);
+                            try {
+                                if (is_array(data.finalize)) {
+                                    data.finalize.forEach(function(fn) {
+                                        if (!is_function(fn)) {
+                                            // TODO: created by import_view
+                                            // should be fixed by function serialization
+                                        } else {
+                                            fn.call(self, data.node, data);
+                                        }
+                                    });
+                                } else {
+                                    data.finalize.call(self, data.node, data);
+                                }
+                            } catch (e) {
+                                display_exception(e, 'USER:echo(finalize)');
+                            }
                         });
                         var last_row;
                         if (partial.length === 0) {
@@ -11047,20 +11177,22 @@
                             var self_offset = self.offset();
                             var top = output.height();
                             var height = command_line.height();
+                            var padding = scroller.outerHeight() - scroller.height();
                             css(self[0], {
                                 '--terminal-height': self.height(),
+                                '--terminal-line-count': output_line_count,
                                 '--terminal-x': offset.left - self_offset.left,
                                 '--terminal-y': offset.top - self_offset.top,
                                 '--terminal-scroll': scroller.prop('scrollTop'),
-                                '--cmd-top': top,
+                                '--cmd-top': top + padding,
                                 '--cmd-height': height
                             });
-                            if (enabled && !is_mobile && !options.update) {
+                            if (enabled && !use_mobile(settings) && !options.update) {
                                 // Firefox won't reflow the cursor automatically, so
                                 // hide it briefly then reshow it
-                                cmd_cursor.hide();
-                                setTimeout(function() {
-                                    cmd_cursor.show();
+                                //cmd_cursor.hide();
+                                cmd_cursor.stopTime().oneTime(1, function() {
+                                    //cmd_cursor.show();
                                 });
                             }
                         });
@@ -11191,62 +11323,40 @@
                         var locals = $.extend({
                             flush: true,
                             exec: true,
-                            raw: settings.raw,
-                            finalize: $.noop,
+                            raw: raw('echo'),
                             unmount: $.noop,
                             delay: settings.execAnimationDelay,
                             ansi: false,
                             typing: false,
-                            externalPause: true,
                             keepWords: false,
                             invokeMethods: settings.invokeMethods,
                             onClear: null,
                             formatters: true,
+                            externalPause: settings.externalPause,
                             allowedAttributes: settings.allowedAttributes,
                             newline: true
                         }, options || {});
-                        var should_pause = settings.externalPause && locals.externalPause;
                         // finalize function is passed around and invoked
                         // in terminal::flush after content is added to DOM
-                        (function(finalize) {
-                            if (is_node(arg)) {
-                                return;
-                            }
-                            locals.finalize = function(node) {
-                                if (locals.raw) {
+                        locals.finalize = [];
+                        if (!is_node(arg)) {
+                            locals.finalize.push(function(node, options) {
+                                if (options.raw) {
                                     node.addClass('raw');
                                 }
-                                if (locals.ansi) {
+                                if (options.ansi) {
                                     node.addClass('ansi');
                                 }
-                                try {
-                                    if (is_function(finalize)) {
-                                        finalize.call(self, node);
-                                    }
-                                    node.on_load({
-                                        error: function(element) {
-                                            element.replaceWith(use_broken_image);
-                                            if (should_pause) {
-                                                self.resume();
-                                            }
-                                        },
-                                        done: function(has_elements) {
-                                            if (has_elements && should_pause) {
-                                                self.resume();
-                                            }
-                                        },
-                                        load: function(has_elements) {
-                                            if (has_elements && should_pause) {
-                                                self.pause();
-                                            }
-                                        }
-                                    });
-                                } catch (e) {
-                                    display_exception(e, 'USER:echo(finalize)');
-                                    finalize = null;
-                                }
-                            };
-                        })(locals.finalize);
+                            });
+                        }
+                        if (options) {
+                            var finalize = locals.finalize;
+                            if (is_function(options.finalize)) {
+                                finalize.push(options.finalize);
+                            } else if (is_array(options.finalize)) {
+                                locals.finalize = finalize.concat(options.finalize);
+                            }
+                        }
                         if (locals.flush) {
                             // flush buffer if there was no flush after previous echo
                             if (!buffer.empty()) {
@@ -11384,7 +11494,7 @@
                     animating = true;
                     var prompt = self.get_prompt();
                     self.set_prompt('');
-                    return unpromise(callback(), function() {
+                    return unpromise(callback.call(self), function() {
                         self.set_prompt(prompt);
                         animating = false;
                     });
@@ -11740,7 +11850,7 @@
                         // result is object with interpreter and completion properties
                         interpreters.push($.extend({}, ret, push_settings));
                         if (push_settings.completion === true) {
-                            if (Array.isArray(ret.completion)) {
+                            if (is_array(ret.completion)) {
                                 interpreters.top().completion = ret.completion;
                             } else if (!ret.completion) {
                                 interpreters.top().completion = false;
@@ -11984,7 +12094,7 @@
                     if (!terminals.length()) {
                         $(window).off('hashchange');
                     }
-                    if (is_mobile) {
+                    if (use_mobile(settings)) {
                         self.off([
                             'touchstart.terminal',
                             'touchmove.terminal',
@@ -12062,7 +12172,7 @@
                 var append = false;
                 buffer.forEach(function(data) {
                     if (data) {
-                        if (is_function(data.finalize)) {
+                        if (is_array(data.finalize)) {
                             append = !data.newline;
                         } else {
                             var output;
@@ -12204,6 +12314,7 @@
         var interpreters;
         var command_line;
         var old_enabled;
+        var virtual_filler;
         var visibility_observer;
         var mutation_observer;
         // backward compatibility
@@ -12219,12 +12330,18 @@
         $(broken_image).hide().appendTo(wrapper);
         var font_resizer = $('<div class="terminal-font">&nbsp;</div>').appendTo(self);
         var pixel_resizer = $('<div class="terminal-pixel"/>').appendTo(self);
-        var filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        var size_filler = $('<div class="terminal-fill"/>').appendTo(scroller);
+        if (settings.virtualOutput) {
+            virtual_filler = $('<div>').addClass('terminal-virtual-filler')
+                .appendTo(wrapper);
+            virtual_filler.is(':visible');
+        }
         output = $('<div>').addClass('terminal-output').attr('role', 'log')
             .appendTo(wrapper);
         self.addClass('terminal');
         var pixel_density = get_pixel_size();
         var char_size = get_char_size(self);
+        container_width = self.width();
         css(self[0], {
             '--char-width': char_size.width,
             '--char-height': char_size.height,
@@ -12250,13 +12367,7 @@
                 }
             }
         }
-        var global_login_fn;
-        if (is_function(settings.login)) {
-            global_login_fn = settings.login;
-        } else if (base_interpreter &&
-            (typeof settings.login === 'string' || settings.login === true)) {
-            global_login_fn = make_json_rpc_login(base_interpreter, settings.login);
-        }
+        var global_login_fn = make_global_login();
         if (have_custom_id) {
             if (!terminals.set(settings.id, self)) {
                 warn(strings().invalidId);
@@ -12268,6 +12379,15 @@
             if (old_enabled) {
                 self.focus();
                 self.scroll_to_bottom();
+            }
+        }
+        // -------------------------------------------------------------------------------
+        function make_global_login() {
+            if (is_function(settings.login)) {
+                return settings.login;
+            } else if (base_interpreter &&
+                       (typeof settings.login === 'string' || settings.login === true)) {
+                return make_json_rpc_login(base_interpreter, settings.login);
             }
         }
         // -------------------------------------------------------------------------------
@@ -12431,6 +12551,8 @@
             // CREATE COMMAND LINE
             command_line = $('<div/>').appendTo(wrapper).cmd({
                 tabindex: settings.tabindex,
+                raw: raw('prompt'),
+                inputStyle: settings.inputStyle,
                 mobileDelete: settings.mobileDelete,
                 mobileIgnoreAutoSpace: settings.mobileIgnoreAutoSpace,
                 prompt: global_login_fn ? false : prompt,
@@ -12459,7 +12581,7 @@
                 onCommandChange: function(command) {
                     // resize is not triggered when insert called just after init
                     //  and scrollbar appear
-                    if (old_width !== filler.width()) {
+                    if (old_width !== size_filler.width()) {
                         // resizer handler will update old_width
                         self.resizer();
                     }
@@ -12469,7 +12591,7 @@
                 commands: commands
             });
             function disable(e) {
-                if (is_mobile) {
+                if (use_mobile(settings)) {
                     return;
                 }
                 e = e.originalEvent;
@@ -12496,7 +12618,7 @@
                 self.disable();
             });
             // istanbul ignore next
-            if (is_mobile) {
+            if (use_mobile(settings)) {
                 (function() {
                     self.addClass('terminal-mobile');
                     var start;
@@ -12597,7 +12719,7 @@
                     var ignore_elements = '.terminal-output textarea,' +
                         '.terminal-output input';
                     self.mousedown(function(e) {
-                        if (!scrollbar_event(e, filler, pixel_density)) {
+                        if (!scrollbar_event(e, size_filler, pixel_density)) {
                             $target = $(e.target);
                         }
                     }).mouseup(function() {
@@ -12665,7 +12787,7 @@
                             var width = 5 * 14;
                             var rect = self[0].getBoundingClientRect();
                             // we need width without scrollbar
-                            var content_width = filler.outerWidth() * pixel_density;
+                            var content_width = size_filler.outerWidth() * pixel_density;
                             // fix jumping when click near bottom or left edge #592
                             var diff_h = (top + cmd_rect.top + height);
                             diff_h = diff_h - rect.height - rect.top;
@@ -12768,8 +12890,9 @@
             resize();
             function resize() {
                 if (self.is(':visible')) {
-                    var width = filler.width();
-                    var height = filler.height();
+                    // TODO: use getBoundingClientRect
+                    var width = size_filler.width();
+                    var height = size_filler.height();
                     pixel_density = get_pixel_size();
                     if (old_pixel_density !== pixel_density) {
                         css(self[0], {
@@ -12925,7 +13048,7 @@
                 command_queue.resolve();
             }
             // touch devices need touch event to get virtual keyboard
-            if (enabled && self.is(':visible') && !is_mobile) {
+            if (enabled && self.is(':visible') && !use_mobile(settings)) {
                 self.focus(undefined, true);
             } else {
                 self.disable();

@@ -9,7 +9,7 @@
  *
  * This file is part of jQuery Terminal that create base class for animation
  *
- * Copyright (c) 2014-2025 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Copyright (c) 2014-2026 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
@@ -154,14 +154,15 @@
         line(line, x, y) {
             var ctx = this.ctx;
             var color = this.option('color');
-            var char_width = Math.ceil(this._char.width);
             var char_height = this._char.height;
+            var self = this;
             line.forEach(function(arr) {
                 var text = arr[3];
                 var len = $.terminal.length(text);
+                var run_width = len * self._char.width;
                 if (arr[2]) {
                     ctx.fillStyle = arr[2];
-                    ctx.fillRect(x, y, char_width * len, char_height);
+                    ctx.fillRect(Math.round(x), y, Math.ceil(run_width), char_height);
                 }
                 if (arr[1]) {
                     ctx.fillStyle = arr[1];
@@ -169,7 +170,7 @@
                     ctx.fillStyle = color;
                 }
                 ctx.fillText(text, x, y);
-                x += len * char_width;
+                x += run_width;
             });
         }
     }

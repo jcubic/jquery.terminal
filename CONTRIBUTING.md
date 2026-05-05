@@ -79,9 +79,9 @@ git push --tags
 
 **NOTE:** If something is wrong (e.g., Travis CI failed), the tag can be removed and a fix can be added in a new commit and the tag readded again.
 
-* New version on GitHub is released. You need to wait a bit to have confirmationfrom CI that the build was successful. In the meantime, you can add Release Notes  on GitHub. Just click releases -> draft new release, then pick the version and copy and paste what's in the CHANGELOG.md file.
+* New version on GitHub is released. You need to wait a bit to have confirmation from CI that the build was successful. In the meantime, you can add Release Notes  on GitHub. Just click releases -> draft new release, then pick the version and copy and paste what's in the CHANGELOG.md file.
 
-* When new release is done, issues that have `resovled` label are closed.
+* When new release is done, issues that have `resolved` label are closed.
 
 * After you get confirmation that CI (travis) run successfully you can close issues
   labeled with `resolved` and release to npm. By calling:
