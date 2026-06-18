@@ -1,6 +1,7 @@
 ## 2.4.6.1
 ### Bugfix
 * fix mobile detection [#1047](https://github.com/jcubic/jquery.terminal/issues/1047)
+* fix caret error on empty selection when copying with CTRL+C [#1048](https://github.com/jcubic/jquery.terminal/issues/1048)
 
 ## 2.46.0
 ### Breaking

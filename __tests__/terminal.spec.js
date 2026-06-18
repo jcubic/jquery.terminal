@@ -917,6 +917,13 @@ describe('Terminal utils', function() {
             expect($.terminal.escape_regex('\\^*+?.$[]{}()')).toEqual(safe);
         });
     });
+    describe('$.fn.caret', function() {
+        it('should not throw on empty selection', function() {
+            expect(function() {
+                $('#caret-missing-node').caret();
+            }).not.toThrow();
+        });
+    });
     describe('$.terminal.have_formatting', function() {
         var formattings = [
             'some text [[;;]Te[xt] and formatting',

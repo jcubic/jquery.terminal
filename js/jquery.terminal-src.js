@@ -908,6 +908,9 @@
     /* istanbul ignore next */
     $.fn.caret = function(pos) {
         var target = this[0];
+        if (!target) {
+            return arguments.length === 0 ? 0 : this;
+        }
         var isContentEditable = target.contentEditable === 'true';
         //get
         if (arguments.length === 0) {
