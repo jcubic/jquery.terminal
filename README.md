@@ -413,7 +413,7 @@ You can request paid support, you can find details at [support.jcubic.pl](https:
 
 ### Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=jcubic/jquery.terminal&type=Date&branch=master)](https://star-history.com/#jcubic/jquery.terminal&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=jcubic/jquery.terminal&type=Date&branch=master)](https://star-history.dera.page/#jcubic/jquery.terminal&Date)
 
 ### License
 
