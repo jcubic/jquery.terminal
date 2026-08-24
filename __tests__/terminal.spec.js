@@ -2389,7 +2389,11 @@ describe('Terminal utils', function() {
                 expect(a0(spans.eq(i).text())).toEqual(string);
             });
             [true, false, true].forEach(function(check, i) {
-                expect([i, spans.eq(i).css('color') === 'red']).toEqual([i, check]);
+                // jsdom < 26 returned the 'red' keyword, jsdom >= 26 (jest 30)
+                // serializes computed color spec-compliantly as rgb()
+                var color = spans.eq(i).css('color');
+                var is_red = color === 'red' || color === 'rgb(255, 0, 0)';
+                expect([i, is_red]).toEqual([i, check]);
             });
             expect(spans.eq(1).is('.terminal-inverted')).toBeTruthy();
         });
