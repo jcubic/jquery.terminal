@@ -380,7 +380,7 @@
     "wcwidth": "^1.0.1"
   },
   "devDependencies": {
-    "cssnano": "^5.1.5",
+    "cssnano": "^7.1.9",
     "emoji-datasource-twitter": "^14.0.0",
     "eslint": "^8.11.0",
     "gm": "^1.23.1",
