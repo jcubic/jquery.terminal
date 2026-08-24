@@ -1,9 +1,13 @@
 ## 2.47.0
+### Breaking
+* echo command echoes a string again (revert of 2.46.0), so the command no longer appears as a function in `export_view`
 ### Features
 * add support for heredocs in command processing
 * support promise as interperter
+* echo `formatters` option now accepts `'command'` to apply command formatters
 ### Bugfix
-* fix applying formatters to echo command
+* fix applying formatters to echo command [#1052](https://github.com/jcubic/jquery.terminal/issues/1052)
+* keep each partial (`echo` with `newline: false`) `raw` and `formatters` options when the line is re-rendered on redraw, `refresh` and `import_view` [#1052](https://github.com/jcubic/jquery.terminal/issues/1052)
 
 ## 2.46.2
 ### Bugfix

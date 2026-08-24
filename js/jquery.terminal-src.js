@@ -1875,19 +1875,45 @@
         this._lines = data;
     };
     // -------------------------------------------------------------------------
+    // :: each partial (echo with newline: false) is stored as a separate
+    // :: segment so it can be re-rendered with its own options (raw and
+    // :: formatters) when the whole line is rendered again on redraw,
+    // :: refresh or import_view - see #1052
+    // -------------------------------------------------------------------------
+    OutputLines.prototype._segment = function(value, options) {
+        var copy = $.extend({}, options);
+        if (is_array(options.finalize)) {
+            // don't share the array so merging into the line options don't
+            // leak into already stored segments
+            copy.finalize = options.finalize.slice();
+        }
+        return {value: value, options: copy};
+    };
+    // -------------------------------------------------------------------------
     OutputLines.prototype.push = function(data) {
+        var value = data[0];
+        var options = data[1];
+        var segment = this._segment(value, options);
         if (this.has_newline()) {
-            this._lines.push(data);
+            this._lines.push([value, options, [segment]]);
         } else {
-            var value = data[0];
-            var options = data[1];
             var last_line = this.last_line();
+            if (!last_line[2]) {
+                // last line comes from an old view without segments
+                last_line[2] = [this._segment(last_line[0], last_line[1])];
+            }
+            last_line[2].push(segment);
             last_line[0] = this.join(last_line[0], value);
             last_line[1].newline = options.newline;
             if (options.finalize.length > 1 && is_function(options.finalize[1])) {
                 last_line[1].finalize.push(options.finalize[1]);
             }
         }
+    };
+    // -------------------------------------------------------------------------
+    OutputLines.prototype.segments = function(index) {
+        var line = this._lines[index];
+        return line && line[2];
     };
     // -------------------------------------------------------------------------
     OutputLines.prototype.clear = function(fn) {
@@ -1940,6 +1966,10 @@
             delete this._snapshot[index];
         } else {
             var line = this._lines[index];
+            // when the value is unchanged this is an internal re-render
+            // (e.g. the #952 partial update) and the per-partial segments
+            // need to be preserved so formatters/raw are re-applied
+            var unchanged = line[0] === value;
             line[0] = value;
             if (options) {
                 var finalize = line[1].finalize;
@@ -1951,6 +1981,11 @@
                 line[1] = $.extend(this._lines[index][1], options, {
                     finalize: finalize
                 });
+            }
+            if (!unchanged || !line[2]) {
+                // real content replacement (public update API) collapses the
+                // line into a single segment holding the new value
+                line[2] = [this._segment(value, line[1])];
             }
             return line[1];
         }
@@ -1984,7 +2019,8 @@
                 lines_to_show.push({
                     value: value,
                     index: index,
-                    options: options
+                    options: options,
+                    segments: line[2]
                 });
             });
             var pivot = lines_to_show.length - limit - 1;
@@ -1994,7 +2030,8 @@
                 return {
                     value: line[0],
                     index: index,
-                    options: line[1]
+                    options: line[1],
+                    segments: line[2]
                 };
             });
         }
@@ -8628,6 +8665,29 @@
         }
         // ---------------------------------------------------------------------
         function process_line(line, safe_throw) {
+            // a line built from more than one partial (echo with
+            // newline: false) is re-rendered by replaying each partial with
+            // its own options so raw/formatters are applied independently #1052
+            if (line.segments && line.segments.length > 1) {
+                var segments = line.segments;
+                // the partials need to be appended to the buffer in order -
+                // they share the same line index so buffer.sort() can't order
+                // them - so async partials (functions/promises) are processed
+                // one after another
+                var index = 0;
+                var process_segment = function process_segment() {
+                    if (index >= segments.length) {
+                        return true;
+                    }
+                    var segment = segments[index++];
+                    return unpromise(process_line({
+                        value: segment.value,
+                        options: segment.options,
+                        index: line.index
+                    }, safe_throw), process_segment);
+                };
+                return process_segment();
+            }
             // prevent exception in display exception
             try {
                 var use_cache = !is_function(line.value);
@@ -8667,10 +8727,19 @@
                         }
                         if (line_settings.formatters) {
                             try {
-                                string = $.terminal.apply_formatters(
-                                    string,
-                                    $.extend(settings, {echo: true})
-                                );
+                                if (line_settings.formatters === 'command') {
+                                    // used by echo_command so the command
+                                    // keeps its highlighting on redraw #1052
+                                    string = $.terminal.apply_formatters(
+                                        string,
+                                        $.extend({}, settings, {command: true})
+                                    );
+                                } else {
+                                    string = $.terminal.apply_formatters(
+                                        string,
+                                        $.extend(settings, {echo: true})
+                                    );
+                                }
                             } catch (e) {
                                 display_exception(e, 'FORMATTING');
                             }
@@ -8871,7 +8940,6 @@
             command = mask_command(command);
             var options = {
                 exec: false,
-                formatters: false,
                 convertLinks: false,
                 finalize: function finalize(div) {
                     a11y_hide(div.addClass('terminal-command'));
@@ -8881,12 +8949,15 @@
             var raw_command = raw('command');
             self.echo(prompt, $.extend({
                 newline: false,
-                raw: raw('prompt')
+                raw: raw('prompt'),
+                formatters: false
             }, options));
-            self.echo(raw_command ? command : function() {
-                return $.terminal.apply_formatters(command, {command: true});
-            }, $.extend({
-                raw: raw_command
+            // the command is echoed as a plain string with formatters set to
+            // 'command' so its highlighting survives redraw and the JSON
+            // serialization used by import_view/export_view #1052
+            self.echo(command, $.extend({
+                raw: raw_command,
+                formatters: raw_command ? false : 'command'
             }, options));
         }
         // ---------------------------------------------------------------------
@@ -11277,7 +11348,8 @@
                             var next = process_line({
                                 value: value,
                                 index: line,
-                                options: options
+                                options: options,
+                                segments: lines.segments(line)
                             });
                             // process_line can return a promise
                             // value is function that resolve to promise

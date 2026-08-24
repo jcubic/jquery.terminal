@@ -2915,6 +2915,46 @@ describe('extensions', function() {
             expect(term.get_output()).toEqual('...' + prompt + command);
             expect(term.get_prompt()).toEqual(prompt);
         });
+        it('should preserve command formatters after stringified import (#1052)', function() {
+            var formatters = $.terminal.defaults.formatters;
+            $.terminal.defaults.formatters = [[/cmd/g, 'CMD', {command: true}]];
+            try {
+                term.clear();
+                term.set_prompt('>>> ');
+                enter(term, 'cmd');
+                var before = term.get_output();
+                expect(before).toEqual('>>> CMD');
+                var view = JSON.parse(JSON.stringify(term.export_view()));
+                term.clear();
+                term.import_view(view);
+                expect(term.get_output()).toEqual(before);
+            } finally {
+                $.terminal.defaults.formatters = formatters;
+            }
+        });
+        it('should keep command formatting after enter (#1052)', async function() {
+            var formatters = $.terminal.defaults.formatters;
+            $.terminal.defaults.formatters = [[/cmd/g, 'CMD', {command: true}]];
+            try {
+                term.clear();
+                term.set_prompt('>>> ');
+                enter(term, 'cmd');
+                // wait for the #952 partial update that re-renders the line
+                await delay(50);
+                expect(term.get_output()).toEqual('>>> CMD');
+            } finally {
+                $.terminal.defaults.formatters = formatters;
+            }
+        });
+        it('should preserve per-partial raw option on redraw (#1052)', function() {
+            term.clear();
+            // first partial is raw HTML, second is escaped
+            term.echo('<b>a</b>', {raw: true, newline: false});
+            term.echo('<b>b</b>');
+            var before = term.find('.terminal-output').html();
+            term.refresh();
+            expect(term.find('.terminal-output').html()).toEqual(before);
+        });
         it('should echo prompt on enter', function() {
             var prompt = '>>> ';
             var command = 'hello';
