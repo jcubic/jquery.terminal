@@ -4562,6 +4562,15 @@ describe('Terminal plugin', function() {
             cmd.position(0);
             expect(cmd.position()).toEqual(0);
         });
+        it('should clamp relative position', function() {
+            cmd.set('foo');
+            cmd.position(0);
+            cmd.position(-1, true);
+            expect(cmd.position()).toEqual(0);
+            cmd.position(3);
+            cmd.position(1, true);
+            expect(cmd.position()).toEqual(3);
+        });
         it('should set and remove mask', function() {
             cmd.set('foobar').position(0);
             term.focus();
@@ -4725,6 +4734,78 @@ describe('Terminal plugin', function() {
             up();
             positions.push(cmd.position());
             expect(positions).toMatchSnapshot();
+        });
+        it('should navigate a line with n - 1 characters (#1050)', function() {
+            var command = 'x'.repeat(term.cols() - 1);
+            term.focus();
+            cmd.set(command);
+            cmd.position(command.length);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(command.length - 1);
+            cmd.position(command.length - 1);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(command.length);
+            cmd.position(command.length);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(0);
+            cmd.position(0);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(0);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate two lines (#1050)', function() {
+            var command = 'abcd\nefgh';
+            term.focus();
+            cmd.set(command);
+            cmd.position(2);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(1);
+            cmd.position(2);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(3);
+            cmd.position(7);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(0);
+            cmd.position(2);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(command.length);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate three lines (#1050)', function() {
+            var command = 'abcd\nefgh\nijkl';
+            term.focus();
+            cmd.set(command);
+            cmd.position(12);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(11);
+            cmd.position(11);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(12);
+            cmd.position(12);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(7);
+            cmd.position(7);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(12);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate emoji across lines (#1050)', function() {
+            var command = 'a\u263a\ufe0fb\nc\u263a\ufe0fd';
+            term.focus();
+            cmd.set(command);
+            cmd.position(3);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(2);
+            cmd.position(3);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(4);
+            cmd.position(8);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(1);
+            cmd.position(3);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(command.length);
+            expect(cmd.get()).toEqual(command);
         });
     });
     function AJAXMock(url, response, options) {

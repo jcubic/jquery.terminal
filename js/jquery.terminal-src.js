@@ -4060,8 +4060,9 @@
                     var pos = position;
                     var len = bare_text(command).length;
                     if (relative) {
-                        position += n;
-                    } else if (n < 0) {
+                        n += position;
+                    }
+                    if (n < 0) {
                         position = 0;
                     } else if (n > len) {
                         position = len;

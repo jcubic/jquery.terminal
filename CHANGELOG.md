@@ -1,3 +1,7 @@
+## 2.47.1
+### Bugfix
+* keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
+
 ## 2.47.0
 ### Breaking
 * echo command echoes a string again (revert of 2.46.0), so the command no longer appears as a function in `export_view`
