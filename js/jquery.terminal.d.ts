@@ -78,6 +78,19 @@ declare namespace JQueryTerminal {
         rest: string;
     };
 
+    type RedirectCallback = (this: JQueryTerminal, ...args: string[]) => TypeOrPromise<void>;
+
+    type PipeRedirects = Array<{
+        name: string;
+        output?: true;
+        callback: RedirectCallback;
+    }>;
+
+    type PipeOptions = {
+        processArguments: boolean;
+        redirects?: PipeRedirects;
+    };
+
     type size = {
         width: number,
         height: number
@@ -216,12 +229,13 @@ declare namespace JQueryTerminal {
         onBeforeLogin?: (this: JQueryTerminal, user: string, tokenOrPass: string) => (boolean | void);
         onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
 
+        execHash?: boolean;
         exit?: boolean;
         clear?: boolean;
         enabled?: boolean;
         maskCHar?: string;
         pipe?: boolean;
-        redirects?: {[key:string]: terminalObjectFunction};
+        redirects?: PipeRedirects;
         wrap?: boolean;
         checkArity?: boolean;
         invokeMethods?: boolean;
@@ -617,7 +631,7 @@ interface JQueryTerminalStatic {
         prompt: boolean
     },
     syntax(lang: string): void;
-    pipe(obj: JQueryTerminal.ObjectInterpreter): JQueryTerminal.interpreterFunction;
+    pipe(obj: JQueryTerminal.ObjectInterpreter, options?: JQueryTerminal.PipeOptions): JQueryTerminal.interpreterFunction;
     // formatters
     // unix formatting
     overtyping: JQueryTerminal.FormatterFunction;
@@ -844,5 +858,6 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
 
 declare module 'jquery.terminal' {
     const JQTerminal: (window: Window, JQuery: JQueryStatic) => void;
+    export type JQueryTerminal = ReturnType<JQuery['terminal']>;
     export default JQTerminal;
 }
