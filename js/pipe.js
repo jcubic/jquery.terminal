@@ -127,6 +127,7 @@
         var overwrite_buffer;
         var term;
         var orig;
+        var tty;
         var command_index;
         var process_redirect = false;
         // -------------------------------------------------------------------------------
@@ -148,6 +149,7 @@
                         }
                         cmd_redirect = {
                             fn: settings_redirect.callback,
+                            output: !!settings_redirect.output,
                             args: []
                         };
                         redirects.push(cmd_redirect);
@@ -216,19 +218,12 @@
                 settings.overwrite === true;
         }
         // -------------------------------------------------------------------------------
-        function redirects(command) {
+        function run_redirect_list(list) {
             var defer = $.Deferred();
-            if (overwrite(command)) {
-                overwrite_buffer = true;
-            }
-            function resolve() {
-                overwrite_buffer = false;
-                defer.resolve();
-            }
-            if (command.redirects.length) {
+            if (list.length) {
                 var i = 0;
                 (function loop() {
-                    var redirect = command.redirects[i++];
+                    var redirect = list[i++];
                     if (redirect) {
                         var fn = redirect.fn;
                         var args = redirect.args;
@@ -237,13 +232,56 @@
                             loop();
                         }, 'redirect loop');
                     } else {
-                        resolve();
+                        defer.resolve();
                     }
                 })();
             } else {
-                resolve();
+                defer.resolve();
             }
             return defer.promise();
+        }
+        // -------------------------------------------------------------------------------
+        function has_output_redirect(command) {
+            return command.redirects.some(function(redirect) {
+                return redirect.output;
+            });
+        }
+        // -------------------------------------------------------------------------------
+        // input-type redirects (e.g. `<<<`) run before the command so it can
+        // read the data they provide
+        function input_redirects(command) {
+            var defer = $.Deferred();
+            if (overwrite(command)) {
+                overwrite_buffer = true;
+            }
+            var list = command.redirects.filter(function(redirect) {
+                return !redirect.output;
+            });
+            run_redirect_list(list).then(function() {
+                overwrite_buffer = false;
+                defer.resolve();
+            });
+            return defer.promise();
+        }
+        // -------------------------------------------------------------------------------
+        // output-type redirects (e.g. `>`) run after the command so they can
+        // consume the text it echoed instead of it being displayed
+        function output_redirects(command) {
+            var list = command.redirects.filter(function(redirect) {
+                return redirect.output;
+            });
+            if (!list.length) {
+                return run_redirect_list([]);
+            }
+            var text = tty.buffer.join('\n');
+            tty.buffer.length = 0;
+            list = list.map(function(redirect) {
+                return {
+                    fn: redirect.fn,
+                    args: redirect.args.concat([text])
+                };
+            });
+            return run_redirect_list(list);
         }
         // -------------------------------------------------------------------------------
         function continuation(promise, callback, debug_log) {
@@ -375,7 +413,7 @@
                     last_index: term.last_index
                 };
             }
-            var tty = make_tty();
+            tty = make_tty();
             var commands = parse_command(command);
             function loop(callback) {
                 var i = 0;
@@ -384,17 +422,28 @@
                     var cmd = commands[i++];
                     if (cmd) {
                         process_redirect = true;
-                        redirects(cmd).then(function() {
+                        input_redirects(cmd).then(function() {
                             process_redirect = false;
-                            if (!commands[i]) {
+                            var is_last = !commands[i];
+                            if (is_last && !has_output_redirect(cmd)) {
                                 $.extend(term, {echo: orig.echo, push: orig.push});
                             }
                             command_index++;
                             var ret = callback(cmd);
+                            function after_command() {
+                                process_redirect = true;
+                                return output_redirects(cmd).then(function() {
+                                    process_redirect = false;
+                                    if (is_last && has_output_redirect(cmd)) {
+                                        $.extend(term, {echo: orig.echo, push: orig.push});
+                                    }
+                                    return inner();
+                                });
+                            }
                             if (ret === false) {
-                                return inner();
+                                return after_command();
                             } else {
-                                return continuation(ret, inner, 'inner');
+                                return continuation(ret, after_command, 'inner');
                             }
                         });
                     } else {

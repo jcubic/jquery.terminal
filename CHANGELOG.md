@@ -1,4 +1,6 @@
-## 2.47.1
+## 2.48.0
+### Features
+* allow using output redirects in pipe extension
 ### Bugfix
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
 

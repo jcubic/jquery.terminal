@@ -2884,6 +2884,63 @@ describe('Terminal utils', function() {
                     });
                 });
             });
+            describe('output redirects', function() {
+                it('should write command output to redirect target', function() {
+                    var written;
+                    var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                        redirects: [
+                            {
+                                name: '>',
+                                output: true,
+                                callback: function(file, text) {
+                                    written = [file, text];
+                                }
+                            }
+                        ]
+                    }));
+                    return term.exec('output foo > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'foo']);
+                        // output goes to redirect, not to the terminal
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should write async command output to redirect target', function() {
+                    var written;
+                    var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                        redirects: [
+                            {
+                                name: '>',
+                                output: true,
+                                callback: function(file, text) {
+                                    written = [file, text];
+                                }
+                            }
+                        ]
+                    }));
+                    return term.exec('async_output foo > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'foo']);
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should write piped output to redirect target', function() {
+                    var written;
+                    var term = $('<div/>').terminal($.terminal.pipe(commands, {
+                        redirects: [
+                            {
+                                name: '>',
+                                output: true,
+                                callback: function(file, text) {
+                                    written = [file, text];
+                                }
+                            }
+                        ]
+                    }));
+                    return term.exec('output hello | grep hell > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'hello']);
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+            });
         });
     });
 });
