@@ -263,22 +263,12 @@
             return defer.promise();
         }
         // -------------------------------------------------------------------------------
-        // output-type redirects (e.g. `>`) run after the command so they can
-        // consume the text it echoed instead of it being displayed
-        function output_redirects(command, tty) {
+        // output-type redirects (e.g. `>`) run after the command so their
+        // callback can call this.read() to consume whatever it echoed,
+        // the same way a piped command would
+        function output_redirects(command) {
             var list = command.redirects.filter(function(redirect) {
                 return redirect.output;
-            });
-            if (!list.length) {
-                return run_redirect_list([]);
-            }
-            var text = tty.buffer.join('\n');
-            tty.buffer.length = 0;
-            list = list.map(function(redirect) {
-                return {
-                    fn: redirect.fn,
-                    args: redirect.args.concat([text])
-                };
             });
             return run_redirect_list(list);
         }
@@ -430,9 +420,7 @@
                             command_index++;
                             var ret = callback(cmd);
                             function after_command() {
-                                process_redirect = true;
-                                return output_redirects(cmd, tty).then(function() {
-                                    process_redirect = false;
+                                return output_redirects(cmd).then(function() {
                                     if (is_last && has_output_redirect(cmd)) {
                                         $.extend(term, {echo: orig.echo, push: orig.push});
                                     }
