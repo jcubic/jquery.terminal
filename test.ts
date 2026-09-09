@@ -17,7 +17,10 @@ $('.term').terminal(function(command, term) {
 $('.term').terminal(function(command) {
     this.echo(command);
 });
-$('.term').terminal([function(command, term) {
+// TypeScript can't contextually type a function literal nested inside an
+// array literal against the Interpreter union, so parameters need explicit
+// types here (this isn't needed when the function is passed on its own, see above)
+$('.term').terminal([function(command: string, term: JQueryTerminal) {
     term.echo(command);
     return Promise.resolve(document.createElement('div'));
 }]);
@@ -51,7 +54,7 @@ $('.term').terminal([
 ]);
 $('.term').terminal([obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter]);
-$('.term').terminal(["foo.php", obj_interpreter, function(command) {
+$('.term').terminal(["foo.php", obj_interpreter, function(command: string) {
 }]);
 $('.term').terminal({
     help: function () {
@@ -485,14 +488,15 @@ $.terminal.defaults.formatters.push(red);
     term.set_interpreter(function(command) {
 
     });
-    term.set_interpreter([function(command, term) {
+    // same as above: array-nested function literals need explicit param types
+    term.set_interpreter([function(command: string, term: JQueryTerminal) {
 
     }]);
     term.set_interpreter("foo.php");
     term.set_interpreter(["foo.php"]);
     term.set_interpreter([obj_interpreter]);
     term.set_interpreter(["foo.php", obj_interpreter]);
-    term.set_interpreter(["foo.php", obj_interpreter, function(command) {
+    term.set_interpreter(["foo.php", obj_interpreter, function(command: string) {
     }]);
     term.set_interpreter("foo.php", true);
     term.set_interpreter("foo.php", "login");
@@ -813,14 +817,15 @@ $.terminal.defaults.formatters.push(red);
     term.push(function(command) {
         this.echo(command.toUpperCase());
     });
-    term.push([function(command, term) {
+    // same as above: array-nested function literals need explicit param types
+    term.push([function(command: string, term: JQueryTerminal) {
         term.echo(command.toUpperCase());
     }]);
     term.push("foo.php");
     term.push(["foo.php"]);
     term.push([obj_interpreter]);
     term.push(["foo.php", obj_interpreter]);
-    term.push(["foo.php", obj_interpreter, function(command) {
+    term.push(["foo.php", obj_interpreter, function(command: string) {
     }]);
     term.push("foo", {
         login: true
