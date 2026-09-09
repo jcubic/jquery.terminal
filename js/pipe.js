@@ -127,7 +127,6 @@
         var overwrite_buffer;
         var term;
         var orig;
-        var tty;
         var command_index;
         var process_redirect = false;
         // -------------------------------------------------------------------------------
@@ -266,7 +265,7 @@
         // -------------------------------------------------------------------------------
         // output-type redirects (e.g. `>`) run after the command so they can
         // consume the text it echoed instead of it being displayed
-        function output_redirects(command) {
+        function output_redirects(command, tty) {
             var list = command.redirects.filter(function(redirect) {
                 return redirect.output;
             });
@@ -413,7 +412,7 @@
                     last_index: term.last_index
                 };
             }
-            tty = make_tty();
+            var tty = make_tty();
             var commands = parse_command(command);
             function loop(callback) {
                 var i = 0;
@@ -432,7 +431,7 @@
                             var ret = callback(cmd);
                             function after_command() {
                                 process_redirect = true;
-                                return output_redirects(cmd).then(function() {
+                                return output_redirects(cmd, tty).then(function() {
                                     process_redirect = false;
                                     if (is_last && has_output_redirect(cmd)) {
                                         $.extend(term, {echo: orig.echo, push: orig.push});
