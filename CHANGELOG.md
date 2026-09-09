@@ -3,6 +3,7 @@
 * allow using output redirects in pipe extension
 ### Bugfix
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
+* fix miscellaneous issues with TypeScript types
 
 ## 2.47.0
 ### Breaking

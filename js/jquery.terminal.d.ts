@@ -22,13 +22,15 @@ type TypeOrPromise<T> = T | PromiseLike<T>;
 
 declare namespace JQueryTerminal {
     type interpreterFunction = (this: JQueryTerminal, command: string, term: JQueryTerminal) => any;
-    type terminalObjectFunction = (this: JQueryTerminal, ...args: (string | number | RegExp)[]) => (void | TypeOrPromise<simpleEchoValue>);
+    type terminalObjectFunction<A = string | number | RegExp> =
+        (this: JQueryTerminal, ...args: A[]) => (void | TypeOrPromise<simpleEchoValue | void>);
 
-    type InterpreterArgument = string | interpreterFunction | ObjectInterpreter;
-    type Interpreter = PromiseLike<TypeOrArray<InterpreterArgument>> | TypeOrArray<TypeOrPromise<InterpreterArgument>>;
+    type InterpreterArgument<A = string | number | RegExp> = string | interpreterFunction | ObjectInterpreter<A>;
+    type Interpreter<A = string | number | RegExp> =
+        PromiseLike<TypeOrArray<InterpreterArgument<A>>> | TypeOrArray<TypeOrPromise<InterpreterArgument<A>>>;
 
-    type ObjectInterpreter = {
-        [key: string]: ObjectInterpreter | terminalObjectFunction;
+    type ObjectInterpreter<A = string | number | RegExp> = {
+        [key: string]: ObjectInterpreter<A> | terminalObjectFunction<A>;
     }
 
     type RegExpReplacementFunction = (...args: string[]) => string;
@@ -87,7 +89,7 @@ declare namespace JQueryTerminal {
     }>;
 
     type PipeOptions = {
-        processArguments: boolean;
+        processArguments?: boolean;
         redirects?: PipeRedirects;
     };
 
@@ -230,6 +232,7 @@ declare namespace JQueryTerminal {
         onAfterLogin?: (this: JQueryTerminal, user: string, token: string) => void;
 
         execHash?: boolean;
+        execHistory?: boolean;
         exit?: boolean;
         clear?: boolean;
         enabled?: boolean;
@@ -547,6 +550,10 @@ declare namespace JQueryTerminal {
 }
 
 interface JQuery<TElement = HTMLElement> {
+    terminal(
+        interpreter: JQueryTerminal.Interpreter<string>,
+        options: JQueryTerminal.TerminalOptions & { processArguments: false }
+    ): JQueryTerminal;
     terminal(interpreter?: JQueryTerminal.Interpreter, options?: JQueryTerminal.TerminalOptions): JQueryTerminal;
     resizer(arg: TypeOrString<anyFunction>): JQuery;
     cmd(options?: CmdOptions): Cmd;
@@ -631,6 +638,10 @@ interface JQueryTerminalStatic {
         prompt: boolean
     },
     syntax(lang: string): void;
+    pipe(
+        obj: JQueryTerminal.ObjectInterpreter<string>,
+        options: JQueryTerminal.PipeOptions & { processArguments: false }
+    ): JQueryTerminal.interpreterFunction;
     pipe(obj: JQueryTerminal.ObjectInterpreter, options?: JQueryTerminal.PipeOptions): JQueryTerminal.interpreterFunction;
     // formatters
     // unix formatting

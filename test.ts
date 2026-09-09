@@ -59,6 +59,46 @@ $('.term').terminal({
     }
 });
 
+// -----------------------------------------------------------------------------
+// :: pipe / processArguments
+// -----------------------------------------------------------------------------
+
+$.terminal.pipe(obj_interpreter);
+$.terminal.pipe(obj_interpreter, {});
+$.terminal.pipe(obj_interpreter, { processArguments: true });
+
+var string_only_interpreter: JQueryTerminal.ObjectInterpreter<string> = {
+    echo: function(...args) {
+        this.echo(args.join(' '));
+    },
+    grep: function(pattern) {
+        return this.read('').then((text) => {
+            text.split('\n').filter((line) => line.includes(pattern)).forEach((line) => {
+                this.echo(line);
+            });
+        });
+    }
+};
+
+$.terminal.pipe(string_only_interpreter, { processArguments: false });
+$.terminal.pipe(string_only_interpreter, {
+    processArguments: false,
+    redirects: [
+        {
+            name: '>',
+            output: true,
+            callback: function(file) {
+                return this.read('').then((text) => {
+                    // eslint-disable-next-line no-console
+                    console.log(file, text);
+                });
+            }
+        }
+    ]
+});
+
+$('.term').terminal(string_only_interpreter, { processArguments: false });
+
 class Foo {
     x: string;
     constructor(x: string) {
