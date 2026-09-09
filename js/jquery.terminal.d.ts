@@ -180,7 +180,7 @@ declare namespace JQueryTerminal {
     type greetingsArg = ((this: JQueryTerminal, setGreeting: setEchoValueFunction) => (void | JQueryTerminal.echoValueOrPromise)) | string | null;
     type cmdPrompt<T = Cmd> = ((this: T, setPrompt: setStringFunction) => void) | string;
 
-    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | PromiseLike<string>)) | string;
+    type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | TypeOrPromise<string>)) | string;
 
     type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
     type TouchScrollCallback = MouseWheelCallback;
