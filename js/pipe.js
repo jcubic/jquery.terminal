@@ -422,7 +422,10 @@
                             function after_command() {
                                 return output_redirects(cmd).then(function() {
                                     if (is_last && has_output_redirect(cmd)) {
-                                        $.extend(term, {echo: orig.echo, push: orig.push});
+                                        $.extend(term, {
+                                            echo: orig.echo,
+                                            push: orig.push
+                                        });
                                     }
                                     return inner();
                                 });
