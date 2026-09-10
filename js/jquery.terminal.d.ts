@@ -80,18 +80,8 @@ declare namespace JQueryTerminal {
         rest: string;
     };
 
-    type RedirectCallback = (this: JQueryTerminal, ...args: string[]) => TypeOrPromise<void>;
-
-    type PipeRedirects = Array<{
-        name: string;
-        output?: true;
-        callback: RedirectCallback;
-    }>;
-
-    type PipeOptions = {
-        processArguments?: boolean;
-        redirects?: PipeRedirects;
-    };
+    // RedirectCallback, PipeRedirects and PipeOptions live in pipe.d.ts,
+    // alongside the `pipe` extension that defines them at runtime
 
     type size = {
         width: number,
@@ -224,7 +214,9 @@ declare namespace JQueryTerminal {
         onAfterEcho?: (this: JQueryTerminal, value: echoValue) => void;
     };
 
-    type TerminalOptions = CommonOptions & {
+    // an interface (not a type alias) so extensions like pipe.d.ts can add
+    // their own fields (e.g. `pipe`, `redirects`) via declaration merging
+    interface TerminalOptions extends CommonOptions {
         // login events need fixing to work with push
         onBeforeLogout?: (this: JQueryTerminal) => (boolean | void);
         onAfterLogout?: (this: JQueryTerminal) => void;
@@ -237,8 +229,6 @@ declare namespace JQueryTerminal {
         clear?: boolean;
         enabled?: boolean;
         maskCHar?: string;
-        pipe?: boolean;
-        redirects?: PipeRedirects;
         wrap?: boolean;
         checkArity?: boolean;
         invokeMethods?: boolean;
@@ -296,7 +286,7 @@ declare namespace JQueryTerminal {
         mobileDelete?: boolean;
         strings?: strings;
         height?: number;
-    };
+    }
 
     type pushOptions = CommonOptions & {
         infiniteLogin?: boolean;
@@ -638,11 +628,7 @@ interface JQueryTerminalStatic {
         prompt: boolean
     },
     syntax(lang: string): void;
-    pipe(
-        obj: JQueryTerminal.ObjectInterpreter<string>,
-        options: JQueryTerminal.PipeOptions & { processArguments: false }
-    ): JQueryTerminal.interpreterFunction;
-    pipe(obj: JQueryTerminal.ObjectInterpreter, options?: JQueryTerminal.PipeOptions): JQueryTerminal.interpreterFunction;
+    // pipe(...) is declared in pipe.d.ts, alongside the extension that adds it at runtime
     // formatters
     // unix formatting
     overtyping: JQueryTerminal.FormatterFunction;
