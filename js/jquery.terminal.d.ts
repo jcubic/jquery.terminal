@@ -124,7 +124,7 @@ declare namespace JQueryTerminal {
 
     type TypingAnimations = 'echo' | 'prompt' | 'enter' | 'command';
 
-    type LessArgument = string | ((cols: number, cb: (text: string) => void) => void) | string[];
+    // LessArgument lives in less.d.ts, alongside the extension that defines it at runtime
 
     type ParsedOptions = {
         _: string[];
@@ -551,12 +551,7 @@ interface JQuery<TElement = HTMLElement> {
     caret(pos?: number): number;
     visible(): JQuery;
     hidden(): JQuery;
-    // plugins
-    less(text: JQueryTerminal.LessArgument, options?: {
-        formatters?: boolean,
-        wrap?: boolean,
-        keepWords?: boolean
-    }): JQueryTerminal;
+    // less(...) is declared in less.d.ts, alongside the extension that adds it at runtime
 }
 
 interface JQueryStatic {

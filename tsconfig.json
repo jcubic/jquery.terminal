@@ -6,6 +6,6 @@
         "noImplicitThis": true,
         "strict": true
     },
-    "files": ["test.ts", "js/jquery.terminal.d.ts", "js/pipe.d.ts"],
+    "files": ["test.ts", "js/jquery.terminal.d.ts", "js/pipe.d.ts", "js/less.d.ts"],
     "exclude": ["npm"]
 }

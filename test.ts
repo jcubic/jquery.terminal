@@ -102,6 +102,25 @@ $.terminal.pipe(string_only_interpreter, {
 
 $('.term').terminal(string_only_interpreter, { processArguments: false });
 
+// -----------------------------------------------------------------------------
+// :: less
+// -----------------------------------------------------------------------------
+
+$('.term').less('some text');
+$('.term').less(['line 1', 'line 2']);
+$('.term').less(function(cols: number, cb: (text: string) => void) {
+    cb('x'.repeat(cols));
+});
+$('.term').less('some text', {
+    formatters: true,
+    wrap: true,
+    keepWords: true,
+    ansi: true,
+    onExit: function() {},
+    exit: function() {}
+});
+var less_term: JQueryTerminal = $('.term').less('some text');
+
 class Foo {
     x: string;
     constructor(x: string) {
