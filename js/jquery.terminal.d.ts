@@ -30,7 +30,7 @@ declare namespace JQueryTerminal {
         PromiseLike<TypeOrArray<InterpreterArgument<A>>> | TypeOrArray<TypeOrPromise<InterpreterArgument<A>>>;
 
     type ObjectInterpreter<A = string | number | RegExp> = {
-        [key: string]: ObjectInterpreter<A> | terminalObjectFunction<A>;
+        [key: string]: string | ObjectInterpreter<A> | terminalObjectFunction<A>;
     }
 
     type RegExpReplacementFunction = (...args: string[]) => string;
