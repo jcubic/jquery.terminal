@@ -251,7 +251,14 @@ declare namespace JQueryTerminal {
         completionEscape?: boolean;
         convertLinks?: boolean;
         errorOnAbort?: boolean;
-        unixFormattingEscapeBrackets?: boolean; // provided by unix_formatting
+        // provided by unix formatting
+        unixFormatting?: {
+            escapeBrackets: boolean;
+            unescape: boolean;
+            ansiParser: Record<string, anyFunction>;
+            position: number;
+            ansiArt: boolean;
+        };
         extra?: any;
         tabs?: number;
         historySize?: number;
