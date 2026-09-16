@@ -527,6 +527,7 @@
     function get_settings(options) {
         var unixFormatting = {
             escapeBrackets: false,
+            unescape: true,
             ansiParser: {},
             position: 0,
             ansiArt: false
@@ -551,8 +552,10 @@
     // :: Replace overtyping (from man) formatting with terminal formatting
     // ---------------------------------------------------------------------
     $.terminal.overtyping = function overtyping(string, options) {
-        string = $.terminal.unescape_brackets(string);
         var settings = get_settings(options);
+        if (settings.unescape) {
+            string = $.terminal.unescape_brackets(string);
+        }
         var removed_chars = [];
         var new_position;
         var char_count = 0;
@@ -1224,7 +1227,9 @@
             // if there are SAUCE record if something after end of file
             input = input.replace(/\x1A.*/, '');
             input = input.replace(/\r?\n?\x1b\[A\x1b\[[0-9]+C/g, '');
-            input = $.terminal.unescape_brackets(input);
+            if (settings.unescape) {
+                input = $.terminal.unescape_brackets(input);
+            }
             var code, inside, format, charset, saved_cursor;
             var print = function print(s) {
                 var s_len = s.length;
