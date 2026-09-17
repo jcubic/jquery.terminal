@@ -312,6 +312,13 @@ body.full-screen-terminal {
     width: 0;
     display: inline-block;
 }
+/* compansate for 1px zero width space in the CMD */
+.terminal-output {
+    margin-left: 1px;
+}
+.cmd:not(:has(span[style="width: 1px;"])) {
+    margin-left: 1px;
+}
 .cmd.raw .cmd-prompt {
     white-space: pre-wrap;
     word-break: break-all;
