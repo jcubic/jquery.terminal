@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Aug 2026 14:55:04 +0000
+ * Date: Fri, 18 Sep 2026 15:08:07 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4060,8 +4060,9 @@
                     var pos = position;
                     var len = bare_text(command).length;
                     if (relative) {
-                        position += n;
-                    } else if (n < 0) {
+                        n += position;
+                    }
+                    if (n < 0) {
                         position = 0;
                     } else if (n > len) {
                         position = len;
@@ -5544,7 +5545,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Mon, 24 Aug 2026 14:55:04 +0000',
+        date: 'Fri, 18 Sep 2026 15:08:07 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7329,7 +7330,10 @@
                         return text.replace(format_parts_re, format);
                     } else {
                         text = safe(text);
-                        text = text.replace(/\\\]/, '&#93;');
+                        if (splitted.length > 1) {
+                            // only when between formatting
+                            text = text.replace(/\\\]/g, '&#93;');
+                        }
                         var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;

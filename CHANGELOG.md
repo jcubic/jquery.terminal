@@ -5,6 +5,7 @@
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
 * fix miscellaneous issues with TypeScript types
 * fix small shift when entering multiline input when each line is a command
+* fix rendering `\]` as `]` inside normal text
 
 ## 2.47.0
 ### Breaking

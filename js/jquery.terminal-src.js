@@ -7330,7 +7330,10 @@
                         return text.replace(format_parts_re, format);
                     } else {
                         text = safe(text);
-                        text = text.replace(/\\\]/, '&#93;');
+                        if (splitted.length > 1) {
+                            // only when between formatting
+                            text = text.replace(/\\\]/g, '&#93;');
+                        }
                         var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;
