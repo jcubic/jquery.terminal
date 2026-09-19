@@ -976,12 +976,12 @@ describe('Terminal utils', function() {
             var string = $.terminal.format(format);
             expect(string).toMatchSnapshot();
         });
-        it('should escape brackets', function() {
+        it('should escape brackets inside formatting', function() {
             var specs = [
-                ['\\]', ']'],
-                ['\\]xxx', ']xxx'],
-                ['xxx\\]xxx', 'xxx]xxx'],
-                ['xxx\\]', 'xxx]'],
+                ['\\]', '\\]'],
+                ['\\]xxx', '\\]xxx'],
+                ['xxx\\]xxx', 'xxx\\]xxx'],
+                ['xxx\\]', 'xxx\\]'],
                 ['[[;;]\\]xxx]', ']xxx'],
                 ['[[;;]xxx\\]]', 'xxx]'],
                 ['[[;;]\\]]', ']'],
