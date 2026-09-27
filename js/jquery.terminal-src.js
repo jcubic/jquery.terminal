@@ -12506,7 +12506,7 @@
             if (is_function(value)) {
                 value = value();
             }
-            if (value && is_function(value.then)) {
+            if (is_promise(value)) {
                 return value.then(stringify_value);
             }
             if (get_type(value) !== 'string') {

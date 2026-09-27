@@ -6,6 +6,7 @@
 * fix miscellaneous issues with TypeScript types
 * fix small shift when entering multiline input when each line is a command
 * fix rendering `\]` as `]` inside normal text
+* fix stringifying a value when echo (conflict with [Mitty](https://github.com/jcubic/mitty))
 
 ## 2.47.0
 ### Breaking
