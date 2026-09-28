@@ -8445,6 +8445,11 @@
                         } else if (type === 'promise') {
                             first.then(function(first) {
                                 recur([first].concat(rest), success);
+                            }, function(e) {
+                                recur(rest, function() {
+                                    success();
+                                    display_exception(e, 'INTERPRETER');
+                                });
                             });
                         }
                     } else {
@@ -8464,6 +8469,9 @@
             } else if (type === 'promise') {
                 user_intrp.then(function(user_intrp) {
                     make_interpreter(user_intrp, login, finalize);
+                }, function(e) {
+                    make_interpreter($.noop, login, finalize);
+                    display_exception(e, 'INTERPRETER');
                 });
             } else if (type === 'string') {
                 if (settings.describe === false) {
