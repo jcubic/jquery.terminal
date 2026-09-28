@@ -5247,6 +5247,40 @@ describe('Terminal plugin', function() {
                 'error'
             ]);
         });
+        it('should show an error when promise is rejected', async () => {
+            const error = new Error('ZONK');
+            const exceptionHandler = jest.fn();
+            const term = $('<div />').terminal(Promise.reject(error), {
+                greetings: false,
+                exceptionHandler
+            });
+            await delay(10);
+            expect(exceptionHandler).toHaveBeenCalledWith(error, 'INTERPRETER');
+            await term.exec('hello');
+            expect(term.get_output()).toEqual('> hello');
+        });
+        it('should show an error when promise in array is rejected', async () => {
+            const error = new Error('ZONK');
+            const exceptionHandler = jest.fn();
+            const term = $('<div />').terminal([
+                Promise.reject(error),
+                {
+                    hello(x) {
+                        return x;
+                    }
+                }
+            ], {
+                greetings: false,
+                exceptionHandler
+            });
+            await delay(10);
+            expect(exceptionHandler).toHaveBeenCalledWith(error, 'INTERPRETER');
+            await term.exec('hello 10');
+            expect(term.get_output().split('\n')).toEqual([
+                '> hello 10',
+                '10'
+            ]);
+        });
     });
     describe('nested object interpreter', function() {
         var interpereter, type, fallback, term;
