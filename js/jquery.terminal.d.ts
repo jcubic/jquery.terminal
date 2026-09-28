@@ -756,6 +756,9 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     set_command(command: string): JQueryTerminal;
     id(): number;
     clear(): JQueryTerminal;
+    ready(handler: ($: JQueryStatic) => void): this;
+    ready(): JQuery.Promise<void>;
+    output_ready(): JQuery.Promise<void>;
     export_view(): JQueryTerminal.View;
     import_view(view: JQueryTerminal.View): JQueryTerminal;
     save_state(command?: string, ignore_hash?: boolean, index?: number): JQueryTerminal;

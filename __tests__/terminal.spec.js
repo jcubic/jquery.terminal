@@ -5707,7 +5707,7 @@ describe('Terminal plugin', function() {
                         await term.delay(50);
                         return 'world';
                     });
-                    await term.output_ready();
+                    await term.ready();
                     const view = term.export_view();
                     term.clear();
                     term.import_view(view);
@@ -6928,9 +6928,32 @@ describe('Terminal plugin', function() {
                 }, {
                     flush: false
                 });
-                return term.output_ready().then(() => {
+                return term.ready().then(() => {
                     term.flush();
                     expect(term.get_output()).toEqual('hello\nworld');
+                });
+            });
+            it('should call jQuery ready when called with a function', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                return new Promise((resolve) => {
+                    expect(term.ready(resolve)).toBe(term);
+                });
+            });
+            it('should keep output_ready as alias of ready', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.echo(async () => {
+                    await term.delay(50);
+                    return 'hello';
+                }, {
+                    flush: false
+                });
+                return term.output_ready().then(() => {
+                    term.flush();
+                    expect(term.get_output()).toEqual('hello');
                 });
             });
         });

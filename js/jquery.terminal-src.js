@@ -10088,10 +10088,20 @@
             // -------------------------------------------------------------
             // :: Return a promise that is resolved when it's safe to
             // :: call export_view or flush, it wait for all async echo
-            // :: to finish
+            // :: to finish. When called with a function it works like
+            // :: jQuery ready method that it overwrites
+            // -------------------------------------------------------------
+            ready: function(fn) {
+                if (is_function(fn)) {
+                    return $.fn.ready.call(self, fn);
+                }
+                return event_hub.wait_for('async_echo_ready');
+            },
+            // -------------------------------------------------------------
+            // :: Old name of Terminal::ready() kept for backward compatibility
             // -------------------------------------------------------------
             output_ready: function() {
-                return event_hub.wait_for('async_echo_ready');
+                return self.ready();
             },
             // -------------------------------------------------------------
             // :: Return an object that can be used with import_view to
@@ -10099,7 +10109,7 @@
             // -------------------------------------------------------------
             export_view: function() {
                 if (!command_line || async_echo.length) {
-                    throw new Error('output not ready use Terminal::output_ready()');
+                    throw new Error('output not ready use Terminal::ready()');
                 }
                 var user_export = fire_event('onExport');
                 user_export = user_export || {};
