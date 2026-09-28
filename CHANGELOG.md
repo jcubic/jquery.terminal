@@ -1,6 +1,7 @@
 ## 2.48.0
 ### Features
 * allow using output redirects in pipe extension
+* rename `Terminal::output_ready()` to `Terminal::ready()`, old name is kept as alias [#1057](https://github.com/jcubic/jquery.terminal/issues/1057)
 ### Bugfix
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
 * fix miscellaneous issues with TypeScript types
