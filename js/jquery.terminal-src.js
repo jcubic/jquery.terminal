@@ -8678,16 +8678,43 @@
             return string;
         }
         // ---------------------------------------------------------------------
-        function process_line(line, safe_throw) {
-            // a line built from more than one partial (echo with
-            // newline: false) is re-rendered by replaying each partial with
-            // its own options so raw/formatters are applied independently #1052
-            if (line.segments && line.segments.length > 1) {
-                var segments = line.segments;
-                // the partials need to be appended to the buffer in order -
-                // they share the same line index so buffer.sort() can't order
-                // them - so async partials (functions/promises) are processed
-                // one after another
+        function apply_line_formatters(string, line_settings) {
+            if (line_settings.formatters) {
+                try {
+                    if (line_settings.formatters === 'command') {
+                        // used by echo_command so the command
+                        // keeps its highlighting on redraw #1052
+                        string = $.terminal.apply_formatters(
+                            string,
+                            $.extend({}, settings, {command: true})
+                        );
+                    } else {
+                        string = $.terminal.apply_formatters(
+                            string,
+                            $.extend(settings, {echo: true})
+                        );
+                    }
+                } catch (e) {
+                    display_exception(e, 'FORMATTING');
+                }
+            }
+            return string;
+        }
+        // ---------------------------------------------------------------------
+        // :: a line built from more than one partial (echo with newline: false)
+        // :: is re-rendered with the options of each partial #1052
+        // ---------------------------------------------------------------------
+        function process_segments(line, safe_throw) {
+            var segments = line.segments;
+            var have_raw = segments.some(function(segment) {
+                return segment.options.raw;
+            });
+            if (have_raw) {
+                // raw partials are replayed one by one so raw/formatters are
+                // applied independently. The partials need to be appended to
+                // the buffer in order - they share the same line index so
+                // buffer.sort() can't order them - so async partials
+                // (functions/promises) are processed one after another
                 var index = 0;
                 var process_segment = function process_segment() {
                     if (index >= segments.length) {
@@ -8701,6 +8728,44 @@
                     }, safe_throw), process_segment);
                 };
                 return process_segment();
+            }
+            // each partial is formatted with its own options and the whole
+            // line is wrapped at once so it fits into the terminal #1060
+            function format_segment(segment) {
+                var line_settings = $.extend({
+                    exec: true,
+                    invokeMethods: false,
+                    formatters: true,
+                    convertLinks: settings.convertLinks
+                }, segment.options);
+                return unpromise(stringify_value(segment.value), function(string) {
+                    string = apply_line_formatters(string, line_settings);
+                    string = process_extended_commands(string, segment, line_settings);
+                    if (string !== '' && line_settings.convertLinks) {
+                        string = links(string);
+                    }
+                    return string;
+                });
+            }
+            return process_line({
+                value: function() {
+                    return unpromise(segments.map(format_segment), function(strings) {
+                        return strings.join('');
+                    });
+                },
+                index: line.index,
+                options: $.extend({}, line.options, {
+                    exec: false,
+                    clear_exec: false,
+                    formatters: false,
+                    convertLinks: false
+                })
+            }, safe_throw);
+        }
+        // ---------------------------------------------------------------------
+        function process_line(line, safe_throw) {
+            if (line.segments && line.segments.length > 1) {
+                return process_segments(line, safe_throw);
             }
             // prevent exception in display exception
             try {
@@ -8739,25 +8804,7 @@
                                 return true;
                             }
                         }
-                        if (line_settings.formatters) {
-                            try {
-                                if (line_settings.formatters === 'command') {
-                                    // used by echo_command so the command
-                                    // keeps its highlighting on redraw #1052
-                                    string = $.terminal.apply_formatters(
-                                        string,
-                                        $.extend({}, settings, {command: true})
-                                    );
-                                } else {
-                                    string = $.terminal.apply_formatters(
-                                        string,
-                                        $.extend(settings, {echo: true})
-                                    );
-                                }
-                            } catch (e) {
-                                display_exception(e, 'FORMATTING');
-                            }
-                        }
+                        string = apply_line_formatters(string, line_settings);
                         string = process_extended_commands(string, line, line_settings);
                         if (string === '') {
                             return;

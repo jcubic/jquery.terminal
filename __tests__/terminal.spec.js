@@ -3143,6 +3143,19 @@ describe('extensions', function() {
                 expect(term.find('.terminal-output .' + cls).length).toBe(1);
             });
         });
+        it('should wrap multiple partials on refresh (#1060)', async function() {
+            for (let i = 0; i < 30; i += 1) {
+                term.echo('qwerty', { newline: false });
+            }
+            var expected = [
+                'qwerty'.repeat(16) + 'qwer',
+                'ty' + 'qwerty'.repeat(13)
+            ];
+            await delay(10);
+            expect(output(term)).toEqual(expected);
+            term.refresh();
+            expect(output(term)).toEqual(expected);
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
