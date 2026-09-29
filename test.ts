@@ -103,6 +103,15 @@ $.terminal.pipe(string_only_interpreter, {
 $('.term').terminal(string_only_interpreter, { processArguments: false });
 
 // -----------------------------------------------------------------------------
+// :: parse_options
+// -----------------------------------------------------------------------------
+
+test_type<JQueryTerminal.ParsedOptions>($.terminal.parse_options('-x foo --bar'));
+test_type<JQueryTerminal.ParsedOptions>($.terminal.parse_options(['-x', 'foo'], {
+    boolean: ['x']
+}));
+
+// -----------------------------------------------------------------------------
 // :: less
 // -----------------------------------------------------------------------------
 
