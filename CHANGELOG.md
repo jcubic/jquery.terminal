@@ -11,6 +11,7 @@
 * show an error when a promise used as interpreter is rejected [#1056](https://github.com/jcubic/jquery.terminal/issues/1056)
 * fix `boolean` option in `$.terminal.parse_options` TypeScript type [#979](https://github.com/jcubic/jquery.terminal/issues/979)
 * add TypeScript type for `$.terminal.xml_formatter.tags` [#979](https://github.com/jcubic/jquery.terminal/issues/979)
+* better error message when `completion: true` is used with a function interpreter [#974](https://github.com/jcubic/jquery.terminal/issues/974)
 
 ## 2.47.0
 ### Breaking
