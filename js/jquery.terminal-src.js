@@ -7869,6 +7869,8 @@
             loginIsNotAFunction: 'Authenticate must be a function',
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: 'Invalid completion',
+            invalidCompletionFunction: "Invalid completion: automatic completion " +
+                "can't be used with a function interpreter",
             invalidSelector: 'Sorry, but terminal said that you use invalid ' +
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
@@ -9527,6 +9529,12 @@
                         case 'array':
                             resolve(completion);
                             break;
+                        case 'boolean':
+                            // completion: true with a function interpreter
+                            // there are no commands to complete #974
+                            throw new $.terminal.Exception(
+                                strings().invalidCompletionFunction
+                            );
                         default:
                             throw new $.terminal.Exception(strings().invalidCompletion);
                     }

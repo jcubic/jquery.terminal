@@ -9,6 +9,7 @@
 * fix rendering `\]` as `]` inside normal text
 * fix stringifying a value when echo (conflict with [Mitty](https://github.com/jcubic/mitty))
 * show an error when a promise used as interpreter is rejected [#1056](https://github.com/jcubic/jquery.terminal/issues/1056)
+* better error message when `completion: true` is used with a function interpreter [#974](https://github.com/jcubic/jquery.terminal/issues/974)
 
 ## 2.47.0
 ### Breaking
