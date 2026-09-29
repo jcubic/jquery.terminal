@@ -148,6 +148,10 @@ declare namespace JQueryTerminal {
         __meta__?: boolean;
     };
     type FormatterFunction = ((str: string, options?: FormatterFunctionOptions) => (string | [string, number])) & FormatterFunctionPropsInterface;
+    type XMLTagFunction = (attrs: { [name: string]: string }) => string;
+    type XMLFormatterFunction = FormatterFunction & {
+        tags: { [name: string]: XMLTagFunction };
+    };
     type FormatterArrayOptions = {
         loop?: boolean;
         echo?: boolean;
@@ -612,7 +616,7 @@ interface JQueryTerminalStatic {
     split_arguments(str: string): string[];
     parse_command(str: string): JQueryTerminal.ParsedCommand<number | RegExp | string>;
     split_command(str: string): JQueryTerminal.ParsedCommand<string>;
-    parse_options(arg: string | string[], options?: { booleans: string[] }): JQueryTerminal.ParsedOptions;
+    parse_options(arg: string | string[], options?: { boolean?: string[] }): JQueryTerminal.ParsedOptions;
     parse_formatting(arg: string): string[];
     extended_command(term: JQueryTerminal, str: string): void;
     /**
@@ -643,7 +647,7 @@ interface JQueryTerminalStatic {
         palette: string[];
     };
     // xml
-    xml_formatter: JQueryTerminal.FormatterFunction;
+    xml_formatter: JQueryTerminal.XMLFormatterFunction;
     Renderer: JQueryTerminal.Renderer;
     CanvasRenderer: JQueryTerminal.Renderer;
     Animation: JQueryTerminal.Animation;
