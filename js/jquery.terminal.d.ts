@@ -61,6 +61,7 @@ declare namespace JQueryTerminal {
         loginIsNotAFunction: string;
         canExitError: string;
         invalidCompletion: string;
+        invalidCompletionFunction: string;
         invalidSelector: string;
         invalidTerminalId: string;
         login: string;

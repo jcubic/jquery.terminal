@@ -5657,6 +5657,26 @@ describe('Terminal plugin', function() {
                 done();
             }, 400);
         });
+        it('should show error when automatic completion used with a function (#974)', function() {
+            var errors = [];
+            var term = $('<div/>').appendTo('body').terminal($.terminal.pipe({
+                foo: function() {}
+            }), {
+                completion: true,
+                greetings: false,
+                exceptionHandler: function(e, label) {
+                    errors.push([label, e.message]);
+                }
+            });
+            term.focus().insert('f');
+            shortcut(false, false, false, 9, 'tab');
+            expect(errors).toEqual([[
+                'USER KEYMAP',
+                "Invalid completion: automatic completion can't be used " +
+                    'with a function interpreter'
+            ]]);
+            term.destroy().remove();
+        });
     });
     describe('jQuery Terminal methods', function() {
         describe('generic', function() {
