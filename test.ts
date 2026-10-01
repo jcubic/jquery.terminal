@@ -423,6 +423,18 @@ $.terminal.defaults.formatters.push(red);
         }
     });
     // -------------------------------------------------------------------------
+    // :: mousewheel/touchscroll
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        mousewheel: function(event, delta, term) {
+            this.echo(String(delta));
+            return this === term;
+        },
+        touchscroll: function(event, delta) {
+            this.scroll(delta);
+        }
+    });
+    // -------------------------------------------------------------------------
     // :: onEchoCommand
     // -------------------------------------------------------------------------
     $('.term').terminal($.noop, {

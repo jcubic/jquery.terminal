@@ -4484,6 +4484,86 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
             });
         });
+        describe('mousewheel', function() {
+            function wheel(term) {
+                var event = new $.Event('wheel');
+                event.originalEvent = { deltaY: 10 };
+                term.trigger(event);
+            }
+            it('should call settings callback with terminal as this', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    mousewheel: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                var context, args;
+                wheel(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([-10, term]);
+                term.destroy();
+            });
+            it('should call interpreter callback with terminal as this', function() {
+                var term = $('<div/>').terminal();
+                var context, args;
+                term.push($.noop, {
+                    mousewheel: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                wheel(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([-10, term]);
+                term.destroy();
+            });
+        });
+        describe('touchscroll', function() {
+            function touch(term) {
+                var scroller = term.find('.terminal-scroller');
+                var target = scroller[0];
+                [['touchstart', 0], ['touchmove', 20]].forEach(function([type, y]) {
+                    var event = new $.Event(type);
+                    event.originalEvent = {
+                        target: target,
+                        touches: [{ clientY: y }],
+                        preventDefault: $.noop
+                    };
+                    scroller.trigger(event);
+                });
+            }
+            it('should call settings callback with terminal as this', function() {
+                var context, args;
+                var term = $('<div/>').terminal($.noop, {
+                    touchscroll: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                touch(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([20, term]);
+                term.destroy();
+            });
+            it('should call interpreter callback with terminal as this', function() {
+                var context, args;
+                var term = $('<div/>').terminal();
+                term.push($.noop, {
+                    touchscroll: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                touch(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([20, term]);
+                term.destroy();
+            });
+        });
     });
     describe('prompt', function() {
         var term;

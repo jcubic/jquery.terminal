@@ -179,7 +179,7 @@ declare namespace JQueryTerminal {
 
     type ExtendedPrompt = ((this: JQueryTerminal, setPrompt: setStringFunction) => (void | TypeOrPromise<string>)) | string;
 
-    type MouseWheelCallback = (event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
+    type MouseWheelCallback = (this: JQueryTerminal, event: MouseEvent, delta: number, self: JQueryTerminal) => boolean | void;
     type TouchScrollCallback = MouseWheelCallback;
 
     type execOptions = JQueryTerminal.animationOptions & {
