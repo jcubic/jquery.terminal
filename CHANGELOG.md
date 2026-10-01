@@ -1,6 +1,7 @@
 ## 2.48.0
 ### Features
 * allow using output redirects in pipe extension
+* add terminal as `this` context to `mousewheel` and `touchscroll` callbacks [#965](https://github.com/jcubic/jquery.terminal/issues/965)
 * rename `Terminal::output_ready()` to `Terminal::ready()`, old name is kept as alias [#1057](https://github.com/jcubic/jquery.terminal/issues/1057)
 ### Bugfix
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)

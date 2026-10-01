@@ -13323,9 +13323,9 @@
                         var interpreter = interpreters.top();
                         var ret;
                         if (is_function(interpreter.mousewheel)) {
-                            ret = interpreter.mousewheel(event, delta, self);
+                            ret = interpreter.mousewheel.call(self, event, delta, self);
                         } else if (is_function(settings.mousewheel)) {
-                            ret = settings.mousewheel(event, delta, self);
+                            ret = settings.mousewheel.call(self, event, delta, self);
                         }
                         if (ret === true) {
                             return;
@@ -13377,9 +13377,9 @@
                     var ret;
                     var interpreter = interpreters.top();
                     if (is_function(interpreter.touchscroll)) {
-                        ret = interpreter.touchscroll(event, delta, self);
+                        ret = interpreter.touchscroll.call(self, event, delta, self);
                     } else if (is_function(settings.touchscroll)) {
-                        ret = settings.touchscroll(event, delta, self);
+                        ret = settings.touchscroll.call(self, event, delta, self);
                     }
                     css(self[0], {
                         '--terminal-scroll': scroller.prop('scrollTop')
