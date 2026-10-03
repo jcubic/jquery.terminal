@@ -238,6 +238,7 @@ declare namespace JQueryTerminal {
         checkArity?: boolean;
         invokeMethods?: boolean;
         useCache?: boolean;
+        cacheSize?: number;
         anyLinks?: boolean;
         id?: number;
         raw?: boolean;
@@ -820,6 +821,7 @@ interface JQueryTerminal<TElement = HTMLElement> extends JQuery<TElement> {
     resize(handler?: JQuery.TypeEventHandler<TElement, null, TElement, TElement, 'resize'> | false): this;
     resize(width?: number, height?: number): JQueryTerminal;
     refresh(): JQueryTerminal;
+    clear_cache(): JQueryTerminal;
     flush(options?: { update?: boolean, scroll?: boolean }): JQueryTerminal;
     update(line: number, str: string, options?: JQueryTerminal.EchoOptions): JQueryTerminal;
     // options for remove_line is useless but that's how API look like

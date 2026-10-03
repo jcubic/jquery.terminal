@@ -1980,6 +1980,120 @@ describe('Terminal utils', function() {
             expect(history_commands('foo')).toEqual(commands);
         });
     });
+    describe('LRUCache', function() {
+        describe('create', function() {
+            it('should be empty', function() {
+                var cache = new $.terminal.LRUCache(100);
+                expect(cache.count()).toEqual(0);
+                expect(cache.size()).toEqual(0);
+            });
+        });
+        describe('get/set', function() {
+            it('should store and return the value', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('key', 'value');
+                expect(cache.has('key')).toBeTruthy();
+                expect(cache.get('key')).toEqual('value');
+            });
+            it('should return undefined for missing key', function() {
+                var cache = new $.terminal.LRUCache(100);
+                expect(cache.has('key')).toBeFalsy();
+                expect(cache.get('key')).toBeUndefined();
+            });
+            it('should replace the value and not count it twice', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('key', 'aaaa');
+                cache.set('key', 'bbbb');
+                expect(cache.get('key')).toEqual('bbbb');
+                expect(cache.count()).toEqual(1);
+                expect(cache.size()).toEqual('key'.length + 'bbbb'.length);
+            });
+            it('should measure keys and values in characters', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('ab', 'cde');
+                expect(cache.size()).toEqual(5);
+            });
+            it('should measure arrays of strings', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('ab', ['cde', 'fg']);
+                expect(cache.size()).toEqual(7);
+            });
+            it('should use custom measure function', function() {
+                var cache = new $.terminal.LRUCache(100, function(value) {
+                    return value.line.length;
+                });
+                cache.set('ab', {line: 'cde'});
+                expect(cache.size()).toEqual(5);
+            });
+        });
+        describe('limit', function() {
+            it('should drop the oldest entries when over the limit', function() {
+                var cache = new $.terminal.LRUCache(12);
+                cache.set('a', 'xxx'); // 4
+                cache.set('b', 'xxx'); // 8
+                cache.set('c', 'xxx'); // 12
+                expect(cache.count()).toEqual(3);
+                cache.set('d', 'xxx'); // over the limit
+                expect(cache.count()).toEqual(3);
+                expect(cache.has('a')).toBeFalsy();
+                expect(cache.has('d')).toBeTruthy();
+            });
+            it('should keep recently used entries', function() {
+                var cache = new $.terminal.LRUCache(12);
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.set('c', 'xxx');
+                cache.get('a'); // 'a' is now the most recently used
+                cache.set('d', 'xxx');
+                expect(cache.has('a')).toBeTruthy();
+                expect(cache.has('b')).toBeFalsy();
+            });
+            it('should not store entries bigger than the limit', function() {
+                var cache = new $.terminal.LRUCache(10);
+                cache.set('a', 'xxx');
+                cache.set('b', new Array(100).join('x'));
+                expect(cache.has('b')).toBeFalsy();
+                expect(cache.has('a')).toBeTruthy();
+            });
+            it('should not store anything when the limit is zero', function() {
+                var cache = new $.terminal.LRUCache(0);
+                cache.set('a', 'xxx');
+                expect(cache.count()).toEqual(0);
+            });
+            it('should not have a limit when it is negative', function() {
+                var cache = new $.terminal.LRUCache(-1);
+                for (var i = 0; i < 100; ++i) {
+                    cache.set('key-' + i, 'value');
+                }
+                expect(cache.count()).toEqual(100);
+            });
+            it('should read the limit from a function', function() {
+                var limit = 12;
+                var cache = new $.terminal.LRUCache(function() {
+                    return limit;
+                });
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.set('c', 'xxx');
+                expect(cache.count()).toEqual(3);
+                limit = 4;
+                cache.set('d', 'xxx');
+                expect(cache.count()).toEqual(1);
+                expect(cache.has('d')).toBeTruthy();
+            });
+        });
+        describe('clear', function() {
+            it('should remove all entries', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.clear();
+                expect(cache.count()).toEqual(0);
+                expect(cache.size()).toEqual(0);
+                expect(cache.has('a')).toBeFalsy();
+            });
+        });
+    });
     describe('Stack', function() {
         describe('create', function() {
             it('should create stack from array', function() {
@@ -8510,6 +8624,160 @@ describe('Terminal plugin', function() {
                 term.invoke_key('CTRL+L');
                 expect(term.find('.terminal-output').html()).toBeFalsy();
             });
+        });
+    });
+    describe('render cache', function() {
+        var defaults;
+        var formatter;
+        beforeEach(function() {
+            defaults = $.terminal.defaults.formatters;
+            // a formatter is only called on a cache miss, so the number of calls
+            // tells if the line was taken from the cache or rendered again
+            formatter = jest.fn(function(string) {
+                return string;
+            });
+            $.terminal.defaults.formatters = [formatter];
+        });
+        afterEach(function() {
+            $.terminal.defaults.formatters = defaults;
+        });
+        function terminal(options) {
+            return $('<div/>').terminal($.noop, $.extend({
+                greetings: false
+            }, options));
+        }
+        function lines(term, index) {
+            return term.find('.terminal-output > div').eq(index).find('div')
+                .map(function() {
+                    return a0($(this).text());
+                }).get();
+        }
+        // the same formatters are used for the command line, only the calls
+        // that come from echo are interesting here
+        function renders() {
+            return formatter.mock.calls.filter(function(call) {
+                return call[1] && call[1].echo === true && call[1].command !== true;
+            }).length;
+        }
+        it('should render the same line only once', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.echo('hello');
+            expect(renders()).toEqual(1);
+            term.destroy();
+        });
+        it('should invalidate the cache on clear_cache', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.clear_cache();
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should keep the cache on clear', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.clear();
+            term.echo('hello');
+            expect(renders()).toEqual(1);
+            term.destroy();
+        });
+        it('should invalidate the cache when an option changes', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.option('convertLinks', false);
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should invalidate the cache when a formatter is added', function() {
+            var term = terminal();
+            term.echo('hello');
+            $.terminal.new_formatter([/hello/, 'world']);
+            term.echo('hello');
+            expect(lines(term, 1)).toEqual(['world']);
+            term.destroy();
+        });
+        it('should invalidate the cache when a formatter is removed', function() {
+            var term = terminal();
+            var replace = [/hello/, 'world'];
+            $.terminal.new_formatter(replace);
+            term.echo('hello');
+            expect(lines(term, 0)).toEqual(['world']);
+            $.terminal.remove_formatter(replace);
+            term.echo('hello');
+            expect(lines(term, 1)).toEqual(['hello']);
+            term.destroy();
+        });
+        it('should not reuse a cached line echoed with other options', function() {
+            $.terminal.defaults.formatters = [[/foo/g, 'bar']];
+            var term = terminal();
+            term.echo('foo');
+            term.echo('foo', {formatters: false});
+            expect(lines(term, 0)).toEqual(['bar']);
+            expect(lines(term, 1)).toEqual(['foo']);
+            term.destroy();
+        });
+        it('should not reuse a cached line wrapped at other width', function() {
+            var term = terminal({numChars: 10});
+            term.echo('hello world');
+            expect(lines(term, 0)).toEqual(['hello worl', 'd']);
+            term.option('numChars', 6);
+            expect(lines(term, 0)).toEqual(['hello', 'world']);
+            term.destroy();
+        });
+        it('should not reuse a cached line with keepWords', function() {
+            var term = terminal({numChars: 10});
+            term.echo('hello world');
+            term.echo('hello world', {keepWords: true});
+            expect(lines(term, 0)).toEqual(['hello worl', 'd']);
+            expect(lines(term, 1)).toEqual(['hello', 'world']);
+            term.destroy();
+        });
+        it('should not reuse a cached line when extended commands can run',
+        function() {
+            var term = terminal({invokeMethods: true});
+            var clear = jest.fn();
+            term.echo('x [[ terminal::clear() ]]', {exec: false});
+            term.clear = clear;
+            // the same line with exec is rendered again, so the command runs
+            term.echo('x [[ terminal::clear() ]]');
+            expect(clear).toHaveBeenCalled();
+            term.destroy();
+        });
+        it('should drop cached lines over the cacheSize limit', function() {
+            var term = terminal({cacheSize: 1000});
+            term.echo('hello');
+            formatter.mockClear();
+            // way more than 1000 characters, so the first line has to be dropped
+            for (var i = 0; i < 20; ++i) {
+                term.echo(new Array(200).join(String.fromCharCode(97 + i)));
+            }
+            term.echo('hello');
+            expect(renders()).toEqual(21);
+            term.destroy();
+        });
+        it('should not cache anything when cacheSize is zero', function() {
+            var term = terminal({cacheSize: 0});
+            term.echo('hello');
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should rewrap the command line when the prompt changes', function() {
+            var term = terminal();
+            term.focus();
+            var cmd = term.cmd();
+            cmd.resize(10);
+            // the command wraps with both prompts, so the split of the first
+            // one is cached before the prompt changes
+            term.set_command('hello world foo');
+            var before = term.find('.cmd-wrapper > div').length;
+            expect(before).toBeGreaterThan(1);
+            // the longer prompt leaves less space for the first line
+            cmd.prompt('>>>>>> ');
+            expect(term.find('.cmd-wrapper > div').length).toBeGreaterThan(before);
+            term.destroy();
         });
     });
 });
