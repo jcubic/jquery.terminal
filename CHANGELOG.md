@@ -3,7 +3,14 @@
 * allow using output redirects in pipe extension
 * add terminal as `this` context to `mousewheel` and `touchscroll` callbacks [#965](https://github.com/jcubic/jquery.terminal/issues/965)
 * rename `Terminal::output_ready()` to `Terminal::ready()`, old name is kept as alias [#1057](https://github.com/jcubic/jquery.terminal/issues/1057)
+* add `cacheSize` option that limits how much the render cache can hold
 ### Bugfix
+* invalidate the render cache so it no longer grows without a limit while echoing
+* clear the render cache when an option is changed with `Terminal::option()`
+* re-render lines echoed with different `keepWords`, `formatters` or `convertLinks` options
+* re-wrap the command line when the prompt changes and the command stays the same
+* execute extended commands again when the same line is echoed twice
+* enable the render cache in Node (the `Map` detection only worked in the browser)
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
 * fix miscellaneous issues with TypeScript types
 * fix small shift when entering multiline input when each line is a command
