@@ -8809,7 +8809,7 @@
         // :: the extended commands are removed from the line when they are
         // :: executed (echo) and when the line is rendered again (redraw)
         // ---------------------------------------------------------------------
-        function strip_extended_commands(line, line_settings) {
+        function should_strip_extended_commands(line, line_settings) {
             return !!(line_settings.exec || line.options.clear_exec);
         }
         // ---------------------------------------------------------------------
@@ -8818,7 +8818,7 @@
         // :: the commands need to be executed on every echo
         // ---------------------------------------------------------------------
         function process_extended_commands(string, line, line_settings, state) {
-            if (strip_extended_commands(line, line_settings)) {
+            if (should_strip_extended_commands(line, line_settings)) {
                 return $.terminal.each_extended_command(string, function(command) {
                     // redraw should not execute commands and it have
                     // and lines variable have all extended commands
@@ -8959,7 +8959,10 @@
                     if (!line_settings.raw) {
                         var cols = line_settings.cols = self.cols();
                         var exec_state = {executed: false};
-                        var strip_exec = strip_extended_commands(line, line_settings);
+                        var strip_exec = should_strip_extended_commands(
+                            line,
+                            line_settings
+                        );
                         var variant = line_variant(line_settings, cols, strip_exec);
                         if (settings.useCache && line_settings.useCache) {
                             var key = string;
