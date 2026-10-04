@@ -1,6 +1,6 @@
 {
   "name": "jquery.terminal",
-  "version": "2.47.0",
+  "version": "2.48.0",
   "description": "jQuery Terminal Emulator is a plugin for creating command line interpreters in your applications.",
   "main": "js/jquery.terminal.js",
   "typings": "js/jquery.terminal.d.ts",
@@ -33,7 +33,11 @@
   "contributors": [
     {
       "name": "Jakub T. Jankiewicz",
-      "url": "https://jakub.jankiewicz.org/"
+      "url": "https://jakub.jankiewicz.org"
+    },
+    {
+      "name": "Ankit Sharma",
+      "url": "https://github.com/AnkitSharma-29"
     },
     {
       "name": "Riccardo Mura",
@@ -44,7 +48,7 @@
       "url": "https://github.com/Neyxo"
     },
     {
-      "name": "kid1412z",
+      "name": "Nikola",
       "url": "https://github.com/kid1412z"
     },
     {
@@ -52,8 +56,16 @@
       "url": "https://github.com/ml1nk"
     },
     {
+      "name": "saptarshi",
+      "url": "https://github.com/sap1110"
+    },
+    {
       "name": "Sébastien Warin",
-      "url": "http://sebastien.warin.fr"
+      "url": "https://sebastien.warin.fr"
+    },
+    {
+      "name": "Snyk bot",
+      "url": "https://snyk.io"
     },
     {
       "name": "Christopher John Ryan",
@@ -62,10 +74,6 @@
     {
       "name": "Johan",
       "url": "https://github.com/johanjordaan"
-    },
-    {
-      "name": "Snyk bot",
-      "url": "https://snyk.io"
     },
     {
       "name": "Florian Schäfer",
@@ -92,60 +100,60 @@
       "url": "https://github.com/antoineol"
     },
     {
-      "name": "youurayy",
-      "url": "https://github.com/youurayy"
-    },
-    {
-      "name": "Steve Kirkegard",
-      "url": "https://www.linkedin.com/in/steve-kirkegard"
-    },
-    {
-      "name": "stereobooster",
-      "url": "https://stereobooster.com"
-    },
-    {
-      "name": "Dev Kumar Gupta",
-      "url": "https://github.com/mrkaiser"
-    },
-    {
-      "name": "dependabot[bot]",
-      "url": "https://github.com/dependabot[bot]"
-    },
-    {
-      "name": "coderaiser",
-      "url": "http://coderaiser.github.io"
-    },
-    {
-      "name": "Yutong Luo",
-      "url": "https://yutongluo.com"
-    },
-    {
-      "name": "Steve Phillips",
-      "url": "https://tryingtobeawesome.com/"
-    },
-    {
-      "name": "Robert W",
-      "url": "https://github.com/rbw"
-    },
-    {
-      "name": "exit1",
-      "url": "https://github.com/exit1"
-    },
-    {
-      "name": "Mateusz Paprocki",
-      "url": "https://github.com/mattpap"
-    },
-    {
-      "name": "Martin v. Löwis",
-      "url": "https://github.com/loewis"
+      "name": "KiddoV",
+      "url": "https://github.com/KiddoV"
     },
     {
       "name": "Kushal",
       "url": "kushalsm.com"
     },
     {
-      "name": "KiddoV",
-      "url": "https://github.com/KiddoV"
+      "name": "Martin v. Löwis",
+      "url": "https://github.com/loewis"
+    },
+    {
+      "name": "Mateusz Paprocki",
+      "url": "https://github.com/mattpap"
+    },
+    {
+      "name": "exit1",
+      "url": "https://github.com/exit1"
+    },
+    {
+      "name": "Robert W",
+      "url": "https://github.com/rbw"
+    },
+    {
+      "name": "Steve Phillips",
+      "url": "https://tryingtobeawesome.com/"
+    },
+    {
+      "name": "Yutong Luo",
+      "url": "https://yutongluo.com"
+    },
+    {
+      "name": "coderaiser",
+      "url": "http://coderaiser.github.io"
+    },
+    {
+      "name": "dependabot[bot]",
+      "url": "https://github.com/dependabot[bot]"
+    },
+    {
+      "name": "Dev Kumar Gupta",
+      "url": "https://github.com/mrkaiser"
+    },
+    {
+      "name": "stereobooster",
+      "url": "https://stereobooster.com"
+    },
+    {
+      "name": "Steve Kirkegard",
+      "url": "https://www.linkedin.com/in/steve-kirkegard"
+    },
+    {
+      "name": "youurayy",
+      "url": "https://github.com/youurayy"
     },
     {
       "name": "Jon Steinich",
@@ -156,8 +164,16 @@
       "url": "http://www.jarv.org"
     },
     {
+      "name": "onice",
+      "url": "https://notes.miaowu.org/"
+    },
+    {
       "name": "Jarry Shaw",
       "url": "https://jarryshaw.me"
+    },
+    {
+      "name": "Jamal Ali",
+      "url": "https://camalali.com"
     },
     {
       "name": "jpaye",
@@ -165,7 +181,7 @@
     },
     {
       "name": "Hraban",
-      "url": "https://br0g.0brg.net"
+      "url": "https://github.com/hraban"
     },
     {
       "name": "Hasan",
