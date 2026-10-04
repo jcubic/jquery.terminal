@@ -2890,6 +2890,19 @@ describe('Terminal utils', function() {
                 });
             });
         });
+        it('should not process arguments when disabled in pipe options', function() {
+            var fn = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                foo: fn
+            }, {
+                processArguments: false
+            }));
+            return term.exec('foo 10 20 /xx/').then(() => {
+                ['10', '20', '/xx/'].forEach((arg, i) => {
+                    expect(fn.mock.calls[0][i]).toEqual(arg);
+                });
+            });
+        });
         describe('redirects', function() {
             var commands = {
                 async_output: function(x) {
@@ -2899,6 +2912,8 @@ describe('Terminal utils', function() {
                 },
                 output: function(x) {
                     this.echo(x);
+                },
+                silent: function() {
                 },
                 grep: function(re) {
                     return this.read('').then((str) => {
@@ -3043,6 +3058,30 @@ describe('Terminal utils', function() {
                     return term.exec('output hello | grep hell > bar.txt').then(() => {
                         expect(written).toEqual(['bar.txt', 'hello']);
                         expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should not ask the user when the command had no output',
+                async function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    term.exec('silent > bar.txt');
+                    await delay(100);
+                    expect(written).toEqual(['bar.txt', undefined]);
+                    expect(term.paused()).toBeFalsy();
+                    term.destroy();
+                });
+                it('should not write unread pipe input to redirect target',
+                function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    // the second command never reads, so what the first one
+                    // echoed is still in the buffer - it's not its output
+                    return term.exec('output hello | output world > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'world']);
                     });
                 });
             });
@@ -8743,6 +8782,47 @@ describe('Terminal plugin', function() {
             // the same line with exec is rendered again, so the command runs
             term.echo('x [[ terminal::clear() ]]');
             expect(clear).toHaveBeenCalled();
+            term.destroy();
+        });
+        it('should run extended commands again after the line was redrawn',
+        async function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal({foo: foo}, {
+                greetings: false,
+                checkArity: false
+            });
+            term.echo('x [[ foo ]]');
+            await delay(10);
+            // the redraw renders the line without executing the command, that
+            // rendering must not be used for an echo that should execute it
+            term.refresh();
+            term.echo('x [[ foo ]]');
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(2);
+            term.destroy();
+        });
+        it('should run extended commands in a partial that renders them later',
+        async function() {
+            var foo = jest.fn();
+            var value = 'a';
+            var term = $('<div/>').terminal({foo: foo}, {
+                greetings: false,
+                checkArity: false
+            });
+            term.echo(function() {
+                return value;
+            }, {newline: false});
+            term.echo('b');
+            await delay(10);
+            value = 'a [[ foo ]]';
+            term.refresh();
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(1);
+            // the command is only executed once, every later redraw of the
+            // partial just removes it
+            term.refresh();
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(1);
             term.destroy();
         });
         it('should drop cached lines over the cacheSize limit', function() {

@@ -259,11 +259,11 @@ declare namespace JQueryTerminal {
         errorOnAbort?: boolean;
         // provided by unix formatting
         unixFormatting?: {
-            escapeBrackets: boolean;
-            unescape: boolean;
-            ansiParser: Record<string, anyFunction>;
-            position: number;
-            ansiArt: boolean;
+            escapeBrackets?: boolean;
+            unescape?: boolean;
+            ansiParser?: Record<string, anyFunction>;
+            position?: number;
+            ansiArt?: boolean;
         };
         extra?: any;
         tabs?: number;

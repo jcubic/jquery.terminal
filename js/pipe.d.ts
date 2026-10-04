@@ -1,16 +1,19 @@
 /// <reference path="./jquery.terminal.d.ts" />
 
-export type RedirectCallback = (this: JQueryTerminal, ...args: string[]) => TypeOrPromise<void>;
+// the redirect arguments come from the same command line as the arguments of
+// the command, so they are parsed the same way unless processArguments is off
+export type RedirectCallback<A = string | number | RegExp> =
+    (this: JQueryTerminal, ...args: A[]) => TypeOrPromise<void>;
 
-export type PipeRedirects = Array<{
+export type PipeRedirects<A = string | number | RegExp> = Array<{
     name: string;
     output?: true;
-    callback: RedirectCallback;
+    callback: RedirectCallback<A>;
 }>;
 
-export type PipeOptions = {
+export type PipeOptions<A = string | number | RegExp> = {
     processArguments?: boolean;
-    redirects?: PipeRedirects;
+    redirects?: PipeRedirects<A>;
 };
 
 declare global {
@@ -24,7 +27,7 @@ declare global {
     interface JQueryTerminalStatic {
         pipe(
             obj: JQueryTerminal.ObjectInterpreter<string>,
-            options: PipeOptions & { processArguments: false }
+            options: PipeOptions<string> & { processArguments: false }
         ): JQueryTerminal.interpreterFunction;
         pipe(obj: JQueryTerminal.ObjectInterpreter, options?: PipeOptions): JQueryTerminal.interpreterFunction;
     }

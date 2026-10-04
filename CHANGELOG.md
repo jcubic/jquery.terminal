@@ -10,6 +10,11 @@
 * re-render lines echoed with different `keepWords`, `formatters` or `convertLinks` options
 * re-wrap the command line when the prompt changes and the command stays the same
 * execute extended commands again when the same line is echoed twice
+* execute extended commands when the same line is echoed after a redraw
+* fix exception when a partial (`echo` with `newline: false`) renders an extended command
+* don't ask the user for input when a command with an output redirect echoed nothing
+* don't write input that a piped command didn't read to its output redirect
+* honor `processArguments: false` option of `$.terminal.pipe` when the terminal parses arguments
 * enable the render cache in Node (the `Map` detection only worked in the browser)
 * keep down-arrow navigation within the command for multiline emoji input [#1050](https://github.com/jcubic/jquery.terminal/issues/1050)
 * fix miscellaneous issues with TypeScript types

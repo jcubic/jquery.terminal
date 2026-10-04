@@ -91,10 +91,24 @@ $.terminal.pipe(string_only_interpreter, {
             name: '>',
             output: true,
             callback: function(file) {
+                // with processArguments off the redirect arguments are strings
                 return this.read('').then((text) => {
                     // eslint-disable-next-line no-console
-                    console.log(file, text);
+                    console.log(file.toUpperCase(), text);
                 });
+            }
+        }
+    ]
+});
+
+// with argument processing the redirect arguments are parsed the same way as
+// the arguments of a command
+$.terminal.pipe(obj_interpreter, {
+    redirects: [
+        {
+            name: '<<<',
+            callback: function(...args: Array<string | number | RegExp>) {
+                this.echo(args.join(' '));
             }
         }
     ]

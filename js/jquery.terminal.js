@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Oct 2026 09:26:01 +0000
+ * Date: Sun, 04 Oct 2026 10:47:27 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5670,7 +5670,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 04 Oct 2026 09:26:01 +0000',
+        date: 'Sun, 04 Oct 2026 10:47:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -8801,6 +8801,11 @@
                 line_settings.convertLinks ? 1 : 0,
                 line_settings.wrap,
                 strip_exec ? 1 : 0,
+                // the line looks the same when the extended commands are only
+                // removed (redraw) as when they are executed and removed
+                // (echo), but the rendering made by a redraw can't be used for
+                // an echo that still has to execute them
+                line_settings.exec ? 1 : 0,
                 $.terminal.defaults.formatters.length,
                 formatters_version
             ].join('|');
@@ -8906,7 +8911,17 @@
                 }, segment.options);
                 return unpromise(stringify_value(segment.value), function(string) {
                     string = apply_line_formatters(string, line_settings);
-                    string = process_extended_commands(string, segment, line_settings);
+                    // the state is only used to not cache a line that executed
+                    // a command, the line made out of the partials is rendered
+                    // from a function so it's never cached anyway. Executing
+                    // the command marks the segment itself as already executed
+                    // so a redraw only removes it
+                    string = process_extended_commands(
+                        string,
+                        segment,
+                        line_settings,
+                        {}
+                    );
                     if (string !== '' && line_settings.convertLinks) {
                         string = links(string);
                     }
