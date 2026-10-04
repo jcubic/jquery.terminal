@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.47.0
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Mon, 24 Aug 2026 15:09:31 +0000
+ * Date: Sun, 04 Oct 2026 10:47:27 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -1666,9 +1666,9 @@
         this._onCache = settings.onCache.bind(this);
         this._action = settings.action.bind(this);
         this._validation = settings.validation.bind(this);
-        if ('Map' in root) {
-            this._cache = new Map();
-        }
+        // the validation drops everything as soon as the conditions change so
+        // there is nothing to evict, the cache only needs the storage
+        this._cache = new LRUCache(-1);
     }
     // -------------------------------------------------------------------------
     WorkerCache.prototype.validate = function(key) {
@@ -1685,9 +1685,6 @@
     };
     // -------------------------------------------------------------------------
     WorkerCache.prototype.get = function(key) {
-        if (!this._cache) {
-            return this._action(key);
-        }
         var value;
         if (this.validate(key) && this._cache.has(key)) {
             value = this._cache.get(key);
@@ -1697,6 +1694,132 @@
         value = this._action(key);
         this._cache.set(key, value);
         return value;
+    };
+    // -------------------------------------------------------------------------
+    // :: bumped every time a global formatter is added or removed, it's part of
+    // :: the render cache key so the lines are rendered again
+    // -------------------------------------------------------------------------
+    var formatters_version = 0;
+    // -------------------------------------------------------------------------
+    // :: number of characters in a string or in an array of strings, it's used
+    // :: to measure how much data a cache entry holds
+    // -------------------------------------------------------------------------
+    function text_size(value) {
+        if (typeof value === 'string') {
+            return value.length;
+        }
+        if (is_array(value)) {
+            var size = 0;
+            for (var i = 0; i < value.length; ++i) {
+                size += text_size(value[i]);
+            }
+            return size;
+        }
+        return 0;
+    }
+    // -------------------------------------------------------------------------
+    // :: Cache that drops the least recently used entries when it grows over
+    // :: the limit, without it the render caches keep every line that was ever
+    // :: printed. The limit is the number of characters (see cacheSize option)
+    // :: and not the number of entries, because a single entry can hold
+    // :: anything between one short line and a whole file. The limit can be a
+    // :: function when it should be possible to change it at runtime.
+    // :: A negative limit means no limit at all.
+    // -------------------------------------------------------------------------
+    function LRUCache(limit, measure) {
+        this._limit = limit;
+        this._measure = measure || text_size;
+        // Map is used because it keeps the insertion order, which is what makes
+        // it possible to find the oldest entry, without it the cache is a noop
+        if (typeof Map !== 'undefined') {
+            this._cache = new Map();
+        }
+        this._size = 0;
+    }
+    // -------------------------------------------------------------------------
+    LRUCache.prototype._max = function() {
+        var limit = this._limit;
+        return is_function(limit) ? limit() : limit;
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.has = function(key) {
+        return !!this._cache && this._cache.has(key);
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.get = function(key) {
+        if (!this._cache) {
+            return;
+        }
+        var entry = this._cache.get(key);
+        if (entry === undefined) {
+            return;
+        }
+        // re-insert so the entry becomes the newest one in iteration order
+        this._cache.delete(key);
+        this._cache.set(key, entry);
+        return entry.value;
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.set = function(key, value) {
+        if (!this._cache) {
+            return;
+        }
+        var max = this._max();
+        var size = key.length + this._measure(value);
+        if (max >= 0 && size > max) {
+            // a single entry that doesn't fit would drop everything else
+            this.delete(key);
+            return;
+        }
+        this.delete(key);
+        this._cache.set(key, {value: value, size: size});
+        this._size += size;
+        this._evict(max);
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.delete = function(key) {
+        if (!this._cache) {
+            return;
+        }
+        var entry = this._cache.get(key);
+        if (entry !== undefined) {
+            this._size -= entry.size;
+            this._cache.delete(key);
+        }
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype._evict = function(max) {
+        if (max === undefined) {
+            max = this._max();
+        }
+        if (max < 0 || this._size <= max) {
+            return;
+        }
+        var keys = this._cache.keys();
+        while (this._size > max) {
+            var next = keys.next();
+            if (next.done) {
+                break;
+            }
+            this.delete(next.value);
+        }
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.clear = function() {
+        if (this._cache) {
+            this._cache.clear();
+        }
+        this._size = 0;
+    };
+    // -------------------------------------------------------------------------
+    // :: number of characters the cache holds
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.size = function() {
+        return this._size;
+    };
+    // -------------------------------------------------------------------------
+    LRUCache.prototype.count = function() {
+        return this._cache ? this._cache.size : 0;
     };
     // -------------------------------------------------------------------------
     // :: HISTORY CLASS
@@ -2044,21 +2167,21 @@
     // :: settings for given format, the settings may change while the terminal
     // :: is running, that's why they are dynamic in form of a function
     // -------------------------------------------------------------------------
-    function FormatBuffer(options) {
+    function FormatBuffer(options, limit) {
         this._options = options;
-        if ('Map' in root) {
-            this._format_cache = new Map();
-        }
+        this._format_cache = new LRUCache(limit, function(data) {
+            return text_size(data.line) + text_size(data.raw);
+        });
         this._output_buffer = [];
     }
     // -------------------------------------------------------------------------
     FormatBuffer.NEW_LINE = 1;
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.format = function format(arg, newline, raw) {
-        var use_cache = this._format_cache && this._settings.useCache;
+        var use_cache = this._settings.useCache;
 
         if (use_cache) {
-            var args = JSON.stringify([arg, this._settings]);
+            var args = this._signature + arg;
             if (this._format_cache.has(args)) {
                 return this._format_cache.get(args);
             }
@@ -2085,6 +2208,9 @@
         this._settings = $.extend({
             useCache: true
         }, this._options(options));
+        // the settings are part of the cache key, they can only change between
+        // append calls so they are serialized once and not for every line
+        this._signature = JSON.stringify(this._settings) + '\x00';
 
         this._output_buffer.push(FormatBuffer.NEW_LINE);
 
@@ -2108,9 +2234,7 @@
     };
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.clear_cache = function() {
-        if (this._format_cache) {
-            this._format_cache.clear();
-        }
+        this._format_cache.clear();
     };
     // -------------------------------------------------------------------------
     FormatBuffer.prototype.output = function() {
@@ -3319,13 +3443,12 @@
             return array;
         }
         // ---------------------------------------------------------------------
+        // only the command line that is currently edited is worth caching, that
+        // is what makes moving the cursor around a long command line fast, so
+        // the cache is dropped as soon as the value or the width change
         var cmd_line_worker = new WorkerCache({
             validation: function(key) {
-                var result = false;
-                if ((!this._previous_value || this._previous_value === key) &&
-                    (!this._cols || this._cols === num_chars)) {
-                    result = true;
-                }
+                var result = this._previous_value === key && this._cols === num_chars;
                 this._previous_value = key;
                 this._cols = num_chars;
                 return result;
@@ -3783,6 +3906,9 @@
                 formatted = formatted || $.terminal.format('[[;;]\u200b]');
                 // update prompt if changed
                 if (prompt_node.html() !== formatted) {
+                    // the first line of the command line has to fit next to the
+                    // prompt, so a new prompt means a different split
+                    cmd_line_worker.clear();
                     prompt_node.html(formatted);
                     // fix for Chrome bug width selection
                     // https://bugs.chromium.org/p/chromium/issues/detail?id=1087787
@@ -4060,8 +4186,9 @@
                     var pos = position;
                     var len = bare_text(command).length;
                     if (relative) {
-                        position += n;
-                    } else if (n < 0) {
+                        n += position;
+                    }
+                    if (n < 0) {
                         position = 0;
                     } else if (n > len) {
                         position = len;
@@ -4153,9 +4280,8 @@
                 }
                 return self;
             },
-            clear_cache: 'Map' in root ? function() {
+            clear_cache: function() {
                 cmd_line_worker.clear();
-            } : function() {
                 return self;
             },
             invoke_key: function(shortcut) {
@@ -5543,8 +5669,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.47.0',
-        date: 'Mon, 24 Aug 2026 15:09:31 +0000',
+        version: 'DEV',
+        date: 'Sun, 04 Oct 2026 10:47:27 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -5585,6 +5711,7 @@
         History: History,
         Stack: Stack,
         EventEmitter: EventEmitter,
+        LRUCache: LRUCache,
         // ---------------------------------------------------------------------
         // :: Validate html color (it can be name or hex)
         // ---------------------------------------------------------------------
@@ -7002,6 +7129,7 @@
         // ---------------------------------------------------------------------
         new_formatter: function(formatter) {
             $.terminal.defaults.formatters.unshift(formatter);
+            formatters_version++;
         },
         // ---------------------------------------------------------------------
         // :: helper function to remove existing formatter
@@ -7010,6 +7138,7 @@
             remove($.terminal.defaults.formatters, function(item) {
                 return item === formatter;
             });
+            formatters_version++;
         }
     };
     (function() {
@@ -7329,7 +7458,10 @@
                         return text.replace(format_parts_re, format);
                     } else {
                         text = safe(text);
-                        text = text.replace(/\\\]/, '&#93;');
+                        if (splitted.length > 1) {
+                            // only when between formatting
+                            text = text.replace(/\\\]/g, '&#93;');
+                        }
                         var data = clean_data(text);
                         var extra = extra_css(text, settings);
                         var prefix;
@@ -7775,6 +7907,7 @@
         linksNoReferrer: false,
         externalPause: true,
         useCache: true,
+        cacheSize: 1000000,
         anyLinks: false,
         linksNoFollow: false,
         processRPCResponse: null,
@@ -7865,6 +7998,8 @@
             loginIsNotAFunction: 'Authenticate must be a function',
             canExitError: "You can't exit from main interpreter",
             invalidCompletion: 'Invalid completion',
+            invalidCompletionFunction: "Invalid completion: automatic completion " +
+                "can't be used with a function interpreter",
             invalidSelector: 'Sorry, but terminal said that you use invalid ' +
                 'selector!',
             invalidTerminalId: 'Invalid Terminal ID',
@@ -8441,6 +8576,11 @@
                         } else if (type === 'promise') {
                             first.then(function(first) {
                                 recur([first].concat(rest), success);
+                            }, function(e) {
+                                recur(rest, function() {
+                                    success();
+                                    display_exception(e, 'INTERPRETER');
+                                });
                             });
                         }
                     } else {
@@ -8460,6 +8600,9 @@
             } else if (type === 'promise') {
                 user_intrp.then(function(user_intrp) {
                     make_interpreter(user_intrp, login, finalize);
+                }, function(e) {
+                    make_interpreter($.noop, login, finalize);
+                    display_exception(e, 'INTERPRETER');
                 });
             } else if (type === 'string') {
                 if (settings.describe === false) {
@@ -8633,17 +8776,59 @@
                  options.wrap === true);
         }
         // ---------------------------------------------------------------------
-        var line_cache;
-        if ('Map' in root) {
-            line_cache = new Map();
+        var line_cache = new LRUCache(function() {
+            return settings.cacheSize;
+        }, function(data) {
+            return text_size(data.input) + text_size(data.raw);
+        });
+        // ---------------------------------------------------------------------
+        // :: The echoed value is the cache key and this is everything else the
+        // :: rendered line depends on - the width of the terminal, the echo
+        // :: options that can differ between two echo calls with the same value
+        // :: and the formatters. It's kept in the cached value and compared on
+        // :: a hit instead of being part of the key, because using a derived
+        // :: string as the key makes echo around 2x slower - the lookup is what
+        // :: flattens the value and every later regex on it pays for it.
+        // :: Formatters are only tracked by their number and by the number of
+        // :: times they were added or removed, when the array is modified in
+        // :: place you need to call Terminal::clear_cache()
+        // ---------------------------------------------------------------------
+        function line_variant(line_settings, cols, strip_exec) {
+            return [
+                cols,
+                line_settings.keepWords ? 1 : 0,
+                line_settings.formatters,
+                line_settings.convertLinks ? 1 : 0,
+                line_settings.wrap,
+                strip_exec ? 1 : 0,
+                // the line looks the same when the extended commands are only
+                // removed (redraw) as when they are executed and removed
+                // (echo), but the rendering made by a redraw can't be used for
+                // an echo that still has to execute them
+                line_settings.exec ? 1 : 0,
+                $.terminal.defaults.formatters.length,
+                formatters_version
+            ].join('|');
         }
         // ---------------------------------------------------------------------
-        function process_extended_commands(string, line, line_settings) {
-            if (line_settings.exec || line.options.clear_exec) {
+        // :: the extended commands are removed from the line when they are
+        // :: executed (echo) and when the line is rendered again (redraw)
+        // ---------------------------------------------------------------------
+        function should_strip_extended_commands(line, line_settings) {
+            return !!(line_settings.exec || line.options.clear_exec);
+        }
+        // ---------------------------------------------------------------------
+        // :: remove the extended commands from the line and execute them, the
+        // :: state tells the caller that the line is not worth caching because
+        // :: the commands need to be executed on every echo
+        // ---------------------------------------------------------------------
+        function process_extended_commands(string, line, line_settings, state) {
+            if (should_strip_extended_commands(line, line_settings)) {
                 return $.terminal.each_extended_command(string, function(command) {
                     // redraw should not execute commands and it have
                     // and lines variable have all extended commands
                     if (line_settings.exec) {
+                        state.executed = true;
                         line.options.exec = false;
                         line.options.clear_exec = true;
                         var trim = command.trim();
@@ -8664,16 +8849,43 @@
             return string;
         }
         // ---------------------------------------------------------------------
-        function process_line(line, safe_throw) {
-            // a line built from more than one partial (echo with
-            // newline: false) is re-rendered by replaying each partial with
-            // its own options so raw/formatters are applied independently #1052
-            if (line.segments && line.segments.length > 1) {
-                var segments = line.segments;
-                // the partials need to be appended to the buffer in order -
-                // they share the same line index so buffer.sort() can't order
-                // them - so async partials (functions/promises) are processed
-                // one after another
+        function apply_line_formatters(string, line_settings) {
+            if (line_settings.formatters) {
+                try {
+                    if (line_settings.formatters === 'command') {
+                        // used by echo_command so the command
+                        // keeps its highlighting on redraw #1052
+                        string = $.terminal.apply_formatters(
+                            string,
+                            $.extend({}, settings, {command: true})
+                        );
+                    } else {
+                        string = $.terminal.apply_formatters(
+                            string,
+                            $.extend(settings, {echo: true})
+                        );
+                    }
+                } catch (e) {
+                    display_exception(e, 'FORMATTING');
+                }
+            }
+            return string;
+        }
+        // ---------------------------------------------------------------------
+        // :: a line built from more than one partial (echo with newline: false)
+        // :: is re-rendered with the options of each partial #1052
+        // ---------------------------------------------------------------------
+        function process_segments(line, safe_throw) {
+            var segments = line.segments;
+            var have_raw = segments.some(function(segment) {
+                return segment.options.raw;
+            });
+            if (have_raw) {
+                // raw partials are replayed one by one so raw/formatters are
+                // applied independently. The partials need to be appended to
+                // the buffer in order - they share the same line index so
+                // buffer.sort() can't order them - so async partials
+                // (functions/promises) are processed one after another
                 var index = 0;
                 var process_segment = function process_segment() {
                     if (index >= segments.length) {
@@ -8687,6 +8899,54 @@
                     }, safe_throw), process_segment);
                 };
                 return process_segment();
+            }
+            // each partial is formatted with its own options and the whole
+            // line is wrapped at once so it fits into the terminal #1060
+            function format_segment(segment) {
+                var line_settings = $.extend({
+                    exec: true,
+                    invokeMethods: false,
+                    formatters: true,
+                    convertLinks: settings.convertLinks
+                }, segment.options);
+                return unpromise(stringify_value(segment.value), function(string) {
+                    string = apply_line_formatters(string, line_settings);
+                    // the state is only used to not cache a line that executed
+                    // a command, the line made out of the partials is rendered
+                    // from a function so it's never cached anyway. Executing
+                    // the command marks the segment itself as already executed
+                    // so a redraw only removes it
+                    string = process_extended_commands(
+                        string,
+                        segment,
+                        line_settings,
+                        {}
+                    );
+                    if (string !== '' && line_settings.convertLinks) {
+                        string = links(string);
+                    }
+                    return string;
+                });
+            }
+            return process_line({
+                value: function() {
+                    return unpromise(segments.map(format_segment), function(strings) {
+                        return strings.join('');
+                    });
+                },
+                index: line.index,
+                options: $.extend({}, line.options, {
+                    exec: false,
+                    clear_exec: false,
+                    formatters: false,
+                    convertLinks: false
+                })
+            }, safe_throw);
+        }
+        // ---------------------------------------------------------------------
+        function process_line(line, safe_throw) {
+            if (line.segments && line.segments.length > 1) {
+                return process_segments(line, safe_throw);
             }
             // prevent exception in display exception
             try {
@@ -8712,10 +8972,17 @@
                 }
                 if (string !== '') {
                     if (!line_settings.raw) {
+                        var cols = line_settings.cols = self.cols();
+                        var exec_state = {executed: false};
+                        var strip_exec = should_strip_extended_commands(
+                            line,
+                            line_settings
+                        );
+                        var variant = line_variant(line_settings, cols, strip_exec);
                         if (settings.useCache && line_settings.useCache) {
                             var key = string;
-                            if (line_cache && line_cache.has(key)) {
-                                var data = line_cache.get(key);
+                            var data = line_cache.get(key);
+                            if (data && data.variant === variant) {
                                 buffer.append(
                                     data.input,
                                     line.index,
@@ -8725,26 +8992,13 @@
                                 return true;
                             }
                         }
-                        if (line_settings.formatters) {
-                            try {
-                                if (line_settings.formatters === 'command') {
-                                    // used by echo_command so the command
-                                    // keeps its highlighting on redraw #1052
-                                    string = $.terminal.apply_formatters(
-                                        string,
-                                        $.extend({}, settings, {command: true})
-                                    );
-                                } else {
-                                    string = $.terminal.apply_formatters(
-                                        string,
-                                        $.extend(settings, {echo: true})
-                                    );
-                                }
-                            } catch (e) {
-                                display_exception(e, 'FORMATTING');
-                            }
-                        }
-                        string = process_extended_commands(string, line, line_settings);
+                        string = apply_line_formatters(string, line_settings);
+                        string = process_extended_commands(
+                            string,
+                            line,
+                            line_settings,
+                            exec_state
+                        );
                         if (string === '') {
                             return;
                         }
@@ -8759,7 +9013,6 @@
                         //string = $.terminal.normalize(string);
                         var array;
                         var raw_array;
-                        var cols = line_settings.cols = self.cols();
                         if (should_wrap(string, line_settings)) {
                             array = $.terminal.split_equal(string, cols, {
                                 keepWords: line_settings.keepWords,
@@ -8781,8 +9034,10 @@
                 }
                 var arg = array || string;
                 var raw = raw_array || raw_string;
-                if (line_cache && key && use_cache) {
-                    line_cache.set(key, {input: arg, raw: raw});
+                // a line that executed an extended command is not cached, the
+                // command has to run again when the same line is echoed
+                if (key && use_cache && !exec_state.executed) {
+                    line_cache.set(key, {variant: variant, input: arg, raw: raw});
                 }
                 buffer.append(arg, line.index, line_settings, raw);
             } catch (e) {
@@ -9515,6 +9770,12 @@
                         case 'array':
                             resolve(completion);
                             break;
+                        case 'boolean':
+                            // completion: true with a function interpreter
+                            // there are no commands to complete #974
+                            throw new $.terminal.Exception(
+                                strings().invalidCompletionFunction
+                            );
                         default:
                             throw new $.terminal.Exception(strings().invalidCompletion);
                     }
@@ -10078,16 +10339,30 @@
                     });
                     output[0].innerHTML = '';
                     self.prop({scrollTop: 0});
+                    // NOTE: the render cache is intentionally kept, it's
+                    // limited by the cacheSize option so the lines that are
+                    // gone can't pile up, and clearing the screen just to
+                    // print the same thing again is a common way to redraw
                 }
                 return self;
             },
             // -------------------------------------------------------------
             // :: Return a promise that is resolved when it's safe to
             // :: call export_view or flush, it wait for all async echo
-            // :: to finish
+            // :: to finish. When called with a function it works like
+            // :: jQuery ready method that it overwrites
+            // -------------------------------------------------------------
+            ready: function(fn) {
+                if (is_function(fn)) {
+                    return $.fn.ready.call(self, fn);
+                }
+                return event_hub.wait_for('async_echo_ready');
+            },
+            // -------------------------------------------------------------
+            // :: Old name of Terminal::ready() kept for backward compatibility
             // -------------------------------------------------------------
             output_ready: function() {
-                return event_hub.wait_for('async_echo_ready');
+                return self.ready();
             },
             // -------------------------------------------------------------
             // :: Return an object that can be used with import_view to
@@ -10095,7 +10370,7 @@
             // -------------------------------------------------------------
             export_view: function() {
                 if (!command_line || async_echo.length) {
-                    throw new Error('output not ready use Terminal::output_ready()');
+                    throw new Error('output not ready use Terminal::ready()');
                 }
                 var user_export = fire_event('onExport');
                 user_export = user_export || {};
@@ -10838,12 +11113,12 @@
             // :: function clear formatting cache if you don't longer need it
             // :: cache is used if option useCache is set to true
             // -------------------------------------------------------------
-            clear_cache: 'Map' in root ? function() {
+            clear_cache: function() {
                 buffer.clear_cache();
                 line_cache.clear();
-                command_line.clear_cache();
-                return self;
-            } : function() {
+                if (command_line) {
+                    command_line.clear_cache();
+                }
                 return self;
             },
             // -------------------------------------------------------------
@@ -12045,9 +12320,13 @@
                         $.each(object_or_name, function(key, value) {
                             settings[key] = value;
                         });
+                        // most of the options change how the lines are
+                        // rendered and options are not changed often
+                        self.clear_cache();
                     }
                 } else {
                     settings[object_or_name] = value;
+                    self.clear_cache();
                     if (object_or_name.match(/^num(Chars|Rows)$/)) {
                         redraw();
                     }
@@ -12399,6 +12678,8 @@
                 escape: false,
                 allowedAttributes: options.allowedAttributes || []
             };
+        }, function() {
+            return settings.cacheSize;
         });
         var lines = new OutputLines(function() {
             return settings;
@@ -12502,7 +12783,7 @@
             if (is_function(value)) {
                 value = value();
             }
-            if (value && is_function(value.then)) {
+            if (is_promise(value)) {
                 return value.then(stringify_value);
             }
             if (get_type(value) !== 'string') {
@@ -13246,9 +13527,9 @@
                         var interpreter = interpreters.top();
                         var ret;
                         if (is_function(interpreter.mousewheel)) {
-                            ret = interpreter.mousewheel(event, delta, self);
+                            ret = interpreter.mousewheel.call(self, event, delta, self);
                         } else if (is_function(settings.mousewheel)) {
-                            ret = settings.mousewheel(event, delta, self);
+                            ret = settings.mousewheel.call(self, event, delta, self);
                         }
                         if (ret === true) {
                             return;
@@ -13300,9 +13581,9 @@
                     var ret;
                     var interpreter = interpreters.top();
                     if (is_function(interpreter.touchscroll)) {
-                        ret = interpreter.touchscroll(event, delta, self);
+                        ret = interpreter.touchscroll.call(self, event, delta, self);
                     } else if (is_function(settings.touchscroll)) {
-                        ret = settings.touchscroll(event, delta, self);
+                        ret = settings.touchscroll.call(self, event, delta, self);
                     }
                     css(self[0], {
                         '--terminal-scroll': scroller.prop('scrollTop')

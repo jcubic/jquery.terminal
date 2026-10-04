@@ -17,7 +17,10 @@ $('.term').terminal(function(command, term) {
 $('.term').terminal(function(command) {
     this.echo(command);
 });
-$('.term').terminal([function(command, term) {
+// TypeScript can't contextually type a function literal nested inside an
+// array literal against the Interpreter union, so parameters need explicit
+// types here (this isn't needed when the function is passed on its own, see above)
+$('.term').terminal([function(command: string, term: JQueryTerminal) {
     term.echo(command);
     return Promise.resolve(document.createElement('div'));
 }]);
@@ -51,13 +54,105 @@ $('.term').terminal([
 ]);
 $('.term').terminal([obj_interpreter]);
 $('.term').terminal(["foo.php", obj_interpreter]);
-$('.term').terminal(["foo.php", obj_interpreter, function(command) {
+$('.term').terminal(["foo.php", obj_interpreter, function(command: string) {
 }]);
 $('.term').terminal({
     help: function () {
         this.echo('Help command');
     }
 });
+
+// -----------------------------------------------------------------------------
+// :: pipe / processArguments
+// -----------------------------------------------------------------------------
+
+$.terminal.pipe(obj_interpreter);
+$.terminal.pipe(obj_interpreter, {});
+$.terminal.pipe(obj_interpreter, { processArguments: true });
+
+var string_only_interpreter: JQueryTerminal.ObjectInterpreter<string> = {
+    echo: function(...args) {
+        this.echo(args.join(' '));
+    },
+    grep: function(pattern) {
+        return this.read('').then((text) => {
+            text.split('\n').filter((line) => line.includes(pattern)).forEach((line) => {
+                this.echo(line);
+            });
+        });
+    }
+};
+
+$.terminal.pipe(string_only_interpreter, { processArguments: false });
+$.terminal.pipe(string_only_interpreter, {
+    processArguments: false,
+    redirects: [
+        {
+            name: '>',
+            output: true,
+            callback: function(file) {
+                // with processArguments off the redirect arguments are strings
+                return this.read('').then((text) => {
+                    // eslint-disable-next-line no-console
+                    console.log(file.toUpperCase(), text);
+                });
+            }
+        }
+    ]
+});
+
+// with argument processing the redirect arguments are parsed the same way as
+// the arguments of a command
+$.terminal.pipe(obj_interpreter, {
+    redirects: [
+        {
+            name: '<<<',
+            callback: function(...args: Array<string | number | RegExp>) {
+                this.echo(args.join(' '));
+            }
+        }
+    ]
+});
+
+$('.term').terminal(string_only_interpreter, { processArguments: false });
+
+// -----------------------------------------------------------------------------
+// :: parse_options
+// -----------------------------------------------------------------------------
+
+test_type<JQueryTerminal.ParsedOptions>($.terminal.parse_options('-x foo --bar'));
+test_type<JQueryTerminal.ParsedOptions>($.terminal.parse_options(['-x', 'foo'], {
+    boolean: ['x']
+}));
+
+// -----------------------------------------------------------------------------
+// :: xml_formatter
+// -----------------------------------------------------------------------------
+
+$.terminal.xml_formatter.tags.gray = function(attrs) {
+    test_type<string>(attrs.class);
+    return '[[;gray;]';
+};
+test_type<string>($.terminal.xml_formatter.tags.bold({}));
+
+// -----------------------------------------------------------------------------
+// :: less
+// -----------------------------------------------------------------------------
+
+$('.term').less('some text');
+$('.term').less(['line 1', 'line 2']);
+$('.term').less(function(cols: number, cb: (text: string) => void) {
+    cb('x'.repeat(cols));
+});
+$('.term').less('some text', {
+    formatters: true,
+    wrap: true,
+    keepWords: true,
+    ansi: true,
+    onExit: function() {},
+    exit: function() {}
+});
+var less_term: JQueryTerminal = $('.term').less('some text');
 
 class Foo {
     x: string;
@@ -342,6 +437,18 @@ $.terminal.defaults.formatters.push(red);
         }
     });
     // -------------------------------------------------------------------------
+    // :: mousewheel/touchscroll
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        mousewheel: function(event, delta, term) {
+            this.echo(String(delta));
+            return this === term;
+        },
+        touchscroll: function(event, delta) {
+            this.scroll(delta);
+        }
+    });
+    // -------------------------------------------------------------------------
     // :: onEchoCommand
     // -------------------------------------------------------------------------
     $('.term').terminal($.noop, {
@@ -390,6 +497,8 @@ $.terminal.defaults.formatters.push(red);
     // :: import/export
     // -------------------------------------------------------------------------
     term.import_view(term.export_view());
+    term.ready().then(() => {});
+    term.output_ready().then(() => {});
     // -------------------------------------------------------------------------
     // :: save_state
     // -------------------------------------------------------------------------
@@ -445,14 +554,15 @@ $.terminal.defaults.formatters.push(red);
     term.set_interpreter(function(command) {
 
     });
-    term.set_interpreter([function(command, term) {
+    // same as above: array-nested function literals need explicit param types
+    term.set_interpreter([function(command: string, term: JQueryTerminal) {
 
     }]);
     term.set_interpreter("foo.php");
     term.set_interpreter(["foo.php"]);
     term.set_interpreter([obj_interpreter]);
     term.set_interpreter(["foo.php", obj_interpreter]);
-    term.set_interpreter(["foo.php", obj_interpreter, function(command) {
+    term.set_interpreter(["foo.php", obj_interpreter, function(command: string) {
     }]);
     term.set_interpreter("foo.php", true);
     term.set_interpreter("foo.php", "login");
@@ -773,14 +883,15 @@ $.terminal.defaults.formatters.push(red);
     term.push(function(command) {
         this.echo(command.toUpperCase());
     });
-    term.push([function(command, term) {
+    // same as above: array-nested function literals need explicit param types
+    term.push([function(command: string, term: JQueryTerminal) {
         term.echo(command.toUpperCase());
     }]);
     term.push("foo.php");
     term.push(["foo.php"]);
     term.push([obj_interpreter]);
     term.push(["foo.php", obj_interpreter]);
-    term.push(["foo.php", obj_interpreter, function(command) {
+    term.push(["foo.php", obj_interpreter, function(command: string) {
     }]);
     term.push("foo", {
         login: true

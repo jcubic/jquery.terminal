@@ -3,8 +3,9 @@
         "target": "es6",
         "module": "commonjs",
         "lib": ["es2015", "ES2018.Promise", "dom"],
-        "noImplicitThis": true
+        "noImplicitThis": true,
+        "strict": true
     },
-    "files": ["test.ts", "js/jquery.terminal.d.ts"],
+    "files": ["test.ts", "js/jquery.terminal.d.ts", "js/pipe.d.ts", "js/less.d.ts"],
     "exclude": ["npm"]
 }

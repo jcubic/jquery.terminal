@@ -127,8 +127,10 @@
         var overwrite_buffer;
         var term;
         var orig;
+        var tty;
         var command_index;
         var process_redirect = false;
+        var process_output_redirect = false;
         // -------------------------------------------------------------------------------
         function parse_redirect(args, re) {
             var redirects = [];
@@ -148,6 +150,7 @@
                         }
                         cmd_redirect = {
                             fn: settings_redirect.callback,
+                            output: !!settings_redirect.output,
                             args: []
                         };
                         redirects.push(cmd_redirect);
@@ -172,7 +175,9 @@
         // -------------------------------------------------------------------------------
         function parse_command(command) {
             var cmd;
-            if (term.settings().processArguments) {
+            // the pipe option turns the parsing off even when the terminal
+            // parses the arguments, so the interpreter always gets strings
+            if (settings.processArguments && term.settings().processArguments) {
                 cmd = $.terminal.parse_command(command);
             } else {
                 cmd = $.terminal.split_command(command);
@@ -216,19 +221,12 @@
                 settings.overwrite === true;
         }
         // -------------------------------------------------------------------------------
-        function redirects(command) {
+        function run_redirect_list(list) {
             var defer = $.Deferred();
-            if (overwrite(command)) {
-                overwrite_buffer = true;
-            }
-            function resolve() {
-                overwrite_buffer = false;
-                defer.resolve();
-            }
-            if (command.redirects.length) {
+            if (list.length) {
                 var i = 0;
                 (function loop() {
-                    var redirect = command.redirects[i++];
+                    var redirect = list[i++];
                     if (redirect) {
                         var fn = redirect.fn;
                         var args = redirect.args;
@@ -237,13 +235,61 @@
                             loop();
                         }, 'redirect loop');
                     } else {
-                        resolve();
+                        defer.resolve();
                     }
                 })();
             } else {
-                resolve();
+                defer.resolve();
             }
             return defer.promise();
+        }
+        // -------------------------------------------------------------------------------
+        function has_output_redirect(command) {
+            return command.redirects.some(function(redirect) {
+                return redirect.output;
+            });
+        }
+        // -------------------------------------------------------------------------------
+        // input-type redirects (e.g. `<<<`) run before the command so it can
+        // read the data they provide
+        function input_redirects(command) {
+            var defer = $.Deferred();
+            if (overwrite(command)) {
+                overwrite_buffer = true;
+            }
+            var list = command.redirects.filter(function(redirect) {
+                return !redirect.output;
+            });
+            run_redirect_list(list).then(function() {
+                overwrite_buffer = false;
+                defer.resolve();
+            });
+            return defer.promise();
+        }
+        // -------------------------------------------------------------------------------
+        // output-type redirects (e.g. `>`) run after the command so their
+        // callback can call this.read() to consume whatever it echoed,
+        // the same way a piped command would
+        function output_redirects(command) {
+            var list = command.redirects.filter(function(redirect) {
+                return redirect.output;
+            });
+            if (!list.length) {
+                return run_redirect_list(list);
+            }
+            // the redirect gets the output of the command, the input that the
+            // command didn't read is not its output, so it's taken out of the
+            // buffer and put back when the redirects are done
+            var unread = tty.buffer.splice(0, tty.input_length);
+            tty.input_length = 0;
+            // the callback reads the output of the command, when the command
+            // echoed nothing it gets an empty buffer instead of a prompt
+            process_output_redirect = true;
+            return run_redirect_list(list).then(function() {
+                process_output_redirect = false;
+                tty.buffer.unshift.apply(tty.buffer, unread);
+                tty.input_length = tty.buffer.length;
+            });
         }
         // -------------------------------------------------------------------------------
         function continuation(promise, callback, debug_log) {
@@ -271,13 +317,20 @@
         function make_tty() {
             var tty = {
                 buffer: [],
+                // how many entries at the front of the buffer are input that
+                // the current command can read and did not produce itself
+                input_length: 0,
                 read: function(message, callback) {
                     // in case we return read() call from interpreter
                     // we can't access force_awake flag in term (it's invoked later)
                     if (term.paused()) {
                         term.resume();
                     }
-                    if ((command_index === 0 && !tty.buffer.length) || process_redirect) {
+                    // an output redirect reads what the command echoed, it
+                    // never asks the user, even when there was no output
+                    if (!process_output_redirect &&
+                        ((command_index === 0 && !tty.buffer.length) ||
+                         process_redirect)) {
                         term.push = orig.push;
                         term.echo = orig.echo;
                         var ret = orig.read.apply(term, arguments);
@@ -292,6 +345,9 @@
                             text = tty.buffer.join('\n');
                             tty.buffer.length = 0;
                         }
+                        // the input was consumed, anything echoed from now on
+                        // is the output of the command
+                        tty.input_length = 0;
                         var d = new $.Deferred();
                         if (is_function(callback)) {
                             callback(text);
@@ -304,6 +360,7 @@
                     if (overwrite_buffer) {
                         overwrite_buffer = false;
                         tty.buffer.length = 0;
+                        tty.input_length = 0;
                     }
                     tty.options = tty.options || [];
                     tty.options.push(options);
@@ -375,7 +432,7 @@
                     last_index: term.last_index
                 };
             }
-            var tty = make_tty();
+            tty = make_tty();
             var commands = parse_command(command);
             function loop(callback) {
                 var i = 0;
@@ -384,17 +441,33 @@
                     var cmd = commands[i++];
                     if (cmd) {
                         process_redirect = true;
-                        redirects(cmd).then(function() {
+                        input_redirects(cmd).then(function() {
                             process_redirect = false;
-                            if (!commands[i]) {
+                            var is_last = !commands[i];
+                            if (is_last && !has_output_redirect(cmd)) {
                                 $.extend(term, {echo: orig.echo, push: orig.push});
                             }
                             command_index++;
+                            // what the previous command and the input
+                            // redirects left in the buffer is the input of
+                            // this command, not something it echoed
+                            tty.input_length = tty.buffer.length;
                             var ret = callback(cmd);
+                            function after_command() {
+                                return output_redirects(cmd).then(function() {
+                                    if (is_last && has_output_redirect(cmd)) {
+                                        $.extend(term, {
+                                            echo: orig.echo,
+                                            push: orig.push
+                                        });
+                                    }
+                                    return inner();
+                                });
+                            }
                             if (ret === false) {
-                                return inner();
+                                return after_command();
                             } else {
-                                return continuation(ret, inner, 'inner');
+                                return continuation(ret, after_command, 'inner');
                             }
                         });
                     } else {

@@ -976,12 +976,12 @@ describe('Terminal utils', function() {
             var string = $.terminal.format(format);
             expect(string).toMatchSnapshot();
         });
-        it('should escape brackets', function() {
+        it('should escape brackets inside formatting', function() {
             var specs = [
-                ['\\]', ']'],
-                ['\\]xxx', ']xxx'],
-                ['xxx\\]xxx', 'xxx]xxx'],
-                ['xxx\\]', 'xxx]'],
+                ['\\]', '\\]'],
+                ['\\]xxx', '\\]xxx'],
+                ['xxx\\]xxx', 'xxx\\]xxx'],
+                ['xxx\\]', 'xxx\\]'],
                 ['[[;;]\\]xxx]', ']xxx'],
                 ['[[;;]xxx\\]]', 'xxx]'],
                 ['[[;;]\\]]', ']'],
@@ -1980,6 +1980,120 @@ describe('Terminal utils', function() {
             expect(history_commands('foo')).toEqual(commands);
         });
     });
+    describe('LRUCache', function() {
+        describe('create', function() {
+            it('should be empty', function() {
+                var cache = new $.terminal.LRUCache(100);
+                expect(cache.count()).toEqual(0);
+                expect(cache.size()).toEqual(0);
+            });
+        });
+        describe('get/set', function() {
+            it('should store and return the value', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('key', 'value');
+                expect(cache.has('key')).toBeTruthy();
+                expect(cache.get('key')).toEqual('value');
+            });
+            it('should return undefined for missing key', function() {
+                var cache = new $.terminal.LRUCache(100);
+                expect(cache.has('key')).toBeFalsy();
+                expect(cache.get('key')).toBeUndefined();
+            });
+            it('should replace the value and not count it twice', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('key', 'aaaa');
+                cache.set('key', 'bbbb');
+                expect(cache.get('key')).toEqual('bbbb');
+                expect(cache.count()).toEqual(1);
+                expect(cache.size()).toEqual('key'.length + 'bbbb'.length);
+            });
+            it('should measure keys and values in characters', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('ab', 'cde');
+                expect(cache.size()).toEqual(5);
+            });
+            it('should measure arrays of strings', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('ab', ['cde', 'fg']);
+                expect(cache.size()).toEqual(7);
+            });
+            it('should use custom measure function', function() {
+                var cache = new $.terminal.LRUCache(100, function(value) {
+                    return value.line.length;
+                });
+                cache.set('ab', {line: 'cde'});
+                expect(cache.size()).toEqual(5);
+            });
+        });
+        describe('limit', function() {
+            it('should drop the oldest entries when over the limit', function() {
+                var cache = new $.terminal.LRUCache(12);
+                cache.set('a', 'xxx'); // 4
+                cache.set('b', 'xxx'); // 8
+                cache.set('c', 'xxx'); // 12
+                expect(cache.count()).toEqual(3);
+                cache.set('d', 'xxx'); // over the limit
+                expect(cache.count()).toEqual(3);
+                expect(cache.has('a')).toBeFalsy();
+                expect(cache.has('d')).toBeTruthy();
+            });
+            it('should keep recently used entries', function() {
+                var cache = new $.terminal.LRUCache(12);
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.set('c', 'xxx');
+                cache.get('a'); // 'a' is now the most recently used
+                cache.set('d', 'xxx');
+                expect(cache.has('a')).toBeTruthy();
+                expect(cache.has('b')).toBeFalsy();
+            });
+            it('should not store entries bigger than the limit', function() {
+                var cache = new $.terminal.LRUCache(10);
+                cache.set('a', 'xxx');
+                cache.set('b', new Array(100).join('x'));
+                expect(cache.has('b')).toBeFalsy();
+                expect(cache.has('a')).toBeTruthy();
+            });
+            it('should not store anything when the limit is zero', function() {
+                var cache = new $.terminal.LRUCache(0);
+                cache.set('a', 'xxx');
+                expect(cache.count()).toEqual(0);
+            });
+            it('should not have a limit when it is negative', function() {
+                var cache = new $.terminal.LRUCache(-1);
+                for (var i = 0; i < 100; ++i) {
+                    cache.set('key-' + i, 'value');
+                }
+                expect(cache.count()).toEqual(100);
+            });
+            it('should read the limit from a function', function() {
+                var limit = 12;
+                var cache = new $.terminal.LRUCache(function() {
+                    return limit;
+                });
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.set('c', 'xxx');
+                expect(cache.count()).toEqual(3);
+                limit = 4;
+                cache.set('d', 'xxx');
+                expect(cache.count()).toEqual(1);
+                expect(cache.has('d')).toBeTruthy();
+            });
+        });
+        describe('clear', function() {
+            it('should remove all entries', function() {
+                var cache = new $.terminal.LRUCache(100);
+                cache.set('a', 'xxx');
+                cache.set('b', 'xxx');
+                cache.clear();
+                expect(cache.count()).toEqual(0);
+                expect(cache.size()).toEqual(0);
+                expect(cache.has('a')).toBeFalsy();
+            });
+        });
+    });
     describe('Stack', function() {
         describe('create', function() {
             it('should create stack from array', function() {
@@ -2776,6 +2890,19 @@ describe('Terminal utils', function() {
                 });
             });
         });
+        it('should not process arguments when disabled in pipe options', function() {
+            var fn = jest.fn();
+            var term = $('<div/>').terminal($.terminal.pipe({
+                foo: fn
+            }, {
+                processArguments: false
+            }));
+            return term.exec('foo 10 20 /xx/').then(() => {
+                ['10', '20', '/xx/'].forEach((arg, i) => {
+                    expect(fn.mock.calls[0][i]).toEqual(arg);
+                });
+            });
+        });
         describe('redirects', function() {
             var commands = {
                 async_output: function(x) {
@@ -2785,6 +2912,8 @@ describe('Terminal utils', function() {
                 },
                 output: function(x) {
                     this.echo(x);
+                },
+                silent: function() {
                 },
                 grep: function(re) {
                     return this.read('').then((str) => {
@@ -2881,6 +3010,78 @@ describe('Terminal utils', function() {
                         return term.exec('input <promise "hello" world | grep /^h/ <echo "hi"').then(() => {
                             expect(get_lines(term)).toEqual(['hi']);
                         });
+                    });
+                });
+            });
+            describe('output redirects', function() {
+                function make_redirect_term(on_write) {
+                    return $('<div/>').terminal($.terminal.pipe(commands, {
+                        redirects: [
+                            {
+                                name: '>',
+                                output: true,
+                                callback: function(file) {
+                                    return this.read('').then((text) => {
+                                        on_write([file, text]);
+                                    });
+                                }
+                            }
+                        ]
+                    }));
+                }
+                it('should write command output to redirect target', function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    return term.exec('output foo > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'foo']);
+                        // output goes to redirect, not to the terminal
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should write async command output to redirect target', function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    return term.exec('async_output foo > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'foo']);
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should write piped output to redirect target', function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    return term.exec('output hello | grep hell > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'hello']);
+                        expect(get_lines(term)).toEqual([]);
+                    });
+                });
+                it('should not ask the user when the command had no output',
+                async function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    term.exec('silent > bar.txt');
+                    await delay(100);
+                    expect(written).toEqual(['bar.txt', undefined]);
+                    expect(term.paused()).toBeFalsy();
+                    term.destroy();
+                });
+                it('should not write unread pipe input to redirect target',
+                function() {
+                    var written;
+                    var term = make_redirect_term((value) => {
+                        written = value;
+                    });
+                    // the second command never reads, so what the first one
+                    // echoed is still in the buffer - it's not its output
+                    return term.exec('output hello | output world > bar.txt').then(() => {
+                        expect(written).toEqual(['bar.txt', 'world']);
                     });
                 });
             });
@@ -3094,6 +3295,19 @@ describe('extensions', function() {
             ['top', 'right', 'bottom', 'left'].forEach((cls) => {
                 expect(term.find('.terminal-output .' + cls).length).toBe(1);
             });
+        });
+        it('should wrap multiple partials on refresh (#1060)', async function() {
+            for (let i = 0; i < 30; i += 1) {
+                term.echo('qwerty', { newline: false });
+            }
+            var expected = [
+                'qwerty'.repeat(16) + 'qwer',
+                'ty' + 'qwerty'.repeat(13)
+            ];
+            await delay(10);
+            expect(output(term)).toEqual(expected);
+            term.refresh();
+            expect(output(term)).toEqual(expected);
         });
     });
     describe('autocomplete_menu', function() {
@@ -4423,6 +4637,86 @@ describe('Terminal plugin', function() {
                 term.destroy().remove();
             });
         });
+        describe('mousewheel', function() {
+            function wheel(term) {
+                var event = new $.Event('wheel');
+                event.originalEvent = { deltaY: 10 };
+                term.trigger(event);
+            }
+            it('should call settings callback with terminal as this', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    mousewheel: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                var context, args;
+                wheel(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([-10, term]);
+                term.destroy();
+            });
+            it('should call interpreter callback with terminal as this', function() {
+                var term = $('<div/>').terminal();
+                var context, args;
+                term.push($.noop, {
+                    mousewheel: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                wheel(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([-10, term]);
+                term.destroy();
+            });
+        });
+        describe('touchscroll', function() {
+            function touch(term) {
+                var scroller = term.find('.terminal-scroller');
+                var target = scroller[0];
+                [['touchstart', 0], ['touchmove', 20]].forEach(function([type, y]) {
+                    var event = new $.Event(type);
+                    event.originalEvent = {
+                        target: target,
+                        touches: [{ clientY: y }],
+                        preventDefault: $.noop
+                    };
+                    scroller.trigger(event);
+                });
+            }
+            it('should call settings callback with terminal as this', function() {
+                var context, args;
+                var term = $('<div/>').terminal($.noop, {
+                    touchscroll: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                touch(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([20, term]);
+                term.destroy();
+            });
+            it('should call interpreter callback with terminal as this', function() {
+                var context, args;
+                var term = $('<div/>').terminal();
+                term.push($.noop, {
+                    touchscroll: function(event, delta, self) {
+                        context = this;
+                        args = [delta, self];
+                        return true;
+                    }
+                });
+                touch(term);
+                expect(context).toBe(term);
+                expect(args).toEqual([20, term]);
+                term.destroy();
+            });
+        });
     });
     describe('prompt', function() {
         var term;
@@ -4561,6 +4855,15 @@ describe('Terminal plugin', function() {
         it('should set position', function() {
             cmd.position(0);
             expect(cmd.position()).toEqual(0);
+        });
+        it('should clamp relative position', function() {
+            cmd.set('foo');
+            cmd.position(0);
+            cmd.position(-1, true);
+            expect(cmd.position()).toEqual(0);
+            cmd.position(3);
+            cmd.position(1, true);
+            expect(cmd.position()).toEqual(3);
         });
         it('should set and remove mask', function() {
             cmd.set('foobar').position(0);
@@ -4725,6 +5028,78 @@ describe('Terminal plugin', function() {
             up();
             positions.push(cmd.position());
             expect(positions).toMatchSnapshot();
+        });
+        it('should navigate a line with n - 1 characters (#1050)', function() {
+            var command = 'x'.repeat(term.cols() - 1);
+            term.focus();
+            cmd.set(command);
+            cmd.position(command.length);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(command.length - 1);
+            cmd.position(command.length - 1);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(command.length);
+            cmd.position(command.length);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(0);
+            cmd.position(0);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(0);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate two lines (#1050)', function() {
+            var command = 'abcd\nefgh';
+            term.focus();
+            cmd.set(command);
+            cmd.position(2);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(1);
+            cmd.position(2);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(3);
+            cmd.position(7);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(0);
+            cmd.position(2);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(command.length);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate three lines (#1050)', function() {
+            var command = 'abcd\nefgh\nijkl';
+            term.focus();
+            cmd.set(command);
+            cmd.position(12);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(11);
+            cmd.position(11);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(12);
+            cmd.position(12);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(7);
+            cmd.position(7);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(12);
+            expect(cmd.get()).toEqual(command);
+        });
+        it('should navigate emoji across lines (#1050)', function() {
+            var command = 'a\u263a\ufe0fb\nc\u263a\ufe0fd';
+            term.focus();
+            cmd.set(command);
+            cmd.position(3);
+            shortcut(false, false, false, 37, 'arrowleft');
+            expect(cmd.position()).toEqual(2);
+            cmd.position(3);
+            shortcut(false, false, false, 39, 'arrowright');
+            expect(cmd.position()).toEqual(4);
+            cmd.position(8);
+            shortcut(false, false, false, 38, 'arrowup');
+            expect(cmd.position()).toEqual(1);
+            cmd.position(3);
+            shortcut(false, false, false, 40, 'arrowdown');
+            expect(cmd.position()).toEqual(command.length);
+            expect(cmd.get()).toEqual(command);
         });
     });
     function AJAXMock(url, response, options) {
@@ -5118,6 +5493,40 @@ describe('Terminal plugin', function() {
                 'error'
             ]);
         });
+        it('should show an error when promise is rejected', async () => {
+            const error = new Error('ZONK');
+            const exceptionHandler = jest.fn();
+            const term = $('<div />').terminal(Promise.reject(error), {
+                greetings: false,
+                exceptionHandler
+            });
+            await delay(10);
+            expect(exceptionHandler).toHaveBeenCalledWith(error, 'INTERPRETER');
+            await term.exec('hello');
+            expect(term.get_output()).toEqual('> hello');
+        });
+        it('should show an error when promise in array is rejected', async () => {
+            const error = new Error('ZONK');
+            const exceptionHandler = jest.fn();
+            const term = $('<div />').terminal([
+                Promise.reject(error),
+                {
+                    hello(x) {
+                        return x;
+                    }
+                }
+            ], {
+                greetings: false,
+                exceptionHandler
+            });
+            await delay(10);
+            expect(exceptionHandler).toHaveBeenCalledWith(error, 'INTERPRETER');
+            await term.exec('hello 10');
+            expect(term.get_output().split('\n')).toEqual([
+                '> hello 10',
+                '10'
+            ]);
+        });
     });
     describe('nested object interpreter', function() {
         var interpereter, type, fallback, term;
@@ -5494,6 +5903,26 @@ describe('Terminal plugin', function() {
                 done();
             }, 400);
         });
+        it('should show error when automatic completion used with a function (#974)', function() {
+            var errors = [];
+            var term = $('<div/>').appendTo('body').terminal($.terminal.pipe({
+                foo: function() {}
+            }), {
+                completion: true,
+                greetings: false,
+                exceptionHandler: function(e, label) {
+                    errors.push([label, e.message]);
+                }
+            });
+            term.focus().insert('f');
+            shortcut(false, false, false, 9, 'tab');
+            expect(errors).toEqual([[
+                'USER KEYMAP',
+                "Invalid completion: automatic completion can't be used " +
+                    'with a function interpreter'
+            ]]);
+            term.destroy().remove();
+        });
     });
     describe('jQuery Terminal methods', function() {
         describe('generic', function() {
@@ -5578,7 +6007,7 @@ describe('Terminal plugin', function() {
                         await term.delay(50);
                         return 'world';
                     });
-                    await term.output_ready();
+                    await term.ready();
                     const view = term.export_view();
                     term.clear();
                     term.import_view(view);
@@ -6799,9 +7228,32 @@ describe('Terminal plugin', function() {
                 }, {
                     flush: false
                 });
-                return term.output_ready().then(() => {
+                return term.ready().then(() => {
                     term.flush();
                     expect(term.get_output()).toEqual('hello\nworld');
+                });
+            });
+            it('should call jQuery ready when called with a function', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                return new Promise((resolve) => {
+                    expect(term.ready(resolve)).toBe(term);
+                });
+            });
+            it('should keep output_ready as alias of ready', () => {
+                const term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.echo(async () => {
+                    await term.delay(50);
+                    return 'hello';
+                }, {
+                    flush: false
+                });
+                return term.output_ready().then(() => {
+                    term.flush();
+                    expect(term.get_output()).toEqual('hello');
                 });
             });
         });
@@ -8211,6 +8663,201 @@ describe('Terminal plugin', function() {
                 term.invoke_key('CTRL+L');
                 expect(term.find('.terminal-output').html()).toBeFalsy();
             });
+        });
+    });
+    describe('render cache', function() {
+        var defaults;
+        var formatter;
+        beforeEach(function() {
+            defaults = $.terminal.defaults.formatters;
+            // a formatter is only called on a cache miss, so the number of calls
+            // tells if the line was taken from the cache or rendered again
+            formatter = jest.fn(function(string) {
+                return string;
+            });
+            $.terminal.defaults.formatters = [formatter];
+        });
+        afterEach(function() {
+            $.terminal.defaults.formatters = defaults;
+        });
+        function terminal(options) {
+            return $('<div/>').terminal($.noop, $.extend({
+                greetings: false
+            }, options));
+        }
+        function lines(term, index) {
+            return term.find('.terminal-output > div').eq(index).find('div')
+                .map(function() {
+                    return a0($(this).text());
+                }).get();
+        }
+        // the same formatters are used for the command line, only the calls
+        // that come from echo are interesting here
+        function renders() {
+            return formatter.mock.calls.filter(function(call) {
+                return call[1] && call[1].echo === true && call[1].command !== true;
+            }).length;
+        }
+        it('should render the same line only once', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.echo('hello');
+            expect(renders()).toEqual(1);
+            term.destroy();
+        });
+        it('should invalidate the cache on clear_cache', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.clear_cache();
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should keep the cache on clear', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.clear();
+            term.echo('hello');
+            expect(renders()).toEqual(1);
+            term.destroy();
+        });
+        it('should invalidate the cache when an option changes', function() {
+            var term = terminal();
+            term.echo('hello');
+            term.option('convertLinks', false);
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should invalidate the cache when a formatter is added', function() {
+            var term = terminal();
+            term.echo('hello');
+            $.terminal.new_formatter([/hello/, 'world']);
+            term.echo('hello');
+            expect(lines(term, 1)).toEqual(['world']);
+            term.destroy();
+        });
+        it('should invalidate the cache when a formatter is removed', function() {
+            var term = terminal();
+            var replace = [/hello/, 'world'];
+            $.terminal.new_formatter(replace);
+            term.echo('hello');
+            expect(lines(term, 0)).toEqual(['world']);
+            $.terminal.remove_formatter(replace);
+            term.echo('hello');
+            expect(lines(term, 1)).toEqual(['hello']);
+            term.destroy();
+        });
+        it('should not reuse a cached line echoed with other options', function() {
+            $.terminal.defaults.formatters = [[/foo/g, 'bar']];
+            var term = terminal();
+            term.echo('foo');
+            term.echo('foo', {formatters: false});
+            expect(lines(term, 0)).toEqual(['bar']);
+            expect(lines(term, 1)).toEqual(['foo']);
+            term.destroy();
+        });
+        it('should not reuse a cached line wrapped at other width', function() {
+            var term = terminal({numChars: 10});
+            term.echo('hello world');
+            expect(lines(term, 0)).toEqual(['hello worl', 'd']);
+            term.option('numChars', 6);
+            expect(lines(term, 0)).toEqual(['hello', 'world']);
+            term.destroy();
+        });
+        it('should not reuse a cached line with keepWords', function() {
+            var term = terminal({numChars: 10});
+            term.echo('hello world');
+            term.echo('hello world', {keepWords: true});
+            expect(lines(term, 0)).toEqual(['hello worl', 'd']);
+            expect(lines(term, 1)).toEqual(['hello', 'world']);
+            term.destroy();
+        });
+        it('should not reuse a cached line when extended commands can run',
+        function() {
+            var term = terminal({invokeMethods: true});
+            var clear = jest.fn();
+            term.echo('x [[ terminal::clear() ]]', {exec: false});
+            term.clear = clear;
+            // the same line with exec is rendered again, so the command runs
+            term.echo('x [[ terminal::clear() ]]');
+            expect(clear).toHaveBeenCalled();
+            term.destroy();
+        });
+        it('should run extended commands again after the line was redrawn',
+        async function() {
+            var foo = jest.fn();
+            var term = $('<div/>').terminal({foo: foo}, {
+                greetings: false,
+                checkArity: false
+            });
+            term.echo('x [[ foo ]]');
+            await delay(10);
+            // the redraw renders the line without executing the command, that
+            // rendering must not be used for an echo that should execute it
+            term.refresh();
+            term.echo('x [[ foo ]]');
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(2);
+            term.destroy();
+        });
+        it('should run extended commands in a partial that renders them later',
+        async function() {
+            var foo = jest.fn();
+            var value = 'a';
+            var term = $('<div/>').terminal({foo: foo}, {
+                greetings: false,
+                checkArity: false
+            });
+            term.echo(function() {
+                return value;
+            }, {newline: false});
+            term.echo('b');
+            await delay(10);
+            value = 'a [[ foo ]]';
+            term.refresh();
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(1);
+            // the command is only executed once, every later redraw of the
+            // partial just removes it
+            term.refresh();
+            await delay(10);
+            expect(foo.mock.calls.length).toEqual(1);
+            term.destroy();
+        });
+        it('should drop cached lines over the cacheSize limit', function() {
+            var term = terminal({cacheSize: 1000});
+            term.echo('hello');
+            formatter.mockClear();
+            // way more than 1000 characters, so the first line has to be dropped
+            for (var i = 0; i < 20; ++i) {
+                term.echo(new Array(200).join(String.fromCharCode(97 + i)));
+            }
+            term.echo('hello');
+            expect(renders()).toEqual(21);
+            term.destroy();
+        });
+        it('should not cache anything when cacheSize is zero', function() {
+            var term = terminal({cacheSize: 0});
+            term.echo('hello');
+            term.echo('hello');
+            expect(renders()).toEqual(2);
+            term.destroy();
+        });
+        it('should rewrap the command line when the prompt changes', function() {
+            var term = terminal();
+            term.focus();
+            var cmd = term.cmd();
+            cmd.resize(10);
+            // the command wraps with both prompts, so the split of the first
+            // one is cached before the prompt changes
+            term.set_command('hello world foo');
+            var before = term.find('.cmd-wrapper > div').length;
+            expect(before).toBeGreaterThan(1);
+            // the longer prompt leaves less space for the first line
+            cmd.prompt('>>>>>> ');
+            expect(term.find('.cmd-wrapper > div').length).toBeGreaterThan(before);
+            term.destroy();
         });
     });
 });
