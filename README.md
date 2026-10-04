@@ -4,16 +4,23 @@
        alt="ASCII Art that represent text jQuery Terminal - JavaScript Library for Web Based Terminal Emulators" />
 </h1>
 
+<div align="center">
+
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
+
+<div align="center">
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
 ![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
 [![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=devel&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
-[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&c9e193e060dcb551b8554ad036ab2c82)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
-![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)
+[![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&f5d1c92e20dbc837a493f425458e4a0b)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
+![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)<br/>
 [![jsDelivr Downloads](https://data.jsdelivr.com/v1/package/npm/jquery.terminal/badge?style=rounded&n=1)](https://www.jsdelivr.com/package/npm/jquery.terminal)
 [![Paid Support](https://img.shields.io/badge/paid-support-354465.svg)](https://support.jcubic.pl/)
 [![LICENSE MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jcubic/jquery.terminal/blob/master/LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/jcubic/jquery.terminal)
+
+</div>
 
 ### Summary
 
