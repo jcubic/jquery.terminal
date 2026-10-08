@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 04 Oct 2026 12:39:54 +0000
+ * Date: Thu, 08 Oct 2026 17:07:25 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5670,7 +5670,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: '2.48.0',
-        date: 'Sun, 04 Oct 2026 12:39:54 +0000',
+        date: 'Thu, 08 Oct 2026 17:07:25 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7333,6 +7333,10 @@
                 return -1;
             }
             // -----------------------------------------------------------------
+            function clean_html(text) {
+                return text.replace(/[<>"']/g, '');
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 var valid_attrs = [];
@@ -7429,7 +7433,7 @@
                     result += ' ' + output_attrs;
                 }
                 if (_class !== '') {
-                    result += ' class="' + _class + '"';
+                    result += ' class="' + clean_html(_class) + '"';
                 }
                 // links and image need data-text attribute cmd click behavior
                 // formatter can return links.

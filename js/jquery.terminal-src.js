@@ -7333,6 +7333,10 @@
                 return -1;
             }
             // -----------------------------------------------------------------
+            function clean_html(text) {
+                return text.replace(/[<>"']/g, '');
+            }
+            // -----------------------------------------------------------------
             function format(s, style, color, background, _class, data_text, text) {
                 var attrs;
                 var valid_attrs = [];
@@ -7429,7 +7433,7 @@
                     result += ' ' + output_attrs;
                 }
                 if (_class !== '') {
-                    result += ' class="' + _class + '"';
+                    result += ' class="' + clean_html(_class) + '"';
                 }
                 // links and image need data-text attribute cmd click behavior
                 // formatter can return links.

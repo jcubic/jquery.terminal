@@ -1184,6 +1184,42 @@ describe('Terminal utils', function() {
             expect($img.attr('src')).toEqual(url.replace(/&amp;/g, '&'));
             expect($img.attr('style')).toEqual(style);
         });
+        it('should strip HTML from class', () => {
+            var spec = [
+                [
+                    'hover:bg-blue-600" onmouseover="alert(1)',
+                    'hover:bg-blue-600 onmouseover=alert(1)'
+                ],
+                [
+                    "active:scale-95' autofocus onfocus='alert(1)",
+                    "active:scale-95 autofocus onfocus=alert(1)"
+                ],
+                [
+                    'w-full onload=javascript:alert(1)',
+                    'w-full onload=javascript:alert(1)'
+                ],
+                [
+                    'grid-cols-3"><script>alert(1)</script>',
+                    'grid-cols-3scriptalert(1)/script'
+                ],
+                [
+                    'flex-row/> <script src="http://evil.com"></script>',
+                    'flex-row/ script src=http://evil.com/script'
+                ],
+                [
+                    'bg-red-500` style=`background:url(javascript:alert(1))',
+                    'bg-red-500` style=`background:url(javascript:alert(1))'
+                ],
+                [
+                    'block\tonblur\n\(=\r\)"alert(1)"',
+                    'block\tonblur\n\(=\r\)alert(1)'
+                ]
+            ];
+            spec.forEach(([input, output]) => {
+                expect($.terminal.format(`[[;;;${input}]foo]`))
+                    .toEqual(`<span class="${output}" data-text="foo"><span>foo</span></span>`);
+            });
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {

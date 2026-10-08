@@ -1,3 +1,7 @@
+## 2.48.1
+### Bugfix
+* fix sanitizing class inside formatting
+
 ## 2.48.0
 ### Features
 * allow using output redirects in pipe extension
