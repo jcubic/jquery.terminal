@@ -488,6 +488,17 @@ describe('Terminal utils', function() {
                 expect(cmd).toMatchSnapshot();
             });
         });
+        it('should handle single quote inside double quotes', function() {
+            [
+                `echo "foo'bar"`,
+                `echo "foo\\'bar"`
+            ].forEach(function(input) {
+                var cmd = jQuery.terminal.parse_command(input);
+                expect(cmd.name).toEqual('echo');
+                expect(cmd.args).toEqual(["foo'bar"]);
+                expect(cmd.args_quotes).toEqual(['"']);
+            });
+        });
     });
     describe('xml formatting', function() {
         let term;
@@ -2678,6 +2689,34 @@ describe('Terminal utils', function() {
             });
             await term.exec('echo "|" | read');
             expect(get_lines(term)).toEqual(['your text: |']);
+        });
+        it('should handle single quote inside double quotes', async function() {
+            var commands = {
+                read: function() {
+                    return this.read('').then((text) => {
+                        this.echo('your text: ' + text);
+                    });
+                },
+                echo: async function(string) {
+                    await delay(10);
+                    return string;
+                }
+            };
+            var term = $('<div/>').terminal($.terminal.pipe(commands));
+            await term.exec(`echo "foo'bar"`);
+            expect(get_lines(term)).toEqual(["foo'bar"]);
+            await term.exec(`echo "foo'bar" | read`);
+            expect(get_lines(term)).toEqual(["your text: foo'bar"]);
+            term.destroy();
+            // new API with option that use monkey patch
+            term = $('<div/>').terminal(commands, {
+                pipe: true
+            });
+            await term.exec(`echo "foo'bar"`);
+            expect(get_lines(term)).toEqual(["foo'bar"]);
+            await term.exec(`echo "foo'bar" | read`);
+            expect(get_lines(term)).toEqual(["your text: foo'bar"]);
+            term.destroy();
         });
         it('should filter lines', function() {
             var term = $('<div/>').terminal($.terminal.pipe({
