@@ -107,7 +107,8 @@
                         resolve(value);
                     }
                 }, {
-                    prompt
+                    prompt,
+                    exit: false
                 });
             });
         },
@@ -126,6 +127,7 @@
                     resolve(str);
                 }, {
                     prompt,
+                    exit: false,
                     keymap: {
                         'CTRL+D': reject
                     }

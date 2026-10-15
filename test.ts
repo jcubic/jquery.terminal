@@ -900,6 +900,9 @@ $.terminal.defaults.formatters.push(red);
         infiniteLogin: true
     });
     term.push("foo", {
+        exit: false
+    });
+    term.push("foo", {
         prompt: "foo"
     });
     term.push("foo", {

@@ -4,6 +4,7 @@
 * add terminal as `this` context to `mousewheel` and `touchscroll` callbacks [#965](https://github.com/jcubic/jquery.terminal/issues/965)
 * rename `Terminal::output_ready()` to `Terminal::ready()`, old name is kept as alias [#1057](https://github.com/jcubic/jquery.terminal/issues/1057)
 * add `cacheSize` option that limits how much the render cache can hold
+* `exit` command is now enabled by default in nested interpreters, and `push()` accepts `exit` option [#988](https://github.com/jcubic/jquery.terminal/issues/988)
 ### Bugfix
 * invalidate the render cache so it no longer grows without a limit while echoing
 * clear the render cache when an option is changed with `Terminal::option()`

@@ -3789,6 +3789,62 @@ describe('Terminal plugin', function() {
                 enter(term, 'exit');
                 expect(term.level()).toEqual(2);
             });
+            it('should add exit command to nested interpreter by default', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.push($.noop);
+                expect(term.level()).toEqual(2);
+                enter(term, 'exit');
+                expect(term.level()).toEqual(1);
+            });
+            it('should not add exit command when disabled in push', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    exit: true
+                });
+                term.push($.noop, {
+                    exit: false
+                });
+                enter(term, 'exit');
+                expect(term.level()).toEqual(2);
+            });
+            it('should add exit command when enabled in push', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    exit: false
+                });
+                term.push($.noop, {
+                    exit: true
+                });
+                enter(term, 'exit');
+                expect(term.level()).toEqual(1);
+            });
+            it('should not add exit command when disabled with option', function() {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                term.option('exit', false);
+                term.push($.noop);
+                enter(term, 'exit');
+                expect(term.level()).toEqual(2);
+            });
+            it('should call exit command of main interpreter', function() {
+                var exit = jest.fn();
+                var term = $('<div/>').terminal({ exit }, {
+                    greetings: false
+                });
+                enter(term, 'exit');
+                expect(exit).toHaveBeenCalled();
+                expect(term.level()).toEqual(1);
+            });
+            it('should not exit from read', async function() {
+                var term = $('<div/>').terminal($.noop, {
+                    greetings: false
+                });
+                var ret = term.read('$ ');
+                enter(term, 'exit');
+                expect(await ret).toEqual('exit');
+                expect(term.level()).toEqual(1);
+            });
         });
         describe('clear', function() {
             it('should add clear command', function() {
