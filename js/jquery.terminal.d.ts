@@ -303,6 +303,7 @@ declare namespace JQueryTerminal {
 
     type pushOptions = CommonOptions & {
         infiniteLogin?: boolean;
+        exit?: boolean;
         onStart?: () => void;
     };
 

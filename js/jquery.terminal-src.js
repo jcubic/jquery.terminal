@@ -9411,7 +9411,7 @@
                         self.logout();
                     }
                     after_exec();
-                } else if (settings.exit && command.match(/^\s*exit\s*$/) &&
+                } else if (exit_enabled() && command.match(/^\s*exit\s*$/) &&
                            !in_login) {
                     before_async_exec();
                     var level = self.level();
@@ -9457,6 +9457,27 @@
             var name = self.prefix_name(true) + '_';
             storage.remove(name + 'token');
             storage.remove(name + 'login');
+        }
+        // ---------------------------------------------------------------------
+        // :: Check if exit command is enabled for current interpreter, nested
+        // :: interpreters have exit unless it's explicitly disabled
+        // ---------------------------------------------------------------------
+        function exit_enabled() {
+            var top = interpreters.top();
+            if (self.level() > 1) {
+                if (typeof top.exit === 'boolean') {
+                    return top.exit;
+                }
+                return settings.exit || !exit_disabled;
+            }
+            return settings.exit;
+        }
+        // ---------------------------------------------------------------------
+        function set_option(name, value) {
+            settings[name] = value;
+            if (name === 'exit') {
+                exit_disabled = value === false;
+            }
         }
         // ---------------------------------------------------------------------
         // :: Save the interpreter name for use with purge
@@ -9742,7 +9763,7 @@
                         if (settings.clear && $.inArray('clear', commands) === -1) {
                             commands.push('clear');
                         }
-                        if (settings.exit && $.inArray('exit', commands) === -1) {
+                        if (exit_enabled() && $.inArray('exit', commands) === -1) {
                             commands.push('exit');
                         }
                     }
@@ -12156,6 +12177,7 @@
                 }, {
                     name: 'read',
                     history: false,
+                    exit: false,
                     prompt: message || '',
                     onStart: function() {
                         options.signal.addEventListener('abort', abort_handler);
@@ -12318,14 +12340,14 @@
                         return settings[object_or_name];
                     } else if (typeof object_or_name === 'object') {
                         $.each(object_or_name, function(key, value) {
-                            settings[key] = value;
+                            set_option(key, value);
                         });
                         // most of the options change how the lines are
                         // rendered and options are not changed often
                         self.clear_cache();
                     }
                 } else {
-                    settings[object_or_name] = value;
+                    set_option(object_or_name, value);
                     self.clear_cache();
                     if (object_or_name.match(/^num(Chars|Rows)$/)) {
                         redraw();
@@ -12651,6 +12673,8 @@
             },
             options || {}
         );
+        // nested interpreters have exit command unless it is explicitly disabled
+        var exit_disabled = !!(options && options.exit === false);
         if (typeof settings.width === 'number') {
             self.width(settings.width);
         }
