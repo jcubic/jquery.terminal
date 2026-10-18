@@ -1318,6 +1318,57 @@ describe('Terminal utils', function() {
                     echo: ['cmd', 'cmd']
                 });
             });
+            describe('echo command (#1052)', function() {
+                function output() {
+                    return term.find('.terminal-command').map(function() {
+                        return a0($(this).text());
+                    }).get();
+                }
+                it('should not apply echo formatters to prompt and command', function() {
+                    term.clear().set_prompt('echo> ');
+                    term.exec('echo');
+                    expect(output()).toEqual(['echo> echo']);
+                    term.refresh();
+                    expect(output()).toEqual(['echo> echo']);
+                });
+                it('should apply command formatters only to the command', function() {
+                    term.clear().set_prompt('cmd> ');
+                    term.exec('cmd');
+                    expect(output()).toEqual(['cmd> c__']);
+                    term.refresh();
+                    expect(output()).toEqual(['cmd> c__']);
+                });
+                it('should apply prompt formatters only to the prompt', function() {
+                    term.clear().set_prompt('prompt> ');
+                    term.exec('prompt');
+                    expect(output()).toEqual(['p__> prompt']);
+                    term.refresh();
+                    expect(output()).toEqual(['p__> prompt']);
+                });
+                it('should apply generic formatters to prompt and command', function() {
+                    term.clear().set_prompt('foo> ');
+                    term.exec('foo');
+                    expect(output()).toEqual(['bar> bar']);
+                    term.refresh();
+                    expect(output()).toEqual(['bar> bar']);
+                });
+                it('should not apply formatters to raw command', function() {
+                    term.destroy();
+                    term = $('<div/>').terminal($.noop, {
+                        greetings: false,
+                        raw: {
+                            command: true
+                        }
+                    });
+                    term.set_prompt('> ');
+                    term.exec('<b>cmd</b>');
+                    expect(output()).toEqual(['> cmd']);
+                    expect(term.find('.terminal-command b').text()).toEqual('cmd');
+                    term.refresh();
+                    expect(output()).toEqual(['> cmd']);
+                    expect(term.find('.terminal-command b').text()).toEqual('cmd');
+                });
+            });
         });
     });
     describe('$.terminal.split_equal', function() {
