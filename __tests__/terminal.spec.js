@@ -8843,6 +8843,31 @@ describe('Terminal plugin', function() {
             expect(lines(term, 1)).toEqual(['hello']);
             term.destroy();
         });
+        describe('echoed command (#1013)', function() {
+            function command(term) {
+                return a0(term.find('.terminal-command').text());
+            }
+            it('should apply a formatter added after exec on refresh', function() {
+                var term = terminal({prompt: '> '});
+                term.exec('hello');
+                expect(command(term)).toEqual('> hello');
+                $.terminal.new_formatter([/hello/g, 'world', {command: true}]);
+                term.refresh();
+                expect(command(term)).toEqual('> world');
+                term.destroy();
+            });
+            it('should remove a formatter from the command on refresh', function() {
+                var term = terminal({prompt: '> '});
+                var replace = [/hello/g, 'world', {command: true}];
+                $.terminal.new_formatter(replace);
+                term.exec('hello');
+                expect(command(term)).toEqual('> world');
+                $.terminal.remove_formatter(replace);
+                term.refresh();
+                expect(command(term)).toEqual('> hello');
+                term.destroy();
+            });
+        });
         it('should not reuse a cached line echoed with other options', function() {
             $.terminal.defaults.formatters = [[/foo/g, 'bar']];
             var term = terminal();
