@@ -11398,6 +11398,12 @@
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
                             function skip() {
+                                // the segment that closes a partial has to be
+                                // processed, it's the one that clears the
+                                // partial class and the partial state #1073
+                                if (partial.length) {
+                                    return false;
+                                }
                                 // don't re-render html and jQuery/DOM nodes #759
                                 // but update HTML that came from function #1029
                                 if (options.update && data.raw === true && data.newline) {
@@ -11416,6 +11422,10 @@
                                 }
                             } else if (is_array(data.finalize)) {
                                 if (skip()) {
+                                    // the node is left alone but the snapshot
+                                    // was cleared by lines.render() and
+                                    // get_output() reads it #1073
+                                    lines.update_snapshot(data.index, snapshot);
                                     return;
                                 }
                                 if (scroll) {

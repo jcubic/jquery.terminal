@@ -3345,6 +3345,42 @@ describe('extensions', function() {
             term.refresh();
             expect(output(term)).toEqual(expected);
         });
+        it('should not duplicate raw echo on refresh (#1073)', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                numChars: 100,
+                greetings: false,
+                prompt: '<span>$ </span>',
+                raw: {prompt: true, echo: true}
+            });
+            await term.exec('foo');
+            term.echo('<span>hello</span>', {raw: true});
+            term.echo('<span>world</span>', {raw: true});
+            await delay(50);
+            var expected = ['$ foo', 'hello', 'world'];
+            var text = term.get_output();
+            expect(output(term)).toEqual(expected);
+            expect(term.find('.terminal-output .partial').length).toEqual(0);
+            term.refresh();
+            expect(output(term)).toEqual(expected);
+            expect(term.find('.terminal-output .partial').length).toEqual(0);
+            expect(term.get_output()).toEqual(text);
+            term.destroy();
+        });
+        it('should keep the output of raw echo on refresh (#1073)', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                numChars: 100,
+                greetings: false,
+                raw: true
+            });
+            term.echo('<b>a</b>', {raw: true});
+            term.echo('<b>b</b>', {raw: true});
+            await delay(20);
+            var text = term.get_output();
+            expect(text).toEqual('<b>a</b>\n<b>b</b>');
+            term.refresh();
+            expect(term.get_output()).toEqual(text);
+            term.destroy();
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {

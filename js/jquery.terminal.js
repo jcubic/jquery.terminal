@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.48.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Oct 2026 17:08:59 +0000
+ * Date: Sun, 25 Oct 2026 23:14:28 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -5669,8 +5669,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.48.1',
-        date: 'Thu, 08 Oct 2026 17:08:59 +0000',
+        version: 'DEV',
+        date: 'Sun, 25 Oct 2026 23:14:28 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -11398,6 +11398,12 @@
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
                             function skip() {
+                                // the segment that closes a partial has to be
+                                // processed, it's the one that clears the
+                                // partial class and the partial state #1073
+                                if (partial.length) {
+                                    return false;
+                                }
                                 // don't re-render html and jQuery/DOM nodes #759
                                 // but update HTML that came from function #1029
                                 if (options.update && data.raw === true && data.newline) {
@@ -11416,6 +11422,10 @@
                                 }
                             } else if (is_array(data.finalize)) {
                                 if (skip()) {
+                                    // the node is left alone but the snapshot
+                                    // was cleared by lines.render() and
+                                    // get_output() reads it #1073
+                                    lines.update_snapshot(data.index, snapshot);
                                     return;
                                 }
                                 if (scroll) {
