@@ -2,6 +2,7 @@
 ### Bugfix
 * fix duplicated output and misplaced command line on resize when echo use `raw: true` [#1073](https://github.com/jcubic/jquery.terminal/issues/1073)
 * fix `Terminal::get_output()` losing lines echoed with `raw: true` after a resize or refresh [#1073](https://github.com/jcubic/jquery.terminal/issues/1073)
+* fix jumping to the beginning of the input during refocus on mobile [#1075](https://github.com/jcubic/jquery.terminal/issues/1075)
 
 ## 2.48.1
 ### Bugfix

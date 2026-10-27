@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Sun, 25 Oct 2026 23:14:28 +0000
+ * Date: Tue, 27 Oct 2026 17:27:12 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4722,7 +4722,9 @@
         (function() {
             if (use_mobile(settings)) {
                 $(clip.$node).on('click touchstart', function() {
-                    self.display_position(clip.$node.caret());
+                    if (self.isenabled()) {
+                        self.display_position(clip.$node.caret());
+                    }
                 });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
@@ -5670,7 +5672,7 @@
     // -------------------------------------------------------------------------
     $.terminal = {
         version: 'DEV',
-        date: 'Sun, 25 Oct 2026 23:14:28 +0000',
+        date: 'Tue, 27 Oct 2026 17:27:12 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',

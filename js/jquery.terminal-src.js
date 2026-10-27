@@ -4722,7 +4722,9 @@
         (function() {
             if (use_mobile(settings)) {
                 $(clip.$node).on('click touchstart', function() {
-                    self.display_position(clip.$node.caret());
+                    if (self.isenabled()) {
+                        self.display_position(clip.$node.caret());
+                    }
                 });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
