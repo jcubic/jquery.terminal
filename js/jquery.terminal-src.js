@@ -7311,7 +7311,7 @@
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
                     if (text) {
-                        result += ' alt="' + text + '"';
+                        result += ' alt="' + clean_html(text) + '"';
                     }
                 }
                 return result;
