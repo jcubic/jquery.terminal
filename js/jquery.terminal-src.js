@@ -4127,9 +4127,9 @@
                 }
             },
             destroy: function() {
-                doc.unbind('keypress.cmd', keypress_event);
-                doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('input.cmd', input_event);
+                doc.off('keypress.cmd', keypress_event);
+                doc.off('keydown.cmd', keydown_event);
+                doc.off('input.cmd', input_event);
                 self.stopTime('blink', blink);
                 self.find('.cmd-wrapper').remove();
                 self.find('.cmd-prompt, .cmd-clipboard, .cmd-editable').remove();
@@ -4715,10 +4715,10 @@
             }
             finalize_input_event();
         }
-        doc.bind('keypress.cmd', keypress_event);
-        doc.bind('keydown.cmd', keydown_event);
-        doc.bind('keyup.cmd', clear_hold);
-        doc.bind('input.cmd', input_event);
+        doc.on('keypress.cmd', keypress_event);
+        doc.on('keydown.cmd', keydown_event);
+        doc.on('keyup.cmd', clear_hold);
+        doc.on('input.cmd', input_event);
         (function() {
             if (use_mobile(settings)) {
                 $(clip.$node).on('click touchstart', function() {
@@ -12451,11 +12451,11 @@
                     self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
                     pixel_resizer.resizer('unbind').remove();
-                    $(document).unbind('.terminal_' + self.id());
-                    $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click mousedown mouseup');
+                    $(document).off('.terminal_' + self.id());
+                    $(window).off('.terminal_' + self.id());
+                    self.off('click mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal').
-                        unbind('.terminal');
+                        off('.terminal');
                     if (settings.width) {
                         self.css('width', '');
                     }
@@ -12716,7 +12716,7 @@
             settings.describe = false;
         }
         // register ajaxSend for cancel requests on CTRL+D
-        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
+        $(document).on('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
@@ -13002,8 +13002,8 @@
                 }
             }
             self.oneTime(100, function() {
-                $(document).bind('click.terminal_' + self.id(), disable).
-                    bind('contextmenu.terminal_' + self.id(), disable);
+                $(document).on('click.terminal_' + self.id(), disable).
+                    on('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
             // cordova application, if keyboard was open and we resume, it will be
@@ -13525,11 +13525,11 @@
             /* istanbul ignore next */
             (function() {
                 var shift = false;
-                $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                $(document).on('keydown.terminal_' + self.id(), function(e) {
                     if (e.shiftKey) {
                         shift = true;
                     }
-                }).bind('keyup.terminal_' + self.id(), function(e) {
+                }).on('keyup.terminal_' + self.id(), function(e) {
                     // in Google Chromium/Linux shiftKey is false
                     if (e.shiftKey || e.which === 16) {
                         shift = false;
