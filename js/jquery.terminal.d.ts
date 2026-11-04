@@ -66,11 +66,15 @@ declare namespace JQueryTerminal {
         invalidTerminalId: string;
         login: string;
         password: string;
-        recursiveCall: string;
+        recursiveLoop: string;
         notAString: string;
         redrawError: string;
         invalidStrings: string;
+        invalidMask: string;
         defunctTerminal: string;
+        abortError: string;
+        timeoutError: string;
+        invalidId: string;
     };
 
     type ParsedCommand<T> = {
@@ -233,7 +237,7 @@ declare namespace JQueryTerminal {
         exit?: boolean;
         clear?: boolean;
         enabled?: boolean;
-        maskCHar?: string;
+        maskChar?: string;
         wrap?: boolean;
         checkArity?: boolean;
         invokeMethods?: boolean;
@@ -251,7 +255,10 @@ declare namespace JQueryTerminal {
         cancelableAjax?: boolean;
         processArguments?: boolean;
         execAnimation?: boolean;
+        execAnimationDelay?: number;
+        externalPause?: boolean;
         linksNoReferrer?: boolean;
+        linksNoFollow?: boolean;
         javascriptLinks?: boolean;
         processRPCResponse?: null | processRPCResponseFunction;
         completionEscape?: boolean;
@@ -277,7 +284,7 @@ declare namespace JQueryTerminal {
         scrollOnEcho?: boolean;
         outputLimit?: number;
         pasteImage?: boolean;
-        scrollBottomOffset?: boolean;
+        scrollBottomOffset?: number;
         wordAutocomplete?: boolean;
         caseSensitiveAutocomplete?: boolean;
         caseSensitiveSearch?: boolean;
@@ -285,7 +292,7 @@ declare namespace JQueryTerminal {
         holdTimeout?: number;
         holdRepeatTimeout?: number;
         repeatTimeoutKeys?: string[];
-        mobileIngoreAutoSpace?: string[];
+        mobileIgnoreAutoSpace?: string[];
         request?: RequestResponseCallback;
         response?: RequestResponseCallback;
         describe?: string | false;
@@ -297,7 +304,7 @@ declare namespace JQueryTerminal {
         onInit?: EventCallback;
         autocompleteMenu?: boolean;
         mobileDelete?: boolean;
-        strings?: strings;
+        strings?: Partial<strings>;
         height?: number;
     }
 
@@ -684,7 +691,7 @@ type CmdOptions = {
     clickTimeout?: number;
     holdTimeout?: number;
     holdRepeatTimeout?: number;
-    mobileIngoreAutoSpace?: string[];
+    mobileIgnoreAutoSpace?: string[];
     repeatTimeoutKeys?: string[];
     onPaste?: (this: Cmd, value: string) => TypeOrPromise<string | Blob> | void;
     width?: number;
