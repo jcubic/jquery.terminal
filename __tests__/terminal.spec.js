@@ -252,6 +252,20 @@ global.URL = window.URL = {
     revokeObjectURL: function() {}
 };
 
+// mock copy command so text_to_clipboard is not a noop
+var clipboard_text;
+document.queryCommandSupported = function(command) {
+    return command === 'copy';
+};
+document.execCommand = function(command) {
+    if (command === 'copy') {
+        var node = document.activeElement;
+        clipboard_text = node.value.substring(node.selectionStart, node.selectionEnd);
+        return true;
+    }
+    return false;
+};
+
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/xml_formatting')(global.$);
@@ -4839,6 +4853,37 @@ describe('Terminal plugin', function() {
         });
     });
     describe('cmd plugin', function() {
+        describe('contenteditable', function() {
+            var term;
+            beforeEach(function() {
+                clipboard_text = undefined;
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    greetings: false,
+                    inputStyle: 'contenteditable'
+                });
+                term.focus();
+            });
+            afterEach(function() {
+                term.destroy().remove();
+            });
+            it('should delete words with CTRL+BACKSPACE #1076', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                term.insert('foo bar baz');
+                expect($node.is(':focus')).toBe(true);
+                expect(function() {
+                    shortcut(true, false, false, 8, 'Backspace');
+                }).not.toThrow();
+                expect(term.get_command()).toEqual('foo bar ');
+                expect(clipboard_text).toEqual('baz');
+                expect(cmd.kill_text()).toEqual('baz');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(true);
+                shortcut(true, false, false, 8, 'Backspace');
+                expect(term.get_command()).toEqual('foo ');
+                expect(clipboard_text).toEqual('bar ');
+            });
+        });
         var string = '';
         var term, cmd, line, history, formatting;
         beforeEach(function() {

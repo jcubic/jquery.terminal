@@ -5486,12 +5486,14 @@
     var text_to_clipboard;
     if (support_copy) {
         text_to_clipboard = function text_to_clipboard($textarea, text) {
-            var val = $textarea.val();
             var had_focus = $textarea.is(':focus');
-            var pos = $textarea.caret();
+            // contenteditable used on mobile don't have select() #1076
+            var is_textarea = is_function($textarea[0].select);
             if (window.navigator && window.navigator.clipboard) {
                 navigator.clipboard.writeText(text);
-            } else if (had_focus) {
+            } else if (had_focus && is_textarea) {
+                var val = $textarea.val();
+                var pos = $textarea.caret();
                 $textarea.val(text).focus();
                 $textarea[0].select();
                 document.execCommand('copy');
@@ -5508,6 +5510,9 @@
                 document.execCommand('copy');
                 $text.blur();
                 $text.remove();
+                if (had_focus) {
+                    $textarea.focus();
+                }
             }
             return true;
         };
