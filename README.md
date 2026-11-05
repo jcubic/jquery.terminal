@@ -9,7 +9,6 @@
 [JavaScript Library for Web Based Terminal Emulators](https://terminal.jcubic.pl)
 
 [![npm](https://img.shields.io/badge/npm-DEV-blue.svg)](https://www.npmjs.com/package/jquery.terminal)
-![bower](https://img.shields.io/badge/bower-DEV-yellow.svg)
 [![Build and test](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml/badge.svg?branch=devel&event=push)](https://github.com/jcubic/jquery.terminal/actions/workflows/build.yaml)
 [![Coverage Status](https://coveralls.io/repos/github/jcubic/jquery.terminal/badge.svg?branch=devel&27538dac84f2f8739b8888c6d2d07432)](https://coveralls.io/github/jcubic/jquery.terminal?branch=devel)
 ![NPM Downloads](https://img.shields.io/npm/dm/jquery.terminal.svg?style=flat)<br/>
@@ -177,13 +176,7 @@ or
 #### Command Line
 
 
-You can also install jQuery Terminal using command line, from [bower repository](https://bower.io/):
-
-```
-bower install jquery.terminal
-```
-
-or [npm registry](https://www.npmjs.com/):
+You can also install jQuery Terminal using command line, from [npm registry](https://www.npmjs.com/):
 
 ```
 npm install jquery.terminal
