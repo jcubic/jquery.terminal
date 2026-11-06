@@ -1094,6 +1094,8 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     test_type<Cmd>(cmd.option("mask", 10));
     test_type<string>(cmd.option("mask"));
+    test_type<Cmd>(cmd.option("mobileIgnoreAutoSpace", [","]));
+    test_type<Cmd>(cmd.option("tabindex", 2));
     // -------------------------------------------------------------------------
     // :: name
     // -------------------------------------------------------------------------

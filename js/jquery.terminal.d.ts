@@ -709,7 +709,8 @@ type CmdOptions = {
 type CmdOption = "mask" | "caseSensitiveSearch" | "historySize" | "prompt" | "enabled" |
     "history" | "tabs" | "onPositionChange" | "clickTimeout" | "holdTimeout" | "onPaste" |
     "holdRepeatTimeout" | "repeatTimeoutKeys" | "width" | "historyFilter" | "commands" |
-    "charWidth" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete";
+    "charWidth" | "onCommandChange" | "name" | "keypress" | "keydown" | "mobileDelete" |
+    "mobileIgnoreAutoSpace" | "tabindex";
 
 // we copy methods from jQuery to overwrite it
 // see: https://github.com/Microsoft/TypeScript/issues/978
