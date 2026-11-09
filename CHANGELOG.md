@@ -5,6 +5,7 @@
 * fix jumping to the beginning of the input during refocus on mobile [#1075](https://github.com/jcubic/jquery.terminal/issues/1075)
 * fix sanitizing image alt text inside formatting
 * fix exception when deleting a word with CTRL+BACKSPACE in contenteditable input [#1076](https://github.com/jcubic/jquery.terminal/issues/1076)
+* fix TypeScript types of terminal options (`maskChar`, `mobileIgnoreAutoSpace`, `scrollBottomOffset`, `execAnimationDelay`, `externalPause`, `linksNoFollow`), allow partial `strings` and add `mobileIgnoreAutoSpace` and `tabindex` to cmd options
 
 ## 2.48.1
 ### Bugfix
