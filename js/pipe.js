@@ -420,7 +420,7 @@
             }).join(' ');
         }
         // -------------------------------------------------------------------------------
-        return function(command, t) {
+        function pipe_interpreter(command, t) {
             command_index = -1;
             term = t; // for echo_non_empty and function that call it
             var term_settings = term.settings();
@@ -567,23 +567,45 @@
                     };
                 });
             }
-        };
+        }
+        if (!is_function(interpreter)) {
+            // used to create completion, the terminal can't create it
+            // from a function #974
+            pipe_interpreter.__interpreter__ = interpreter;
+        }
+        return pipe_interpreter;
     };
     // -------------------------------------------------------------------------
     var init = $.fn.terminal;
     $.fn.terminal = function(interpreter, options) {
-        if (options && options.pipe) {
+        var piped = interpreter && interpreter.__interpreter__;
+        var completion = options && options.completion === true &&
+            (options.pipe || piped);
+        if (options && (options.pipe || completion)) {
             var settings = $.extend({}, options, {
                 onInit: function() {
+                    var self = this;
                     var defer = $.Deferred();
-                    if (options && options.pipe) {
-                        var interpreter = $.terminal.pipe(this.commands(), options);
-                        this.set_interpreter(interpreter).then(defer.resolve);
+                    var pipe_intrp = interpreter;
+                    if (options.pipe) {
+                        pipe_intrp = $.terminal.pipe(self.commands(), options);
+                    }
+                    if (completion) {
+                        // the pipe interpreter is a function, so automatic
+                        // completion needs to be created from the original
+                        // interpreter #974
+                        var user_intrp = options.pipe ? interpreter : piped;
+                        var login = options.login;
+                        self.__make_interpreter__(user_intrp, login, function(ret) {
+                            if (Array.isArray(ret.completion)) {
+                                self.option('completion', ret.completion);
+                            }
+                            self.set_interpreter(pipe_intrp).then(defer.resolve);
+                        });
                     } else {
-                        defer.resolve();
+                        self.set_interpreter(pipe_intrp).then(defer.resolve);
                     }
                     if (options && is_function(options.onInit)) {
-                        var self = this;
                         defer.then(function() {
                             options.onInit.call(self, self);
                         });
