@@ -6022,9 +6022,7 @@ describe('Terminal plugin', function() {
         });
         it('should show error when automatic completion used with a function (#974)', function() {
             var errors = [];
-            var term = $('<div/>').appendTo('body').terminal($.terminal.pipe({
-                foo: function() {}
-            }), {
+            var term = $('<div/>').appendTo('body').terminal(function() {}, {
                 completion: true,
                 greetings: false,
                 exceptionHandler: function(e, label) {
@@ -6038,6 +6036,45 @@ describe('Terminal plugin', function() {
                 "Invalid completion: automatic completion can't be used " +
                     'with a function interpreter'
             ]]);
+            term.destroy().remove();
+        });
+        it('should complete commands of object used with pipe (#974)', async function() {
+            var errors = [];
+            var term = $('<div/>').appendTo('body').terminal($.terminal.pipe({
+                foo: function() {},
+                bar: function() {}
+            }), {
+                completion: true,
+                greetings: false,
+                exceptionHandler: function(e, label) {
+                    errors.push([label, e.message]);
+                }
+            });
+            term.focus().insert('f');
+            shortcut(false, false, false, 9, 'tab');
+            await delay(100);
+            expect(errors).toEqual([]);
+            expect(term.get_command()).toEqual('foo');
+            term.destroy().remove();
+        });
+        it('should complete commands with pipe option (#974)', async function() {
+            var errors = [];
+            var term = $('<div/>').appendTo('body').terminal({
+                foo: function() {},
+                bar: function() {}
+            }, {
+                pipe: true,
+                completion: true,
+                greetings: false,
+                exceptionHandler: function(e, label) {
+                    errors.push([label, e.message]);
+                }
+            });
+            term.focus().insert('b');
+            shortcut(false, false, false, 9, 'tab');
+            await delay(100);
+            expect(errors).toEqual([]);
+            expect(term.get_command()).toEqual('bar');
             term.destroy().remove();
         });
     });

@@ -10769,6 +10769,14 @@
                 return interpreters.top().interpreter;
             },
             // -------------------------------------------------------------
+            // :: Internal API used by extensions (e.g. pipe) to create the
+            // :: interpreter function and its completion from user value
+            // -------------------------------------------------------------
+            __make_interpreter__: function(user_intrp, login, finalize) {
+                make_interpreter(user_intrp, login, finalize);
+                return self;
+            },
+            // -------------------------------------------------------------
             // :: Low Level method that overwrites interpreter
             // -------------------------------------------------------------
             set_interpreter: function(user_intrp, login) {
