@@ -1234,6 +1234,38 @@ describe('Terminal utils', function() {
                     .toEqual(`<span class="${output}" data-text="foo"><span>foo</span></span>`);
             });
         });
+        it('should handle alt attribute', () => {
+            expect($.terminal.format(`[[@;;;;https://example.com/a.png]x"/onerror="alert(1)]`)).toEqual("<img src=\"https://example.com/a.png\" alt=\"x/onerror=alert(1)\" data-text/>");
+        });
+        it('should handle emoji', () => {
+            const specs = [
+                [
+                    'ab&lt;b/attr=hello&gt;x',
+                    'ab<b/attr=hello>x',
+                ],
+                [
+                    '😀&lt;b/attr=hello&gt;x',
+                    '😀<b/attr=hello>x',
+                ]
+            ];
+            specs.forEach(([input, output]) => {
+                console.log({
+                    input: as_html($.terminal.format(input)),
+                    output: as_text(output)
+                });
+                expect(as_html($.terminal.format(input))).toEqual(as_text(output));
+            });
+            function as_text(input) {
+                const $dom = $('<div/>');
+                $dom.text(input);
+                return $dom.text();
+            }
+            function as_html(input) {
+                const $dom = $('<div/>');
+                $dom.html(input);
+                return $dom.text();
+            }
+        });
     });
     describe('$.terminal.strip', function() {
         it('should remove formatting', function() {
