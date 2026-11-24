@@ -2404,14 +2404,29 @@
                     spellcheck: 'false',
                     tabindex: settings.tabindex
                 }).insertAfter(self);
+                // when true focus and blur don't change the state of the
+                // command line, see clip.keep_state()
+                var ignore_state = false;
                 $node.on('focus', function() {
-                    self.enable();
+                    if (!ignore_state) {
+                        self.enable();
+                    }
                 }).on('blur', function() {
-                    self.disable();
+                    if (!ignore_state) {
+                        self.disable();
+                    }
                 });
                 var timer;
                 var clip = {
                     $node: $node,
+                    keep_state: function(fn) {
+                        ignore_state = true;
+                        try {
+                            fn();
+                        } finally {
+                            ignore_state = false;
+                        }
+                    },
                     val: function(value) {
                         if (typeof value === 'undefined') {
                             return $node.text();
@@ -2461,6 +2476,11 @@
                              'Clipboard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
+                    // the textarea has no focus and blur handlers so there is
+                    // no state to protect
+                    keep_state: function(fn) {
+                        fn();
+                    },
                     val: function(value) {
                         // even if value is undeifned
                         // when calling val(value) it return jQuery object
@@ -2840,14 +2860,14 @@
                 var len = text(command).length;
                 if (len > position) {
                     kill_text = self['delete'](len - position);
-                    text_to_clipboard(clip.$node, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
             'CTRL+U': function() {
                 if (command !== '' && position !== 0) {
                     kill_text = self['delete'](-position);
-                    text_to_clipboard(clip.$node, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
@@ -2881,7 +2901,7 @@
                 if (m) {
                     kill_text = m[0];
                     if (options.clipboard) {
-                        text_to_clipboard(clip.$node, kill_text);
+                        text_to_clipboard(clip, kill_text);
                     }
                 }
                 self.set(
@@ -2908,7 +2928,7 @@
                     if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (options.clipboard) {
-                            text_to_clipboard(clip.$node, kill_text);
+                            text_to_clipboard(clip, kill_text);
                         }
                     }
                 }
@@ -4127,9 +4147,9 @@
                 }
             },
             destroy: function() {
-                doc.unbind('keypress.cmd', keypress_event);
-                doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('input.cmd', input_event);
+                doc.off('keypress.cmd', keypress_event);
+                doc.off('keydown.cmd', keydown_event);
+                doc.off('input.cmd', input_event);
                 self.stopTime('blink', blink);
                 self.find('.cmd-wrapper').remove();
                 self.find('.cmd-prompt, .cmd-clipboard, .cmd-editable').remove();
@@ -4715,14 +4735,16 @@
             }
             finalize_input_event();
         }
-        doc.bind('keypress.cmd', keypress_event);
-        doc.bind('keydown.cmd', keydown_event);
-        doc.bind('keyup.cmd', clear_hold);
-        doc.bind('input.cmd', input_event);
+        doc.on('keypress.cmd', keypress_event);
+        doc.on('keydown.cmd', keydown_event);
+        doc.on('keyup.cmd', clear_hold);
+        doc.on('input.cmd', input_event);
         (function() {
             if (use_mobile(settings)) {
                 $(clip.$node).on('click touchstart', function() {
-                    self.display_position(clip.$node.caret());
+                    if (self.isenabled()) {
+                        self.display_position(clip.$node.caret());
+                    }
                 });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
@@ -5278,14 +5300,13 @@
     // -------------------------------------------------------------------------
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
-            var bare = bare_text(text);
-            var chars = $.terminal.split_characters(bare);
+            var chars = $.terminal.split_characters(text);
             if (chars.length === 1) {
                 return text;
             }
             var specs = chars.map(function(chr) {
                 return {
-                    len: strlen(chr),
+                    len: strlen(bare_text(chr)),
                     chr: chr
                 };
             }).reduce(function(arr, spec) {
@@ -5483,29 +5504,40 @@
     // ---------------------------------------------------------------------
     var text_to_clipboard;
     if (support_copy) {
-        text_to_clipboard = function text_to_clipboard($textarea, text) {
-            var val = $textarea.val();
+        text_to_clipboard = function text_to_clipboard(clip, text) {
+            var $textarea = clip.$node;
             var had_focus = $textarea.is(':focus');
-            var pos = $textarea.caret();
+            // contenteditable used on mobile don't have select() #1076
+            var is_textarea = is_function($textarea[0].select);
             if (window.navigator && window.navigator.clipboard) {
                 navigator.clipboard.writeText(text);
-            } else if (had_focus) {
+            } else if (had_focus && is_textarea) {
+                var val = $textarea.val();
+                var pos = $textarea.caret();
                 $textarea.val(text).focus();
                 $textarea[0].select();
                 document.execCommand('copy');
                 $textarea.val(val);
                 $textarea.caret(pos);
             } else {
-                var $text = $('<textarea/>').css({
-                    position: 'fixed',
-                    top: 0,
-                    left: 0
-                }).appendTo('body');
-                $text.val(text).focus();
-                $text[0].select();
-                document.execCommand('copy');
-                $text.blur();
-                $text.remove();
+                // the temporary textarea steals the focus and gives it back, this
+                // is only to copy the text so it should leave the command line
+                // enabled or disabled exactly as it was
+                clip.keep_state(function() {
+                    var $text = $('<textarea/>').css({
+                        position: 'fixed',
+                        top: 0,
+                        left: 0
+                    }).appendTo('body');
+                    $text.val(text).focus();
+                    $text[0].select();
+                    document.execCommand('copy');
+                    $text.blur();
+                    $text.remove();
+                    if (had_focus) {
+                        $textarea.focus();
+                    }
+                });
             }
             return true;
         };
@@ -7309,7 +7341,7 @@
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
                     if (text) {
-                        result += ' alt="' + text + '"';
+                        result += ' alt="' + clean_html(text) + '"';
                     }
                 }
                 return result;
@@ -9709,7 +9741,7 @@
                         self.set_command('');
                     } else {
                         var clip = command_line.clip();
-                        text_to_clipboard(clip.$node, process_selected_html(html));
+                        text_to_clipboard(clip, process_selected_html(html));
                     }
                 });
                 return false;
@@ -11398,6 +11430,12 @@
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
                             function skip() {
+                                // the segment that closes a partial has to be
+                                // processed, it's the one that clears the
+                                // partial class and the partial state #1073
+                                if (partial.length) {
+                                    return false;
+                                }
                                 // don't re-render html and jQuery/DOM nodes #759
                                 // but update HTML that came from function #1029
                                 if (options.update && data.raw === true && data.newline) {
@@ -11416,6 +11454,10 @@
                                 }
                             } else if (is_array(data.finalize)) {
                                 if (skip()) {
+                                    // the node is left alone but the snapshot
+                                    // was cleared by lines.render() and
+                                    // get_output() reads it #1073
+                                    lines.update_snapshot(data.index, snapshot);
                                     return;
                                 }
                                 if (scroll) {
@@ -12439,11 +12481,11 @@
                     self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
                     pixel_resizer.resizer('unbind').remove();
-                    $(document).unbind('.terminal_' + self.id());
-                    $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click mousedown mouseup');
+                    $(document).off('.terminal_' + self.id());
+                    $(window).off('.terminal_' + self.id());
+                    self.off('click mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal').
-                        unbind('.terminal');
+                        off('.terminal');
                     if (settings.width) {
                         self.css('width', '');
                     }
@@ -12704,7 +12746,7 @@
             settings.describe = false;
         }
         // register ajaxSend for cancel requests on CTRL+D
-        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
+        $(document).on('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
@@ -12990,8 +13032,8 @@
                 }
             }
             self.oneTime(100, function() {
-                $(document).bind('click.terminal_' + self.id(), disable).
-                    bind('contextmenu.terminal_' + self.id(), disable);
+                $(document).on('click.terminal_' + self.id(), disable).
+                    on('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
             // cordova application, if keyboard was open and we resume, it will be
@@ -13513,11 +13555,11 @@
             /* istanbul ignore next */
             (function() {
                 var shift = false;
-                $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                $(document).on('keydown.terminal_' + self.id(), function(e) {
                     if (e.shiftKey) {
                         shift = true;
                     }
-                }).bind('keyup.terminal_' + self.id(), function(e) {
+                }).on('keyup.terminal_' + self.id(), function(e) {
                     // in Google Chromium/Linux shiftKey is false
                     if (e.shiftKey || e.which === 16) {
                         shift = false;

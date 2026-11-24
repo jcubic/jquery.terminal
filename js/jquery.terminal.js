@@ -4,7 +4,7 @@
  *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
  * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
  * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
- *           \/              /____/                              version 2.48.1
+ *           \/              /____/                              version DEV
  *
  * This file is part of jQuery Terminal. https://terminal.jcubic.pl
  *
@@ -41,7 +41,7 @@
  *
  * broken image by Sophia Bai from the Noun Project (CC-BY)
  *
- * Date: Thu, 08 Oct 2026 17:08:59 +0000
+ * Date: Tue, 24 Nov 2026 08:33:49 +0000
  */
 /* global define, Map, BigInt */
 /* eslint-disable */
@@ -4127,9 +4127,9 @@
                 }
             },
             destroy: function() {
-                doc.unbind('keypress.cmd', keypress_event);
-                doc.unbind('keydown.cmd', keydown_event);
-                doc.unbind('input.cmd', input_event);
+                doc.off('keypress.cmd', keypress_event);
+                doc.off('keydown.cmd', keydown_event);
+                doc.off('input.cmd', input_event);
                 self.stopTime('blink', blink);
                 self.find('.cmd-wrapper').remove();
                 self.find('.cmd-prompt, .cmd-clipboard, .cmd-editable').remove();
@@ -4715,14 +4715,16 @@
             }
             finalize_input_event();
         }
-        doc.bind('keypress.cmd', keypress_event);
-        doc.bind('keydown.cmd', keydown_event);
-        doc.bind('keyup.cmd', clear_hold);
-        doc.bind('input.cmd', input_event);
+        doc.on('keypress.cmd', keypress_event);
+        doc.on('keydown.cmd', keydown_event);
+        doc.on('keyup.cmd', clear_hold);
+        doc.on('input.cmd', input_event);
         (function() {
             if (use_mobile(settings)) {
                 $(clip.$node).on('click touchstart', function() {
-                    self.display_position(clip.$node.caret());
+                    if (self.isenabled()) {
+                        self.display_position(clip.$node.caret());
+                    }
                 });
                 $(self[0]).add(clip.$node).on('touchstart.cmd', function() {
                     if (!self.isenabled()) {
@@ -5278,14 +5280,13 @@
     // -------------------------------------------------------------------------
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
-            var bare = bare_text(text);
-            var chars = $.terminal.split_characters(bare);
+            var chars = $.terminal.split_characters(text);
             if (chars.length === 1) {
                 return text;
             }
             var specs = chars.map(function(chr) {
                 return {
-                    len: strlen(chr),
+                    len: strlen(bare_text(chr)),
                     chr: chr
                 };
             }).reduce(function(arr, spec) {
@@ -5484,12 +5485,14 @@
     var text_to_clipboard;
     if (support_copy) {
         text_to_clipboard = function text_to_clipboard($textarea, text) {
-            var val = $textarea.val();
             var had_focus = $textarea.is(':focus');
-            var pos = $textarea.caret();
+            // contenteditable used on mobile don't have select() #1076
+            var is_textarea = is_function($textarea[0].select);
             if (window.navigator && window.navigator.clipboard) {
                 navigator.clipboard.writeText(text);
-            } else if (had_focus) {
+            } else if (had_focus && is_textarea) {
+                var val = $textarea.val();
+                var pos = $textarea.caret();
                 $textarea.val(text).focus();
                 $textarea[0].select();
                 document.execCommand('copy');
@@ -5506,6 +5509,9 @@
                 document.execCommand('copy');
                 $text.blur();
                 $text.remove();
+                if (had_focus) {
+                    $textarea.focus();
+                }
             }
             return true;
         };
@@ -5669,8 +5675,8 @@
     }
     // -------------------------------------------------------------------------
     $.terminal = {
-        version: '2.48.1',
-        date: 'Thu, 08 Oct 2026 17:08:59 +0000',
+        version: 'DEV',
+        date: 'Tue, 24 Nov 2026 08:33:49 +0000',
         // colors from https://www.w3.org/wiki/CSS/Properties/color/keywords
         color_names: [
             'transparent', 'currentcolor', 'black', 'silver', 'gray', 'white',
@@ -7309,7 +7315,7 @@
                 if (valid_src(data)) {
                     result += ' src="' + data + '"';
                     if (text) {
-                        result += ' alt="' + text + '"';
+                        result += ' alt="' + clean_html(text) + '"';
                     }
                 }
                 return result;
@@ -11398,6 +11404,12 @@
                         //       to many levels of abstractions in one place
                         buffer.flush(function(data) {
                             function skip() {
+                                // the segment that closes a partial has to be
+                                // processed, it's the one that clears the
+                                // partial class and the partial state #1073
+                                if (partial.length) {
+                                    return false;
+                                }
                                 // don't re-render html and jQuery/DOM nodes #759
                                 // but update HTML that came from function #1029
                                 if (options.update && data.raw === true && data.newline) {
@@ -11416,6 +11428,10 @@
                                 }
                             } else if (is_array(data.finalize)) {
                                 if (skip()) {
+                                    // the node is left alone but the snapshot
+                                    // was cleared by lines.render() and
+                                    // get_output() reads it #1073
+                                    lines.update_snapshot(data.index, snapshot);
                                     return;
                                 }
                                 if (scroll) {
@@ -12439,11 +12455,11 @@
                     self.touch_scroll('unbind');
                     font_resizer.resizer('unbind').remove();
                     pixel_resizer.resizer('unbind').remove();
-                    $(document).unbind('.terminal_' + self.id());
-                    $(window).unbind('.terminal_' + self.id());
-                    self.unbind('click mousedown mouseup');
+                    $(document).off('.terminal_' + self.id());
+                    $(window).off('.terminal_' + self.id());
+                    self.off('click mousedown mouseup');
                     self.removeData('terminal').removeClass('terminal').
-                        unbind('.terminal');
+                        off('.terminal');
                     if (settings.width) {
                         self.css('width', '');
                     }
@@ -12704,7 +12720,7 @@
             settings.describe = false;
         }
         // register ajaxSend for cancel requests on CTRL+D
-        $(document).bind('ajaxSend.terminal_' + self.id(), function(e, xhr) {
+        $(document).on('ajaxSend.terminal_' + self.id(), function(e, xhr) {
             requests.push(xhr);
         });
         var scroller = $('<div class="terminal-scroller"/>').appendTo(self);
@@ -12990,8 +13006,8 @@
                 }
             }
             self.oneTime(100, function() {
-                $(document).bind('click.terminal_' + self.id(), disable).
-                    bind('contextmenu.terminal_' + self.id(), disable);
+                $(document).on('click.terminal_' + self.id(), disable).
+                    on('contextmenu.terminal_' + self.id(), disable);
             });
             var $win = $(window);
             // cordova application, if keyboard was open and we resume, it will be
@@ -13513,11 +13529,11 @@
             /* istanbul ignore next */
             (function() {
                 var shift = false;
-                $(document).bind('keydown.terminal_' + self.id(), function(e) {
+                $(document).on('keydown.terminal_' + self.id(), function(e) {
                     if (e.shiftKey) {
                         shift = true;
                     }
-                }).bind('keyup.terminal_' + self.id(), function(e) {
+                }).on('keyup.terminal_' + self.id(), function(e) {
                     // in Google Chromium/Linux shiftKey is false
                     if (e.shiftKey || e.which === 16) {
                         shift = false;

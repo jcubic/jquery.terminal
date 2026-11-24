@@ -1,3 +1,14 @@
+## 2.48.2
+### Bugfix
+* fix duplicated output and misplaced command line on resize when echo use `raw: true` [#1073](https://github.com/jcubic/jquery.terminal/issues/1073)
+* fix `Terminal::get_output()` losing lines echoed with `raw: true` after a resize or refresh [#1073](https://github.com/jcubic/jquery.terminal/issues/1073)
+* fix jumping to the beginning of the input during refocus on mobile [#1075](https://github.com/jcubic/jquery.terminal/issues/1075)
+* fix sanitizing image alt text inside formatting
+* fix exception when deleting a word with CTRL+BACKSPACE in contenteditable input [#1076](https://github.com/jcubic/jquery.terminal/issues/1076)
+* fix TypeScript types of terminal options (`maskChar`, `mobileIgnoreAutoSpace`, `scrollBottomOffset`, `execAnimationDelay`, `externalPause`, `linksNoFollow`), allow partial `strings` and add `mobileIgnoreAutoSpace` and `tabindex` to cmd options
+* fix unescape html entities when using wide characters
+* fix enabling the command line of a paused terminal when copying text with contenteditable input
+
 ## 2.48.1
 ### Bugfix
 * fix sanitizing class inside formatting

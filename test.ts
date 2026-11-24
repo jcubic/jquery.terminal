@@ -478,6 +478,30 @@ $.terminal.defaults.formatters.push(red);
             }
         }
     });
+    // -------------------------------------------------------------------------
+    // :: other options from $.terminal.defaults
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        maskChar: '#',
+        execAnimationDelay: 200,
+        externalPause: false,
+        linksNoFollow: true,
+        scrollBottomOffset: 40,
+        mobileIgnoreAutoSpace: [',', '.']
+    });
+    // -------------------------------------------------------------------------
+    // :: strings
+    // -------------------------------------------------------------------------
+    $('.term').terminal($.noop, {
+        strings: {
+            commandNotFound: "Unknown command '%s'"
+        }
+    });
+    test_type<string>($.terminal.defaults.strings.recursiveLoop);
+    test_type<string>($.terminal.defaults.strings.invalidMask);
+    test_type<string>($.terminal.defaults.strings.abortError);
+    test_type<string>($.terminal.defaults.strings.timeoutError);
+    test_type<string>($.terminal.defaults.strings.invalidId);
 });
 
 // -----------------------------------------------------------------------------
@@ -991,6 +1015,9 @@ $.terminal.defaults.formatters.push(red);
         prompt: ">>> "
     });
     $('<div/>').cmd({
+        mobileIgnoreAutoSpace: [',', '.', ')']
+    });
+    $('<div/>').cmd({
         prompt: function(cb) {
             cb(">>> ");
         }
@@ -1067,6 +1094,8 @@ $.terminal.defaults.formatters.push(red);
     // -------------------------------------------------------------------------
     test_type<Cmd>(cmd.option("mask", 10));
     test_type<string>(cmd.option("mask"));
+    test_type<Cmd>(cmd.option("mobileIgnoreAutoSpace", [","]));
+    test_type<Cmd>(cmd.option("tabindex", 2));
     // -------------------------------------------------------------------------
     // :: name
     // -------------------------------------------------------------------------

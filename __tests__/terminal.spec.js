@@ -252,6 +252,20 @@ global.URL = window.URL = {
     revokeObjectURL: function() {}
 };
 
+// mock copy command so text_to_clipboard is not a noop
+var clipboard_text;
+document.queryCommandSupported = function(command) {
+    return command === 'copy';
+};
+document.execCommand = function(command) {
+    if (command === 'copy') {
+        var node = document.activeElement;
+        clipboard_text = node.value.substring(node.selectionStart, node.selectionEnd);
+        return true;
+    }
+    return false;
+};
+
 require('../js/jquery.terminal-src')(global.$);
 require('../js/unix_formatting')(global.$);
 require('../js/xml_formatting')(global.$);
@@ -1219,6 +1233,38 @@ describe('Terminal utils', function() {
                 expect($.terminal.format(`[[;;;${input}]foo]`))
                     .toEqual(`<span class="${output}" data-text="foo"><span>foo</span></span>`);
             });
+        });
+        it('should handle alt attribute', () => {
+            expect($.terminal.format(`[[@;;;;https://example.com/a.png]x"/onerror="alert(1)]`)).toEqual("<img src=\"https://example.com/a.png\" alt=\"x/onerror=alert(1)\" data-text/>");
+        });
+        it('should handle emoji', () => {
+            const specs = [
+                [
+                    'ab&lt;b/attr=hello&gt;x',
+                    'ab<b/attr=hello>x',
+                ],
+                [
+                    '😀&lt;b/attr=hello&gt;x',
+                    '😀<b/attr=hello>x',
+                ]
+            ];
+            specs.forEach(([input, output]) => {
+                console.log({
+                    input: as_html($.terminal.format(input)),
+                    output: as_text(output)
+                });
+                expect(as_html($.terminal.format(input))).toEqual(as_text(output));
+            });
+            function as_text(input) {
+                const $dom = $('<div/>');
+                $dom.text(input);
+                return $dom.text();
+            }
+            function as_html(input) {
+                const $dom = $('<div/>');
+                $dom.html(input);
+                return $dom.text();
+            }
         });
     });
     describe('$.terminal.strip', function() {
@@ -3345,6 +3391,42 @@ describe('extensions', function() {
             term.refresh();
             expect(output(term)).toEqual(expected);
         });
+        it('should not duplicate raw echo on refresh (#1073)', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                numChars: 100,
+                greetings: false,
+                prompt: '<span>$ </span>',
+                raw: {prompt: true, echo: true}
+            });
+            await term.exec('foo');
+            term.echo('<span>hello</span>', {raw: true});
+            term.echo('<span>world</span>', {raw: true});
+            await delay(50);
+            var expected = ['$ foo', 'hello', 'world'];
+            var text = term.get_output();
+            expect(output(term)).toEqual(expected);
+            expect(term.find('.terminal-output .partial').length).toEqual(0);
+            term.refresh();
+            expect(output(term)).toEqual(expected);
+            expect(term.find('.terminal-output .partial').length).toEqual(0);
+            expect(term.get_output()).toEqual(text);
+            term.destroy();
+        });
+        it('should keep the output of raw echo on refresh (#1073)', async function() {
+            var term = $('<div/>').terminal($.noop, {
+                numChars: 100,
+                greetings: false,
+                raw: true
+            });
+            term.echo('<b>a</b>', {raw: true});
+            term.echo('<b>b</b>', {raw: true});
+            await delay(20);
+            var text = term.get_output();
+            expect(text).toEqual('<b>a</b>\n<b>b</b>');
+            term.refresh();
+            expect(term.get_output()).toEqual(text);
+            term.destroy();
+        });
     });
     describe('autocomplete_menu', function() {
         function completion(term) {
@@ -4803,6 +4885,80 @@ describe('Terminal plugin', function() {
         });
     });
     describe('cmd plugin', function() {
+        describe('contenteditable', function() {
+            var term;
+            beforeEach(function() {
+                clipboard_text = undefined;
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    greetings: false,
+                    inputStyle: 'contenteditable'
+                });
+                term.focus();
+            });
+            afterEach(function() {
+                term.destroy().remove();
+            });
+            it('should delete words with CTRL+BACKSPACE #1076', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                term.insert('foo bar baz');
+                expect($node.is(':focus')).toBe(true);
+                expect(function() {
+                    shortcut(true, false, false, 8, 'Backspace');
+                }).not.toThrow();
+                expect(term.get_command()).toEqual('foo bar ');
+                expect(clipboard_text).toEqual('baz');
+                expect(cmd.kill_text()).toEqual('baz');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(true);
+                shortcut(true, false, false, 8, 'Backspace');
+                expect(term.get_command()).toEqual('foo ');
+                expect(clipboard_text).toEqual('bar ');
+            });
+        });
+        describe('copy selection with contenteditable', function() {
+            var term;
+            function select(node) {
+                var range = document.createRange();
+                range.selectNodeContents(node);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            beforeEach(function() {
+                clipboard_text = undefined;
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    greetings: 'hello',
+                    pauseEvents: false,
+                    inputStyle: 'contenteditable'
+                });
+                term.focus();
+            });
+            afterEach(function() {
+                window.getSelection().removeAllRanges();
+                term.destroy().remove();
+            });
+            it('should restore focus after CTRL+C', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                select(term.find('.terminal-output')[0]);
+                shortcut(true, false, false, 67, 'c');
+                expect(clipboard_text).toEqual('hello');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(true);
+            });
+            it('should not enable paused command line after CTRL+C', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                term.pause(true);
+                expect(cmd.isenabled()).toBe(false);
+                select(term.find('.terminal-output')[0]);
+                shortcut(true, false, false, 67, 'c');
+                expect(clipboard_text).toEqual('hello');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(false);
+            });
+        });
         var string = '';
         var term, cmd, line, history, formatting;
         beforeEach(function() {

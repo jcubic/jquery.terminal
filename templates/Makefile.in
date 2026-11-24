@@ -21,14 +21,11 @@ COMMIT=`git log -n 1 | grep '^commit' | sed 's/commit //'`
 TOKEN=cat .github.token | tr -d '\n'
 URL=`git config --get remote.origin.url`
 skip_re="[xfi]it\\(|[fdx]describe\\("
-UPDATE_CONTRIBUTORS=0
+UPDATE_CONTRIBUTORS=1
 
 .PHONY: coverage test coveralls lint.src eslint skipped_tests jsonlint publish lint tscheck publish-github emoji
 
-ALL: Makefile .$(VERSION) terminal.jquery.json bower.json package.json assets/ascii_art.svg js/jquery.terminal.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map  css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
-
-bower.json: templates/bower.in .$(VERSION)
-	$(SED) -e "s/{{VER}}/$(VERSION)/g" templates/bower.in > bower.json
+ALL: Makefile .$(VERSION) terminal.jquery.json package.json assets/ascii_art.svg js/jquery.terminal.js js/jquery.terminal.min.js js/jquery.terminal.min.js.map  css/jquery.terminal.min.css css/jquery.terminal.min.css.map css/jquery.terminal.css README.md import.html js/terminal.widget.js css/emoji.css update-contributors
 
 package.json: .$(VERSION)
 	$(SED) -i 's/"version": "[^"]\+"/"version": "$(VERSION)"/' package.json
@@ -109,9 +106,8 @@ skipped_tests:
 tscheck:
 	$(TSC) --noEmit --project tsconfig.json
 
-jsonlint: package.json bower.json
+jsonlint: package.json
 	$(JSONLINT) -cq package.json
-	$(JSONLINT) -cq bower.json
 
 publish:
 	test -e npm && ( $(CD) npm && $(GIT) pull ) || true
