@@ -2404,14 +2404,29 @@
                     spellcheck: 'false',
                     tabindex: settings.tabindex
                 }).insertAfter(self);
+                // when true focus and blur don't change the state of the
+                // command line, see clip.keep_state()
+                var ignore_state = false;
                 $node.on('focus', function() {
-                    self.enable();
+                    if (!ignore_state) {
+                        self.enable();
+                    }
                 }).on('blur', function() {
-                    self.disable();
+                    if (!ignore_state) {
+                        self.disable();
+                    }
                 });
                 var timer;
                 var clip = {
                     $node: $node,
+                    keep_state: function(fn) {
+                        ignore_state = true;
+                        try {
+                            fn();
+                        } finally {
+                            ignore_state = false;
+                        }
+                    },
                     val: function(value) {
                         if (typeof value === 'undefined') {
                             return $node.text();
@@ -2461,6 +2476,11 @@
                              'Clipboard textarea for jQuery Terminal</label>');
                 return {
                     $node: $node,
+                    // the textarea has no focus and blur handlers so there is
+                    // no state to protect
+                    keep_state: function(fn) {
+                        fn();
+                    },
                     val: function(value) {
                         // even if value is undeifned
                         // when calling val(value) it return jQuery object
@@ -2840,14 +2860,14 @@
                 var len = text(command).length;
                 if (len > position) {
                     kill_text = self['delete'](len - position);
-                    text_to_clipboard(clip.$node, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
             'CTRL+U': function() {
                 if (command !== '' && position !== 0) {
                     kill_text = self['delete'](-position);
-                    text_to_clipboard(clip.$node, kill_text);
+                    text_to_clipboard(clip, kill_text);
                 }
                 return false;
             },
@@ -2881,7 +2901,7 @@
                 if (m) {
                     kill_text = m[0];
                     if (options.clipboard) {
-                        text_to_clipboard(clip.$node, kill_text);
+                        text_to_clipboard(clip, kill_text);
                     }
                 }
                 self.set(
@@ -2908,7 +2928,7 @@
                     if (m[0].length) {
                         kill_text = self['delete'](-m[0].length);
                         if (options.clipboard) {
-                            text_to_clipboard(clip.$node, kill_text);
+                            text_to_clipboard(clip, kill_text);
                         }
                     }
                 }
@@ -5484,7 +5504,8 @@
     // ---------------------------------------------------------------------
     var text_to_clipboard;
     if (support_copy) {
-        text_to_clipboard = function text_to_clipboard($textarea, text) {
+        text_to_clipboard = function text_to_clipboard(clip, text) {
+            var $textarea = clip.$node;
             var had_focus = $textarea.is(':focus');
             // contenteditable used on mobile don't have select() #1076
             var is_textarea = is_function($textarea[0].select);
@@ -5499,19 +5520,24 @@
                 $textarea.val(val);
                 $textarea.caret(pos);
             } else {
-                var $text = $('<textarea/>').css({
-                    position: 'fixed',
-                    top: 0,
-                    left: 0
-                }).appendTo('body');
-                $text.val(text).focus();
-                $text[0].select();
-                document.execCommand('copy');
-                $text.blur();
-                $text.remove();
-                if (had_focus) {
-                    $textarea.focus();
-                }
+                // the temporary textarea steals the focus and gives it back, this
+                // is only to copy the text so it should leave the command line
+                // enabled or disabled exactly as it was
+                clip.keep_state(function() {
+                    var $text = $('<textarea/>').css({
+                        position: 'fixed',
+                        top: 0,
+                        left: 0
+                    }).appendTo('body');
+                    $text.val(text).focus();
+                    $text[0].select();
+                    document.execCommand('copy');
+                    $text.blur();
+                    $text.remove();
+                    if (had_focus) {
+                        $textarea.focus();
+                    }
+                });
             }
             return true;
         };
@@ -9715,7 +9741,7 @@
                         self.set_command('');
                     } else {
                         var clip = command_line.clip();
-                        text_to_clipboard(clip.$node, process_selected_html(html));
+                        text_to_clipboard(clip, process_selected_html(html));
                     }
                 });
                 return false;

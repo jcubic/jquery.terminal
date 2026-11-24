@@ -4916,6 +4916,49 @@ describe('Terminal plugin', function() {
                 expect(clipboard_text).toEqual('bar ');
             });
         });
+        describe('copy selection with contenteditable', function() {
+            var term;
+            function select(node) {
+                var range = document.createRange();
+                range.selectNodeContents(node);
+                var selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            beforeEach(function() {
+                clipboard_text = undefined;
+                term = $('<div/>').appendTo('body').terminal($.noop, {
+                    greetings: 'hello',
+                    pauseEvents: false,
+                    inputStyle: 'contenteditable'
+                });
+                term.focus();
+            });
+            afterEach(function() {
+                window.getSelection().removeAllRanges();
+                term.destroy().remove();
+            });
+            it('should restore focus after CTRL+C', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                select(term.find('.terminal-output')[0]);
+                shortcut(true, false, false, 67, 'c');
+                expect(clipboard_text).toEqual('hello');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(true);
+            });
+            it('should not enable paused command line after CTRL+C', function() {
+                var cmd = term.cmd();
+                var $node = cmd.clip().$node;
+                term.pause(true);
+                expect(cmd.isenabled()).toBe(false);
+                select(term.find('.terminal-output')[0]);
+                shortcut(true, false, false, 67, 'c');
+                expect(clipboard_text).toEqual('hello');
+                expect($node.is(':focus')).toBe(true);
+                expect(cmd.isenabled()).toBe(false);
+            });
+        });
         var string = '';
         var term, cmd, line, history, formatting;
         beforeEach(function() {
