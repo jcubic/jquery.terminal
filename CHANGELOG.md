@@ -6,6 +6,7 @@
 * fix sanitizing image alt text inside formatting
 * fix exception when deleting a word with CTRL+BACKSPACE in contenteditable input [#1076](https://github.com/jcubic/jquery.terminal/issues/1076)
 * fix TypeScript types of terminal options (`maskChar`, `mobileIgnoreAutoSpace`, `scrollBottomOffset`, `execAnimationDelay`, `externalPause`, `linksNoFollow`), allow partial `strings` and add `mobileIgnoreAutoSpace` and `tabindex` to cmd options
+* fix unescape html entities when using wide characters
 
 ## 2.48.1
 ### Bugfix

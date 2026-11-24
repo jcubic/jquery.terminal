@@ -5280,14 +5280,13 @@
     // -------------------------------------------------------------------------
     function wide_characters(text, options) {
         if (typeof wcwidth !== 'undefined') {
-            var bare = bare_text(text);
-            var chars = $.terminal.split_characters(bare);
+            var chars = $.terminal.split_characters(text);
             if (chars.length === 1) {
                 return text;
             }
             var specs = chars.map(function(chr) {
                 return {
-                    len: strlen(chr),
+                    len: strlen(bare_text(chr)),
                     chr: chr
                 };
             }).reduce(function(arr, spec) {
